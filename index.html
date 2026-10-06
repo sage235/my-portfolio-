@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ASDODJI Le Sage — The Village Walk | Interactive Portfolio</title>
-<meta name="description" content="Interactive RPG portfolio of ASDODJI Le Sage, software engineering student at AUCA (Rwanda). Walk or ride bicycles and donkeys through the village, visit each hut, and experience the day/night cycle.">
+<meta name="description" content="Interactive RPG portfolio of ASDODJI Le Sage, software engineering student at AUCA (Rwanda). Walk through the village, enter each hut, and watch the sun set over the paths.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@
    1. TOKENS
 ===================================================== */
 :root{
-  --a:0;                 /* 0 = noon, 1 = deep night */
+  --a:0;                 /* 0 = noon, 1 = deep night (driven by JS) */
   --dusk:0; --night:0; --sunp:0; --moonp:0;
   --sky-h:clamp(150px,24vh,230px);
 
@@ -97,7 +97,7 @@ a{color:inherit}
   filter:brightness(calc(1 - var(--night)*.7)) saturate(calc(1 - var(--night)*.3))}
 
 /* =====================================================
-   3. HUD & MOUNT BADGES
+   3. HUD
 ===================================================== */
 .hud{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:50;
   width:calc(100% - 24px);max-width:1180px;display:flex;align-items:center;gap:14px;justify-content:space-between;
@@ -118,12 +118,6 @@ a{color:inherit}
 .tools{display:flex;align-items:center;gap:6px;flex:none}
 .chip{font-size:.74rem;font-weight:700;padding:6px 11px;border-radius:999px;background:rgba(0,0,0,.06);white-space:nowrap}
 body[data-theme="night"] .chip{background:rgba(255,255,255,.09)}
-
-/* Mount Status Pill in HUD */
-.mount-pill{display:none;align-items:center;gap:6px;background:var(--accent);color:#fff;font-size:.74rem;font-weight:800;padding:6px 12px;border-radius:999px;cursor:pointer;animation:popMount .3s cubic-bezier(.34,1.56,.64,1)}
-.mount-pill.active{display:inline-flex}
-@keyframes popMount{from{transform:scale(.8)}to{transform:scale(1)}}
-
 .ibtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--panel-solid);display:grid;place-items:center;
   font-size:.74rem;font-weight:800;text-decoration:none;transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .2s}
 .ibtn:hover{transform:scale(1.1);border-color:var(--accent)}
@@ -186,17 +180,9 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
   display:grid;place-items:center;color:#f7ead2;font-family:var(--f-display);font-weight:700;font-size:1.02rem;text-align:center;line-height:1.1}
 .gate .beam small{display:block;font-family:var(--f-sign);font-weight:400;font-size:.6rem;opacity:.75;margin-bottom:2px}
 
-/* =====================================================
-   5. ACTORS & MOUNTS (BOY, BICYCLE, DONKEY, ANIMALS)
-===================================================== */
-:root {
-  --cadence: 0.32s;
-  --stride-rot: 32deg;
-  --arm-rot: 36deg;
-}
-
-.actor{position:absolute;width:60px;height:90px;transform:translate(-50%,-100%);pointer-events:none;transition:width .2s, height .2s}
-.actor .bob{width:100%;height:100%;transform-origin:50% 100%;will-change:transform}
+/* actors */
+.actor{position:absolute;width:60px;height:90px;transform:translate(-50%,-100%);pointer-events:none}
+.actor .bob{width:100%;height:100%;transform-origin:50% 100%}
 .sp{width:100%;height:100%;overflow:visible;display:block}
 .v{display:none}
 [data-dir=down] .v-fb,[data-dir=up] .v-fb,[data-dir=left] .v-side,[data-dir=right] .v-side{display:inline}
@@ -204,111 +190,101 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 [data-dir=down] .back{display:none}
 [data-dir=left] .sp{transform:scaleX(-1)}
 .sp g[class^=leg],.sp g[class^=arm]{transform-box:fill-box;transform-origin:50% 0}
+.actor:not(.walking) .bob{animation:breathe 2.6s ease-in-out infinite alternate}
+@keyframes breathe{from{transform:scaleY(1)}to{transform:scaleY(1.018)}}
+.walking .bob{animation:bob var(--gait,.32s) ease-in-out infinite alternate}
+.walking .v-side .legL{animation:swing var(--gait,.32s) ease-in-out infinite alternate}
+.walking .v-side .legR{animation:swing var(--gait,.32s) ease-in-out infinite alternate-reverse}
+.walking .v-side .armR{animation:swingArm var(--gait,.32s) ease-in-out infinite alternate}
+.walking .v-fb .legL{animation:step var(--gait,.32s) ease-in-out infinite alternate}
+.walking .v-fb .legR{animation:step var(--gait,.32s) ease-in-out infinite alternate-reverse}
+.walking .v-fb .armL{animation:armFB var(--gait,.32s) ease-in-out infinite alternate}
+.walking .v-fb .armR{animation:armFB var(--gait,.32s) ease-in-out infinite alternate-reverse}
+/* sprint: longer stride, higher knees, arm drive, forward lean */
+.running .bob{animation-name:bobRun}
+.running .v-side .legL,.running .v-side .legR{animation-name:swingRun}
+.running .v-side .armR{animation-name:swingArmRun}
+.running .v-fb .legL,.running .v-fb .legR{animation-name:stepRun}
+.running .v-fb .armL,.running .v-fb .armR{animation-name:armFBRun}
+/* riders: smooth ride bounce */
+.actor.mounted.ride-donkey.walking .bob{animation-name:bobDonkey}
+.actor.mounted.ride-bike.walking .bob{animation-name:bobBike}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes bobRun{from{transform:translateY(0)}to{transform:translateY(-7px)}}
+@keyframes bobDonkey{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+@keyframes bobBike{from{transform:translateY(0)}to{transform:translateY(-1.5px)}}
+@keyframes swing{from{transform:rotate(30deg)}to{transform:rotate(-30deg)}}
+@keyframes swingRun{from{transform:rotate(52deg)}to{transform:rotate(-52deg)}}
+@keyframes swingArm{from{transform:rotate(-34deg)}to{transform:rotate(34deg)}}
+@keyframes swingArmRun{from{transform:rotate(-66deg)}to{transform:rotate(66deg)}}
+@keyframes step{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+@keyframes stepRun{from{transform:translateY(0)}to{transform:translateY(-11px)}}
+@keyframes armFB{from{transform:translateY(-2px)}to{transform:translateY(3px)}}
+@keyframes armFBRun{from{transform:translateY(-5px)}to{transform:translateY(7px)}}
 
-/* Idle Breathing */
-.actor:not(.walking) .bob{animation:breathe 2.4s ease-in-out infinite alternate}
-@keyframes breathe{from{transform:scaleY(1)}to{transform:scaleY(1.02) translateY(-1px)}}
-
-/* Realistic On-Foot Walking & Athletic Sprinting */
-.actor:not(.mounted).walking .bob{animation:bobWalk var(--cadence) cubic-bezier(.45,0,.55,1) infinite alternate}
-.actor:not(.mounted).walking.sprinting .bob{animation:bobSprint var(--cadence) cubic-bezier(.45,0,.55,1) infinite alternate}
-
-/* Side Gait (True Bipedal Knee & Arm Swing) */
-.actor:not(.mounted).walking .v-side .legL{animation:swingLegL var(--cadence) ease-in-out infinite alternate}
-.actor:not(.mounted).walking .v-side .legR{animation:swingLegR var(--cadence) ease-in-out infinite alternate}
-.actor:not(.mounted).walking .v-side .armL{animation:swingArmL var(--cadence) ease-in-out infinite alternate}
-.actor:not(.mounted).walking .v-side .armR{animation:swingArmR var(--cadence) ease-in-out infinite alternate}
-
-/* Front/Back Gait (Hip & Stride Dip) */
-.actor:not(.mounted).walking .v-fb .legL{animation:stepFB_L var(--cadence) ease-in-out infinite alternate}
-.actor:not(.mounted).walking .v-fb .legR{animation:stepFB_R var(--cadence) ease-in-out infinite alternate}
-.actor:not(.mounted).walking .v-fb .armL{animation:armFB_L var(--cadence) ease-in-out infinite alternate}
-.actor:not(.mounted).walking .v-fb .armR{animation:armFB_R var(--cadence) ease-in-out infinite alternate}
-
-@keyframes bobWalk{
-  0%{transform:translateY(0) scale(1,1)}
-  50%{transform:translateY(-3.5px) scale(0.98,1.02)}
-  100%{transform:translateY(0) scale(1.02,0.98)}
-}
-@keyframes bobSprint{
-  0%{transform:translateY(0) scale(1,1)}
-  50%{transform:translateY(-6px) scale(0.96,1.04)}
-  100%{transform:translateY(0) scale(1.04,0.96)}
-}
-
-@keyframes swingLegL{0%{transform:rotate(var(--stride-rot))}100%{transform:rotate(calc(-1 * var(--stride-rot)))}}
-@keyframes swingLegR{0%{transform:rotate(calc(-1 * var(--stride-rot)))}100%{transform:rotate(var(--stride-rot))}}
-@keyframes swingArmL{0%{transform:rotate(var(--arm-rot))}100%{transform:rotate(calc(-1 * var(--arm-rot)))}}
-@keyframes swingArmR{0%{transform:rotate(calc(-1 * var(--arm-rot)))}100%{transform:rotate(var(--arm-rot))}}
-
-@keyframes stepFB_L{0%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-7px) scaleY(.92)}100%{transform:translateY(0) scaleY(1.02)}}
-@keyframes stepFB_R{0%{transform:translateY(-7px) scaleY(.92)}50%{transform:translateY(0) scaleY(1)}100%{transform:translateY(-7px) scaleY(.92)}}
-@keyframes armFB_L{0%{transform:translateY(-3px)}100%{transform:translateY(3px)}}
-@keyframes armFB_R{0%{transform:translateY(3px)}100%{transform:translateY(-3px)}}
-
-/* =====================================================
-   REALISTIC MOUNTS (BICYCLE & DONKEY)
-===================================================== */
-.actor.mounted-bike{width:82px;height:98px}
-.actor.mounted-donkey{width:92px;height:106px}
-
-/* Bicycle Animations */
-.actor.mounted-bike .wheel{transform-box:fill-box;transform-origin:center;will-change:transform}
-.actor.mounted-bike.pedaling .wheel{animation:spinWheel var(--cadence) linear infinite}
-.actor.mounted-bike.pedaling .crankL{animation:pedalStrokeL var(--cadence) linear infinite;transform-box:fill-box;transform-origin:center}
-.actor.mounted-bike.pedaling .crankR{animation:pedalStrokeR var(--cadence) linear infinite;transform-box:fill-box;transform-origin:center}
-.actor.mounted-bike.coasting .wheel{animation:spinWheel calc(var(--cadence) * 1.6) linear infinite}
-
-@keyframes spinWheel{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes pedalStrokeL{0%{transform:rotate(0deg)}50%{transform:rotate(180deg)}100%{transform:rotate(360deg)}}
-@keyframes pedalStrokeR{0%{transform:rotate(180deg)}50%{transform:rotate(360deg)}100%{transform:rotate(540deg)}}
-
-/* Donkey Quadruped Anatomical Trot (Diagonal Pairs) */
-.actor.mounted-donkey .donkeyLegFL{transform-box:fill-box;transform-origin:50% 0}
-.actor.mounted-donkey .donkeyLegBR{transform-box:fill-box;transform-origin:50% 0}
-.actor.mounted-donkey .donkeyLegFR{transform-box:fill-box;transform-origin:50% 0}
-.actor.mounted-donkey .donkeyLegBL{transform-box:fill-box;transform-origin:50% 0}
-.actor.mounted-donkey .donkeyHead{transform-box:fill-box;transform-origin:20% 80%}
-.actor.mounted-donkey .donkeyTail{transform-box:fill-box;transform-origin:100% 0}
-.actor.mounted-donkey .donkeyEar{transform-box:fill-box;transform-origin:50% 100%}
-
-.actor.mounted-donkey.walking .donkeyLegFL,
-.actor.mounted-donkey.walking .donkeyLegBR{animation:quadTrotA var(--cadence) ease-in-out infinite alternate}
-
-.actor.mounted-donkey.walking .donkeyLegFR,
-.actor.mounted-donkey.walking .donkeyLegBL{animation:quadTrotB var(--cadence) ease-in-out infinite alternate}
-
-.actor.mounted-donkey.walking .donkeyHead{animation:headBob var(--cadence) ease-in-out infinite alternate}
-.actor.mounted-donkey.walking .donkeyTail{animation:tailSway calc(var(--cadence) * 1.5) ease-in-out infinite alternate}
-.actor.mounted-donkey.walking .donkeyEar{animation:earTwitch 1.2s ease-in-out infinite alternate}
-
-@keyframes quadTrotA{0%{transform:rotate(-24deg)}50%{transform:rotate(4deg) translateY(-2px)}100%{transform:rotate(24deg)}}
-@keyframes quadTrotB{0%{transform:rotate(24deg)}50%{transform:rotate(4deg) translateY(-2px)}100%{transform:rotate(-24deg)}}
-@keyframes headBob{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(-3.5px) rotate(-4deg)}}
-@keyframes tailSway{0%{transform:rotate(-18deg)}100%{transform:rotate(22deg)}}
-@keyframes earTwitch{0%,80%{transform:rotate(0deg)}90%{transform:rotate(-12deg)}100%{transform:rotate(8deg)}}
-
-/* Stamina Bar over Player */
-.stamina-meter{position:absolute;left:50%;top:-10px;transform:translateX(-50%);width:48px;height:6px;background:rgba(0,0,0,.5);border:1.5px solid #2a1a10;border-radius:999px;overflow:hidden;opacity:0;transition:opacity .25s;pointer-events:none;z-index:10}
-.stamina-meter.on{opacity:1}
-.stamina-fill{height:100%;width:100%;background:linear-gradient(90deg,#e8a41c,#ff5722);border-radius:999px;transition:width .08s linear}
-.stamina-fill.tired{background:#e53935}
-
-/* Wind / Speed Streaks */
-.speed-streak{position:absolute;height:2px;border-radius:2px;background:rgba(255,255,255,.75);pointer-events:none;animation:streak .35s ease-out forwards}
-@keyframes streak{0%{opacity:.8;transform:scaleX(1)}100%{opacity:0;transform:scaleX(2.5) translateX(var(--streak-dx))}}
-
-/* Parked Mount Interactive Objects */
-.mount-obj{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25));transition:filter .2s, transform .2s}
-.mount-obj:hover,.mount-obj.near{filter:brightness(1.14) drop-shadow(0 0 14px var(--gold));transform:translate(-50%,-100%) scale(1.06)}
-.mount-obj svg{display:block;width:100%;height:100%}
-
-/* Animals */
 .animal{position:absolute;transform:translate(-50%,-100%);pointer-events:none}
 .animal svg{display:block;width:100%;height:100%;overflow:visible}
 .animal.flip svg{transform:scaleX(-1)}
 .animal.moving .bob{animation:hop .26s ease-in-out infinite alternate}
 @keyframes hop{from{transform:translateY(0)}to{transform:translateY(-4px)}}
+
+/* rides: bicycles and donkeys */
+.rider{width:100%;height:100%;transform-origin:50% 100%;transform:translateY(calc(var(--lift,0px) * -1)) rotate(var(--lean,0deg));transition:transform .2s ease-out}
+.actor.mounted.ride-bike{--lift:24px}.actor.mounted.ride-donkey{--lift:30px}
+.mount{position:absolute;bottom:0;pointer-events:none;display:none}
+.mount svg{width:100%;height:100%;display:block;overflow:visible}
+.mount.bike{left:-18px;width:120px;height:80px;transform-origin:48px 50%}
+.mount.donkey{left:-30px;width:130px;height:90px;transform-origin:60px 50%}
+.actor.ride-bike>.mount.bike,.actor.ride-donkey>.mount.donkey{display:block}
+.actor.mounted[data-dir=left]>.mount{transform:scaleX(-1)}
+.actor.mounting-bike .rider{animation:hopOnBike .5s cubic-bezier(.3,.7,.4,1)}
+.actor.mounting-donkey .rider{animation:hopOnDonkey .5s cubic-bezier(.3,.7,.4,1)}
+.actor.dismounting-bike .rider{animation:hopOffBike .46s cubic-bezier(.3,.7,.4,1)}
+.actor.dismounting-donkey .rider{animation:hopOffDonkey .46s cubic-bezier(.3,.7,.4,1)}
+.actor.mounting-bike>.mount.bike,.actor.mounting-donkey>.mount.donkey{animation:fadeIn .3s ease-out}
+@keyframes hopOnBike{0%{transform:translateY(0)}40%{transform:translateY(-58px)}100%{transform:translateY(-24px)}}
+@keyframes hopOnDonkey{0%{transform:translateY(0)}40%{transform:translateY(-72px)}100%{transform:translateY(-30px)}}
+@keyframes hopOffBike{0%{transform:translateY(-24px)}45%{transform:translateY(-54px)}100%{transform:translateY(0)}}
+@keyframes hopOffDonkey{0%{transform:translateY(-30px)}45%{transform:translateY(-64px)}100%{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}}
+.actor.mounted .say{margin-bottom:58px}
+.actor.mounted.ride-donkey .sp g[class^=leg],.actor.mounted.ride-donkey .sp g[class^=arm]{animation:none!important}
+.wheel,.dleg{transform-box:fill-box}
+.wheel{transform-origin:50% 50%}
+.dleg{transform-origin:50% 0}
+.walking .wheel{animation:spin var(--spin,.34s) linear infinite}
+.walking .dleg.a,.moving .dleg.a{animation:hoof var(--hoof,.45s) ease-in-out infinite alternate}
+.walking .dleg.b,.moving .dleg.b{animation:hoof var(--hoof,.45s) ease-in-out infinite alternate-reverse}
+.dhead{transform-box:fill-box;transform-origin:15% 90%}
+.dtail{transform-box:fill-box;transform-origin:100% 0;animation:swish 1.8s ease-in-out infinite alternate}
+.walking .dhead,.moving .dhead{animation:nod var(--hoof,.45s) ease-in-out infinite alternate}
+@keyframes nod{from{transform:rotate(-3deg)}to{transform:rotate(4deg)}}
+@keyframes swish{from{transform:rotate(-8deg)}to{transform:rotate(10deg)}}
+.ride-world{position:absolute;transform:translate(-50%,-100%);pointer-events:none}
+.ride-world svg{display:block;width:100%;height:100%;overflow:visible}
+.ride-world.near,.animal.near{filter:drop-shadow(0 0 9px #ffd34d)}
+.animal .tail{transform-box:fill-box;transform-origin:0 50%;animation:wag .3s ease-in-out infinite alternate}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes hoof{from{transform:rotate(22deg)}to{transform:rotate(-22deg)}}
+@keyframes wag{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
+
+.stam{position:fixed;left:16px;bottom:64px;z-index:40;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(30,20,16,.82);color:#fbf3e6;font-size:.7rem;font-weight:700;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s;pointer-events:none}
+.stam.show{opacity:1;transform:none}
+.stam .bar{width:110px;height:7px;border-radius:5px;background:rgba(255,255,255,.2);overflow:hidden}
+.stam .bar i{display:block;height:100%;width:100%;transform-origin:0 50%;background:#7bd36b}
+.stam.tired .bar i{background:#e8774a}
+@media (pointer:coarse){.stam{bottom:auto;top:calc(var(--sky-h) + 14px);left:12px}}
+/* articulated riders */
+.rig{position:absolute;left:-50px;bottom:-6px;width:160px;height:120px;overflow:visible;pointer-events:none;display:none}
+.actor.rigged .rig{display:block}
+.actor.rigged .rider{visibility:hidden}
+.rig g[data-v]{transition:opacity .1s linear}
+.rig .dleg,.rig .dhead,.rig .dtail{animation:none!important}
+.animal .dhead{transition:transform .6s ease-in-out}
+.animal.drinking .dhead{animation:none!important;transform:rotate(27deg)}
+.big{font-family:var(--f-display);font-size:2rem;line-height:1.15;color:var(--ink)}
+.mean{color:var(--accent);font-weight:700}
+.motto{font-family:var(--f-display);font-style:italic;font-size:1.3rem;line-height:1.4;color:var(--ink)}
 
 .dust{position:absolute;width:14px;height:8px;border-radius:50%;background:rgba(214,170,120,.7);transform:translate(-50%,-50%);pointer-events:none;animation:dust .55s ease-out forwards}
 @keyframes dust{to{opacity:0;transform:translate(-50%,-90%) scale(2.4)}}
@@ -326,23 +302,22 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 @keyframes wander{from{transform:translate(0,0)}50%{transform:translate(var(--dx),calc(var(--dy)*-.5))}to{transform:translate(calc(var(--dx)*-.6),var(--dy))}}
 
 /* =====================================================
-   6. CONTROLS & HUD
+   5. CONTROLS
 ===================================================== */
 .hint{position:fixed;left:16px;bottom:16px;z-index:40;display:flex;gap:10px;align-items:center;padding:9px 16px;border-radius:999px;
   background:rgba(30,20,16,.85);color:#fbf3e6;font-size:.78rem;font-weight:600;backdrop-filter:blur(8px)}
 .hint kbd{font-family:var(--f-sign);font-size:.72rem;background:rgba(255,255,255,.18);padding:2px 7px;border-radius:5px}
-
 .dpad{position:fixed;right:14px;bottom:18px;z-index:40;display:none;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:5px;padding:10px;border-radius:26px;background:rgba(30,20,16,.75);backdrop-filter:blur(8px);touch-action:none}
 .dpad button{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.12);color:#fff;border-radius:14px;font-size:1.1rem;touch-action:none}
 .dpad button:active{background:var(--accent)}
-.dpad .u{grid-column:2;grid-row:1}.dpad .l{grid-column:1;grid-row:2}.dpad .o{grid-column:2;grid-row:2;font-weight:800;font-size:.8rem}.dpad .r{grid-column:3;grid-row:2}.dpad .d{grid-column:2;grid-row:3}
+.dpad .u{grid-column:2;grid-row:1}.dpad .l{grid-column:1;grid-row:2}.dpad .o{grid-column:2;grid-row:2;font-weight:800;font-size:.8rem}.dpad .r{grid-column:3;grid-row:2}.dpad .d{grid-column:2;grid-row:3}.dpad .f{grid-column:1;grid-row:3;font-size:.62rem;font-weight:800}.dpad .s{grid-column:3;grid-row:3;font-size:.62rem;font-weight:800}
 @media (pointer:coarse){ .dpad{display:grid} .hint{display:none} }
 
 .toast{position:fixed;left:50%;top:calc(var(--sky-h) + 20px);transform:translate(-50%,-30px);z-index:60;background:#1c1411;color:#fbf3e6;padding:10px 20px;border-radius:999px;font-weight:700;font-size:.85rem;opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 10px 28px rgba(0,0,0,.4);max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* =====================================================
-   7. MODAL / DIALOGS
+   6. INTRO + MODAL
 ===================================================== */
 .overlay{position:fixed;inset:0;z-index:100;background:rgba(14,10,8,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .35s}
 .overlay.open{opacity:1;pointer-events:auto}
@@ -370,6 +345,7 @@ body[data-theme="night"] .card{background:rgba(255,255,255,.035)}
 .tags span{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(47,107,58,.14);color:var(--leaf)}
 body[data-theme="night"] .tags span{color:#8fd19a;background:rgba(143,209,154,.12)}
 .card .lnk{align-self:flex-start;margin-top:6px;font-size:.82rem;font-weight:800;color:var(--accent);text-decoration:none;border-bottom:2px solid currentColor}
+.card .soon{font-size:.74rem;color:var(--ink-soft)}
 .skill-list{list-style:none;display:flex;flex-direction:column;gap:9px;margin-top:8px;font-size:.92rem;color:var(--ink-soft);line-height:1.5}
 .skill-list b{color:var(--ink)}
 .timeline{display:flex;flex-direction:column;gap:14px;margin-top:16px}
@@ -427,12 +403,6 @@ body[data-theme="night"] .when{color:#8fd19a}
   <ul class="fast" id="fast" aria-label="Walk to a hut"></ul>
 
   <div class="tools">
-    <span class="mount-pill" id="mountHudPill" title="Click or press F to dismount">
-      <span id="mountHudIcon">🚲</span>
-      <span id="mountHudLabel">Riding Bicycle</span>
-      <span style="opacity:.75;font-size:.68rem">✕</span>
-    </span>
-
     <span class="chip" id="progress">Explored 0/5</span>
     <a class="ibtn links" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener" aria-label="LinkedIn profile" title="LinkedIn">in</a>
     <a class="ibtn links" href="https://github.com/sage235" target="_blank" rel="noopener" aria-label="GitHub profile" title="GitHub">
@@ -443,13 +413,13 @@ body[data-theme="night"] .when{color:#8fd19a}
     </button>
     <button class="ibtn" id="themeBtn" aria-label="Switch between day and night" title="Day / night">
       <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M1.5 12H4M20 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
-      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
     </button>
   </div>
 </header>
 
 <!-- ============ WORLD ============ -->
-<main id="viewport" aria-label="Interactive village. Walk, ride bicycles and donkeys to visit each hut.">
+<main id="viewport" aria-label="Interactive village. Use the buttons at the top to visit each hut.">
   <div id="world">
     <svg id="ground"></svg>
     <div id="objects"></div>
@@ -457,23 +427,19 @@ body[data-theme="night"] .when{color:#8fd19a}
   <canvas id="night"></canvas>
 </main>
 
-<div class="hint">
-  <span>Walk / Sprint</span> <kbd>WASD</kbd> + <kbd>Shift</kbd>
-  <span>· Mount / Dismount</span> <kbd>F</kbd>
-  <span>· Bell</span> <kbd>B</kbd>
-  <span>· Bray</span> <kbd>H</kbd>
-  <span>· Enter door</span> <kbd>E</kbd>
-</div>
+<div class="hint"><span>Walk</span> <kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> <span>or</span> <kbd>WASD</kbd> <kbd>ZQSD</kbd> <span>· Enter a door</span> <kbd>E</kbd> <span>· Ride</span> <kbd>F</kbd> <span>· Sprint</span> <kbd>Shift</kbd> <span>· Or click the ground</span></div>
 
 <div class="dpad" id="dpad">
   <button class="u" data-v="0,-1" aria-label="Up">▲</button>
   <button class="l" data-v="-1,0" aria-label="Left">◀</button>
-  <button class="o" id="actBtn" aria-label="Action">GO</button>
+  <button class="o" id="actBtn" aria-label="Enter">GO</button>
   <button class="r" data-v="1,0" aria-label="Right">▶</button>
   <button class="d" data-v="0,1" aria-label="Down">▼</button>
-  <button class="sprint-btn" id="sprintBtn" aria-label="Toggle Sprint" style="grid-column:1;grid-row:3;font-size:.85rem;background:rgba(232,164,28,.25)">⚡</button>
-  <button class="mount-act-btn" id="mountActBtn" aria-label="Bell or Bray" style="grid-column:3;grid-row:3;font-size:.85rem;background:rgba(184,58,38,.25)">🔔</button>
+  <button class="f" id="rideBtn" aria-label="Get on or off a ride">RIDE</button>
+  <button class="s" id="runBtn" aria-label="Hold to sprint">RUN</button>
 </div>
+
+<div class="stam" id="stam" aria-hidden="true"><span>Stamina</span><div class="bar"><i id="stamFill"></i></div></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -481,18 +447,14 @@ body[data-theme="night"] .when{color:#8fd19a}
 <div class="overlay open" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
   <div class="sheet small">
     <div class="kicker">Portfolio of ASDODJI Le Sage</div>
-    <h2 id="introTitle">Welcome to the Living Village.</h2>
-    <p>Explore my portfolio through a living African village. Walk, sprint, or <strong>ride bicycles 🚲 and donkeys 🫏</strong> to discover each hut: my background, backend projects, technical skills, education at AUCA Kigali, and contacts.</p>
-    <p><strong>Move &amp; Sprint:</strong> Arrow keys, WASD / ZQSD (<kbd>Shift</kbd> to sprint or gallop).<br>
-       <strong>Mount / Dismount (Vélo &amp; Âne):</strong> Press <kbd>F</kbd> or click the mount.<br>
-       <strong>Bicycle Bell / Donkey Call:</strong> Press <kbd>B</kbd> to ring bell 🔔, <kbd>H</kbd> to bray 🫏.<br>
-       <strong>Enter doors:</strong> Press <kbd>E</kbd> or click the door sign.<br>
-       <strong>Day / Night:</strong> Click the sun/moon button to watch the sunset.</p>
-    <div class="actions"><button class="btn" id="startBtn">Enter the Village 🛖</button></div>
+    <h2 id="introTitle">Welcome to my village.</h2>
+    <p>Each hut holds a piece of my story: who I am, what I build, what I know, where I study and how to reach me. Follow the dirt paths, read the signs, and step inside.</p>
+    <p><strong>Walk</strong> with the arrow keys, WASD or ZQSD (hold Shift to sprint; it drains your stamina). Press <strong>E</strong> at a door to go in. On a phone, use the pad or tap the ground. See a <strong>bicycle</strong> or a <strong>donkey</strong>? Stand next to it and press <strong>F</strong> to hop on (the bike is the fastest). Tired? The <strong>marigot</strong> has cool water, a stone to rest on and a word for the day. The moon button lets the sun set.</p>
+    <div class="actions"><button class="btn" id="startBtn">Start walking</button></div>
   </div>
 </div>
 
-<!-- Hut interior modal -->
+<!-- Hut interior -->
 <div class="overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="sheet">
     <button class="x" id="closeBtn" aria-label="Close and go back outside">✕</button>
@@ -530,13 +492,15 @@ const HUTS = [
   { key:'workshop', x:1650, y:900,  type:'forge',   sign:['Hut II','The Workshop'],   label:'Projects', name:'the Workshop',       blurb:'7 projects built so far', col:[-120,-70,240,70] },
   { key:'skills',   x:700,  y:1280, type:'granary', sign:['Hut III','The Granary'],   label:'Skills',   name:'the Granary',        blurb:'My tools and skills',      col:[-110,-60,220,60] },
   { key:'school',   x:1650, y:1620, type:'school',  sign:['Hut IV','The School'],     label:'Education',name:'the School',         blurb:'Where I study',            col:[-115,-70,230,70] },
-  { key:'contact',  x:1150, y:1880, type:'tree',    sign:['Fireside','Palaver Tree'], label:'Contact',  name:'the Palaver Tree',   blurb:'Come and say hello',       col:[-48,-60,96,60] }
+  { key:'contact',  x:1150, y:1880, type:'tree',    sign:['Fireside','Palaver Tree'], label:'Contact',  name:'the Palaver Tree',   blurb:'Come and say hello',       col:[-48,-60,96,60] },
+  { key:'marigot',  x:640,  y:1850, type:'water',   sign:['Marigot','Rest & words'],  label:'Marigot',  name:'the Marigot',        blurb:'Drink, rest and read the word of the day', verb:'Rest at', col:[-70,-44,140,44] }
 ];
 const SPAWN = { x:1200, y:270 };
 const MAIN_PATH = [[1200,170],[1200,340],[960,500],[700,660],[860,820],[1250,900],[1650,1000],[1500,1130],[1150,1230],[700,1380],[900,1500],[1300,1560],[1650,1720],[1500,1850],[1150,1980]];
 const POND = { cx:1960, cy:430, rx:175, ry:95 };
 const WELL = { x:390, y:940 };
-const BRANCHES = [ [[1200,340],[1450,395],[1730,470]], [[700,660],[540,790],[430,900]] ];
+const BRANCHES = [ [[1200,340],[1450,395],[1730,470]], [[700,660],[540,790],[430,900]], [[900,1500],[840,1700],[720,1900],[650,1956]] ];
+const MG = { cx:420, cy:1780, rx:190, ry:100 };   // the marigot (watering hole)
 
 function smoothPath(pts){
   let d = `M${pts[0][0]},${pts[0][1]}`;
@@ -548,7 +512,7 @@ function smoothPath(pts){
 }
 
 /* =====================================================
-   2. GROUND (grass, savanna, pond, dirt paths)
+   2. GROUND (grass, field, pond, dirt paths)
 ===================================================== */
 let g = `<defs>
   <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86b45a"/><stop offset=".5" stop-color="#78a84f"/><stop offset="1" stop-color="#6c9a47"/></linearGradient>
@@ -576,11 +540,22 @@ g += `<ellipse cx="${POND.cx}" cy="${POND.cy+8}" rx="${POND.rx+14}" ry="${POND.r
 <ellipse cx="${POND.cx-20}" cy="${POND.cy-14}" rx="${POND.rx*.7}" ry="${POND.ry*.6}" fill="#6bb6d8" opacity=".7"/>
 <ellipse class="ripple" cx="${POND.cx+40}" cy="${POND.cy+10}" rx="50" ry="22" fill="none" stroke="#fff" stroke-width="2" opacity=".5"><animate attributeName="rx" values="20;70" dur="4s" repeatCount="indefinite"/><animate attributeName="ry" values="9;32" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".6;0" dur="4s" repeatCount="indefinite"/></ellipse>`;
 for(let i=0;i<7;i++) g += `<ellipse cx="${POND.cx+rr(-110,110)}" cy="${POND.cy+rr(-50,50)}" rx="13" ry="7" fill="#4f9a45"/>`;
+// marigot
+g += `<ellipse cx="${MG.cx}" cy="${MG.cy+10}" rx="${MG.rx+28}" ry="${MG.ry+18}" fill="#8a6a40"/>
+<ellipse cx="${MG.cx}" cy="${MG.cy+6}" rx="${MG.rx+13}" ry="${MG.ry+9}" fill="#a98a58"/>
+<ellipse cx="${MG.cx}" cy="${MG.cy}" rx="${MG.rx}" ry="${MG.ry}" fill="#3f8c8a"/>
+<ellipse cx="${MG.cx-24}" cy="${MG.cy-12}" rx="${MG.rx*.68}" ry="${MG.ry*.58}" fill="#58a7a3" opacity=".75"/>
+<ellipse cx="${MG.cx+30}" cy="${MG.cy+14}" rx="40" ry="16" fill="none" stroke="#fff" stroke-width="2" opacity=".5"><animate attributeName="rx" values="14;74" dur="5s" repeatCount="indefinite"/><animate attributeName="ry" values="6;30" dur="5s" repeatCount="indefinite"/><animate attributeName="opacity" values=".6;0" dur="5s" repeatCount="indefinite"/></ellipse>`;
+for(let i=0;i<8;i++) g += `<ellipse cx="${MG.cx+rr(-130,120)}" cy="${MG.cy+rr(-55,55)}" rx="${rr(10,16)}" ry="${rr(5,8)}" fill="#4f9a45"/>`;
+for(let i=0;i<22;i++){ const t = rr(-1.1,1.1), k = 1.05 + rr(.02,.14);
+  g += `<ellipse cx="${MG.cx+Math.cos(t)*MG.rx*k}" cy="${MG.cy+10+Math.sin(t)*MG.ry*k}" rx="${rr(2.5,4.5)}" ry="${rr(1.6,2.6)}" fill="#6e5230" opacity=".7"/>`; }
+for(let i=0;i<9;i++){ const t = rr(2.2,5.4); g += `<ellipse cx="${MG.cx+Math.cos(t)*(MG.rx+24)}" cy="${MG.cy+10+Math.sin(t)*(MG.ry+14)}" rx="${rr(8,15)}" ry="${rr(5,9)}" fill="#9b968b" stroke="#6b665c" stroke-width="1.5"/>`; }
+
 // paths
 const mainD = smoothPath(MAIN_PATH);
 g += `<g id="paths" fill="none" stroke-linecap="round" stroke-linejoin="round">`;
-BRANCHES.forEach(b => { const d = smoothPath(b);
-  g += `<path d="${d}" stroke="#a9693f" stroke-width="52"/><path d="${d}" stroke="#cd9566" stroke-width="40"/>`; });
+BRANCHES.forEach((b,bi) => { const d = smoothPath(b);
+  g += `<path id="br${bi}" d="${d}" stroke="#a9693f" stroke-width="52"/><path d="${d}" stroke="#cd9566" stroke-width="40"/>`; });
 g += `<path id="mainPath" d="${mainD}" stroke="#a9693f" stroke-width="82"/>
 <path d="${mainD}" stroke="#cd9566" stroke-width="68"/>
 <path d="${mainD}" stroke="#dcaa7b" stroke-width="34" opacity=".55"/>
@@ -591,8 +566,12 @@ ground.innerHTML = g;
 const mp = $('#mainPath'), total = mp.getTotalLength();
 const S = [];
 for(let l=0; l<=total; l += 12){ const p = mp.getPointAtLength(l); S.push([p.x,p.y]); }
-function distToPath(x,y){ let m = 1e9; for(const s of S){ const d = (s[0]-x)**2 + (s[1]-y)**2; if(d<m) m=d; } return Math.sqrt(m); }
+function distToPath(x,y){ let m = 1e9; for(const s of NETP){ const d = (s[0]-x)**2 + (s[1]-y)**2; if(d<m) m=d; } return Math.sqrt(m); }
 function nearestSample(x,y){ let m=1e18,k=0; S.forEach((s,i)=>{ const d=(s[0]-x)**2+(s[1]-y)**2; if(d<m){m=d;k=i;} }); return k; }
+const BR = BRANCHES.map((b,bi) => { const el = document.getElementById('br'+bi), L = el.getTotalLength(), pts = [];
+  for(let l=0;l<=L;l+=12){ const q = el.getPointAtLength(l); pts.push([q.x,q.y]); }
+  return { pts, j:nearestSample(pts[0][0],pts[0][1]) }; });
+const NETP = S.concat(...BR.map(b => b.pts));
 
 // pebbles along path edge
 let peb = '';
@@ -605,8 +584,8 @@ ground.insertAdjacentHTML('beforeend', peb);
 /* =====================================================
    3. OBJECTS (huts, signs, trees, gate…)
 ===================================================== */
-const colliders = [];
-const lights = [];
+const colliders = [];       // rects {x,y,w,h} or ellipses {e:1,cx,cy,rx,ry}
+const lights = [];          // night lights {x,y,r,warm,flick}
 function addObj(html, x, y, w, h, cls = '', z = y){
   const d = document.createElement('div');
   d.className = 'obj ' + cls; d.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:${Math.round(z)}`;
@@ -661,6 +640,19 @@ function hutSVG(type){
     <path d="M150,72 L150,42 L170,42 L170,72" stroke="${C.wood}" stroke-width="4" fill="none"/><path d="M154,60 q0,-15 6,-15 q6,0 6,15z" fill="#e8a41c"/>
     <path d="M24,160 L160,70 L296,160Z" fill="#a1583a" stroke="#6e3822" stroke-width="4" stroke-linejoin="round"/>
     <path d="M100,112 L84,158 M140,86 L128,158 M180,86 L192,158 M220,112 L236,158" stroke="#6e3822" stroke-opacity=".5" stroke-width="3"/></svg>`;
+  if(type==='water'){
+    let reeds = '';
+    for(let i=0;i<9;i++){ const x = 28 + i*9 + (i%2)*3, h = 36 + (i*7)%22;
+      reeds += `<path d="M${x},276 Q${x-4},${276-h*.5} ${x+2},${276-h}" stroke="#6f8f3a" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+      if(i%3===0) reeds += `<ellipse cx="${x+2}" cy="${276-h-4}" rx="3" ry="8" fill="#6b4429"/>`; }
+    return `<svg viewBox="0 0 320 290"><ellipse cx="160" cy="279" rx="150" ry="12" fill="rgba(0,0,0,.22)"/>${reeds}
+      <path d="M250,276 Q252,200 236,150 L246,146 Q258,176 262,196 Q270,170 282,142 L292,148 Q272,180 268,276Z" fill="#5a3b22"/>
+      <ellipse cx="262" cy="122" rx="64" ry="25" fill="#4f8f3d"/><ellipse cx="234" cy="108" rx="40" ry="16" fill="#5fa648"/><ellipse cx="290" cy="106" rx="34" ry="14" fill="#69b251"/>
+      <path d="M86,264 Q88,240 118,238 L192,238 Q220,240 222,264 L224,274 Q154,284 84,274Z" fill="#9b968b" stroke="#6b665c" stroke-width="3"/>
+      <ellipse cx="154" cy="241" rx="60" ry="8" fill="#b9b4a8"/>
+      <path d="M118,238 q-11,-4 -10,-19 q2,-12 13,-12 q11,0 13,12 q1,15 -10,19Z" fill="#a24b2c"/><path d="M110,212 q11,-6 22,0" stroke="#7d3820" stroke-width="2" fill="none"/>
+      <path d="M176,238 q-9,-8 -1,-18 q9,8 1,18Z" fill="#c9a24a" stroke="#8f6f26" stroke-width="1.5"/></svg>`;
+  }
   /* tree: palaver tree + campfire */
   return `<svg viewBox="0 0 320 290"><ellipse cx="160" cy="279" rx="150" ry="13" fill="rgba(0,0,0,.25)"/>
     <rect x="58" y="248" width="62" height="20" rx="9" fill="#6b4429"/><rect x="200" y="248" width="62" height="20" rx="9" fill="#6b4429"/>
@@ -675,14 +667,14 @@ function hutSVG(type){
 // gate
 (() => {
   const x = 1200, y = 200;
-  addObj(`<div class="post p1"></div><div class="post p2"></div><div class="beam"><div><small>Welcome, traveler</small>Le Sage's Village</div></div>`, x, y, 300, 170, 'gate');
+  const el = addObj(`<div class="post p1"></div><div class="post p2"></div><div class="beam"><div><small>Welcome, traveler</small>Le Sage's Village</div></div>`, x, y, 300, 170, 'gate');
   colliders.push({x:x-130,y:y-28,w:28,h:28},{x:x+102,y:y-28,w:28,h:28});
   lights.push({x:x-118,y:y-120,r:120,warm:.7},{x:x+118,y:y-120,r:120,warm:.7});
 })();
 
 // huts + signs
 const hutEls = {}, signEls = {};
-HUTS.forEach((h) => {
+HUTS.forEach((h,i) => {
   const el = addObj(hutSVG(h.type), h.x, h.y, 320, 290, 'hut');
   el.dataset.key = h.key; el.setAttribute('role','button'); el.setAttribute('aria-label', 'Enter ' + h.name);
   if(h.type==='forge') el.insertAdjacentHTML('beforeend', [0,1.3,2.6].map(d => `<span class="smoke" style="left:240px;top:56px;animation-delay:${d}s"></span>`).join(''));
@@ -696,14 +688,16 @@ HUTS.forEach((h) => {
 
   lights.push({x:h.x, y:h.y-70, r:h.type==='tree'?330:170, warm:h.type==='tree'?.9:.6, flick:h.type==='tree'||h.type==='forge'});
   lights.push({x:h.x+56, y:sy-62, r:120, warm:.75});
-  h.front = { x:h.x, y:h.y+104 };
-  h.talk  = { x:h.x, y:h.y+62 };
+  h.front = { x:h.x, y:h.y+104 };      // where visitors stand
+  h.talk  = { x:h.x, y:h.y+62 };       // proximity centre
 });
 
 // well
 addObj(`<svg viewBox="0 0 70 80"><ellipse cx="35" cy="76" rx="30" ry="6" fill="rgba(0,0,0,.25)"/><rect x="10" y="40" width="50" height="34" rx="6" fill="#8f8a7e" stroke="#6b665c" stroke-width="2"/><path d="M14,48 h42 M14,58 h42 M24,40 v34 M46,40 v34" stroke="#6b665c" stroke-opacity=".5"/><ellipse cx="35" cy="40" rx="25" ry="8" fill="#2c6d8f"/><rect x="8" y="10" width="6" height="40" fill="#4b2d19"/><rect x="56" y="10" width="6" height="40" fill="#4b2d19"/><path d="M4,14 L35,0 L66,14Z" fill="#b9923f" stroke="#8a6a2c" stroke-width="2"/><path d="M35,10 v22" stroke="#4b2d19" stroke-width="2"/><rect x="31" y="30" width="8" height="8" rx="2" fill="#7c5a2e"/></svg>`, WELL.x, WELL.y, 70, 80);
 colliders.push({x:WELL.x-28,y:WELL.y-22,w:56,h:22});
 
+colliders.push({x:728,y:1838,w:26,h:14});                                      // shade tree trunk at the marigot
+colliders.push({e:1, cx:MG.cx, cy:MG.cy, rx:MG.rx-22, ry:MG.ry-16});          // deep water of the marigot
 // pond collider (ellipse)
 colliders.push({e:1, cx:POND.cx, cy:POND.cy, rx:POND.rx-6, ry:POND.ry-4});
 
@@ -719,6 +713,7 @@ function freeSpot(x,y,pad=0){
   if(((x-POND.cx)/(POND.rx+60))**2 + ((y-POND.cy)/(POND.ry+60))**2 < 1) return false;
   if(x>1820 && x<2300 && y>1100 && y<1430) return false;
   if(Math.hypot(x-WELL.x,y-WELL.y) < 110) return false;
+  if(((x-MG.cx)/(MG.rx+90))**2 + ((y-MG.cy)/(MG.ry+90))**2 < 1) return false;
   if(Math.hypot(x-SPAWN.x,y-SPAWN.y) < 200) return false;
   for(const h of HUTS) if(Math.abs(x-h.x) < 210 && y > h.y-300 && y < h.y+150) return false;
   return true;
@@ -733,7 +728,7 @@ while(placed.length < 95 && tries++ < 4000){
   addObj(TREES[k](), x, y, 140*sc, 170*sc);
   colliders.push({x:x-9*sc, y:y-11*sc, w:18*sc, h:11*sc});
 }
-// bushes & rocks
+// bushes & rocks (bushes are walkable, rocks are not)
 for(let i=0,t=0;i<60 && t<2000;t++){
   const x=rr(40,W-40), y=rr(150,H-20); if(!freeSpot(x,y,-30)) continue; i++;
   if(rand()<.7) addObj(`<svg viewBox="0 0 60 40"><ellipse cx="30" cy="36" rx="26" ry="4" fill="rgba(0,0,0,.18)"/><circle cx="18" cy="26" r="13" fill="#4a8f45"/><circle cx="34" cy="22" r="15" fill="#58a152"/><circle cx="44" cy="29" r="10" fill="#4a8f45"/></svg>`, x, y, 60, 40);
@@ -748,80 +743,7 @@ for(let i=0;i<34;i++){
 }
 
 /* =====================================================
-   4. MOUNTS (BICYCLE & DONKEY SVG & DATA)
-===================================================== */
-function parkedBikeSVG(){
-  return `<svg viewBox="0 0 70 54">
-    <ellipse cx="35" cy="50" rx="30" ry="4" fill="rgba(0,0,0,.22)"/>
-    <!-- Wheels -->
-    <circle cx="16" cy="36" r="13" fill="none" stroke="#2a2a2e" stroke-width="3"/>
-    <circle cx="16" cy="36" r="11" fill="none" stroke="#8a8a92" stroke-width="1.2"/>
-    <circle cx="54" cy="36" r="13" fill="none" stroke="#2a2a2e" stroke-width="3"/>
-    <circle cx="54" cy="36" r="11" fill="none" stroke="#8a8a92" stroke-width="1.2"/>
-    <!-- Yellow / Terracotta Frame -->
-    <path d="M16,36 L34,36 L48,22 L30,22 Z" stroke="#e0553d" stroke-width="3.5" stroke-linejoin="round" fill="none"/>
-    <path d="M34,36 L48,16 M48,22 L54,36" stroke="#e0553d" stroke-width="3.5" stroke-linecap="round"/>
-    <!-- Handlebars & Seat -->
-    <path d="M46,14 L50,14 M48,14 L48,18" stroke="#1f1f23" stroke-width="3.5" stroke-linecap="round"/>
-    <path d="M26,18 L34,18" stroke="#1f1f23" stroke-width="4" stroke-linecap="round"/>
-    <line x1="30" y1="22" x2="30" y2="18" stroke="#8a8a92" stroke-width="3"/>
-    <!-- Kickstand -->
-    <line x1="34" y1="36" x2="30" y2="48" stroke="#2a2a2e" stroke-width="2.5"/>
-  </svg>`;
-}
-
-function parkedDonkeySVG(){
-  return `<svg viewBox="0 0 76 68">
-    <ellipse cx="38" cy="62" rx="30" ry="5" fill="rgba(0,0,0,.22)"/>
-    <!-- Legs -->
-    <rect x="18" y="38" width="4.5" height="24" rx="2" fill="#756b62"/>
-    <rect x="26" y="38" width="4.5" height="24" rx="2" fill="#5e554d"/>
-    <rect x="46" y="38" width="4.5" height="24" rx="2" fill="#756b62"/>
-    <rect x="54" y="38" width="4.5" height="24" rx="2" fill="#5e554d"/>
-    <!-- Donkey Body -->
-    <ellipse cx="36" cy="34" rx="22" ry="13" fill="#8f8479"/>
-    <ellipse cx="36" cy="35" rx="16" ry="9" fill="#a4998e"/>
-    <!-- Saddle / Pack Blanket -->
-    <rect x="28" y="22" width="16" height="18" rx="3" fill="#c05824"/>
-    <path d="M28,26 h16 M28,34 h16" stroke="#f0b429" stroke-width="2"/>
-    <!-- Neck & Head with Long Ears -->
-    <path d="M48,32 L58,16 L66,22 L56,38 Z" fill="#8f8479"/>
-    <circle cx="62" cy="20" r="7" fill="#8f8479"/>
-    <ellipse cx="68" cy="24" rx="5" ry="4" fill="#d9cec1"/>
-    <!-- Long Ears -->
-    <path d="M56,16 L54,2 L60,14" fill="#6e645a"/>
-    <path d="M60,16 L62,2 L65,14" fill="#8f8479"/>
-    <circle cx="62" cy="18" r="1.5" fill="#1c1513"/>
-    <!-- Tail with Tuft -->
-    <path d="M14,32 Q10,44 12,50" stroke="#5e554d" stroke-width="2.5" fill="none"/>
-    <circle cx="12" cy="50" r="2.5" fill="#3a342e"/>
-  </svg>`;
-}
-
-// Interactive Mounts array in the village
-const MOUNTS = [
-  { id:'bike_workshop', type:'bike', name:'Village Bicycle', icon:'🚲', x:1520, y:990, speed:310, w:70, h:54 },
-  { id:'bike_school',   type:'bike', name:'Rwandan Blue Bike', icon:'🚲', x:1520, y:1710, speed:310, w:70, h:54 },
-  { id:'donkey_well',   type:'donkey', name:'Kind Donkey', icon:'🫏', x:490, y:970, speed:240, w:76, h:68 },
-  { id:'donkey_granary',type:'donkey', name:'Village Donkey', icon:'🫏', x:840, y:1350, speed:240, w:76, h:68 }
-];
-
-const mountEls = {};
-MOUNTS.forEach(m => {
-  const el = addObj(m.type==='bike' ? parkedBikeSVG() : parkedDonkeySVG(), m.x, m.y, m.w, m.h, 'mount-obj');
-  el.dataset.mountId = m.id;
-  el.setAttribute('role', 'button');
-  el.setAttribute('aria-label', `Mount ${m.name}`);
-  el.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if(P.mount) dismountPlayer();
-    else mountPlayer(m);
-  });
-  mountEls[m.id] = el;
-});
-
-/* =====================================================
-   5. CHARACTER SPRITES (ON FOOT & REALISTIC MOUNT SPRITES)
+   4. CHARACTERS
 ===================================================== */
 function sprite(o){
   const {skin,hair,top,stripe,bottom,bag,wrap,dress} = o, dk = '#1a0f0a';
@@ -855,193 +777,382 @@ function sprite(o){
     <circle cx="38" cy="22.5" r="1.7" fill="${dk}"/><path d="M43,23 q2.2,2 0,3.6" stroke="${dk}" stroke-width="1.2" fill="none"/><path d="M36,28 Q39,30 41,28" stroke="${dk}" stroke-width="1.3" fill="none" stroke-linecap="round"/></g>`;
   return `<svg class="sp" viewBox="0 0 60 90"><ellipse cx="30" cy="87" rx="16" ry="4" fill="rgba(0,0,0,.28)"/>${fb}${side}</svg>`;
 }
-
-/* Realistic Mounted Sprite: Boy on Bicycle */
-function spriteMountedBike(){
-  return `<svg class="sp" viewBox="0 0 78 96">
-    <ellipse cx="39" cy="91" rx="34" ry="4.5" fill="rgba(0,0,0,.26)"/>
-    <!-- Bicycle Wheels with Rotating Spokes -->
-    <g class="wheel" style="transform-origin: 18px 74px;">
-      <circle cx="18" cy="74" r="14" fill="none" stroke="#252528" stroke-width="3"/>
-      <circle cx="18" cy="74" r="12" fill="none" stroke="#8a8a92" stroke-width="1"/>
-      <line x1="18" y1="60" x2="18" y2="88" stroke="#8a8a92" stroke-width="1.2"/>
-      <line x1="4" y1="74" x2="32" y2="74" stroke="#8a8a92" stroke-width="1.2"/>
-    </g>
-    <g class="wheel" style="transform-origin: 60px 74px;">
-      <circle cx="60" cy="74" r="14" fill="none" stroke="#252528" stroke-width="3"/>
-      <circle cx="60" cy="74" r="12" fill="none" stroke="#8a8a92" stroke-width="1"/>
-      <line x1="60" y1="60" x2="60" y2="88" stroke="#8a8a92" stroke-width="1.2"/>
-      <line x1="46" y1="74" x2="74" y2="74" stroke="#8a8a92" stroke-width="1.2"/>
-    </g>
-    <!-- Frame & Chain -->
-    <path d="M18,74 L38,74 L54,58 L34,58 Z" stroke="#e0553d" stroke-width="3.5" stroke-linejoin="round" fill="none"/>
-    <path d="M38,74 L54,48 M54,58 L60,74" stroke="#e0553d" stroke-width="3.5" stroke-linecap="round"/>
-    <path d="M50,46 L58,46" stroke="#1f1f23" stroke-width="4.5" stroke-linecap="round"/>
-    <!-- Boy Body Pedaling -->
-    <g class="pedalLeg" style="transform-origin: 38px 68px;">
-      <rect x="34" y="56" width="7.5" height="18" rx="3.5" fill="#7a4a2d"/>
-      <circle cx="37.5" cy="74" r="3.5" fill="#2a1a10"/>
-      <line x1="38" y1="68" x2="44" y2="74" stroke="#444" stroke-width="2.5"/>
-    </g>
-    <rect x="27" y="44" width="16" height="13" rx="4" fill="#2f5d8a"/>
-    <path d="M26,26 Q36,21 46,26 L48,47 Q36,51 24,47Z" fill="#c8452d"/>
-    <rect x="18" y="28" width="10" height="16" rx="3" fill="#3f7a45"/>
-    <path d="M42,32 L54,46" stroke="#7a4a2d" stroke-width="5" stroke-linecap="round"/>
-    <circle cx="38" cy="16" r="11" fill="#7a4a2d"/>
-    <circle cx="38" cy="14" r="13" fill="#16100d"/>
-    <circle cx="38" cy="17" r="11" fill="#7a4a2d"/>
-    <circle cx="43" cy="16" r="1.5" fill="#111"/>
-  </svg>`;
-}
-
-/* Realistic Mounted Sprite: Boy on Trotting Donkey */
-function spriteMountedDonkey(){
-  return `<svg class="sp" viewBox="0 0 90 104">
-    <ellipse cx="45" cy="98" rx="36" ry="4.5" fill="rgba(0,0,0,.26)"/>
-    <!-- Donkey 4-Leg Gait -->
-    <g class="donkeyLegB" style="transform-origin: 24px 68px;">
-      <rect x="20" y="68" width="5.5" height="28" rx="2.5" fill="#756b62"/>
-      <ellipse cx="22.5" cy="95" rx="3.5" ry="2" fill="#3b2011"/>
-    </g>
-    <g class="donkeyLegF" style="transform-origin: 62px 68px;">
-      <rect x="60" y="68" width="5.5" height="28" rx="2.5" fill="#756b62"/>
-      <ellipse cx="62.5" cy="95" rx="3.5" ry="2" fill="#3b2011"/>
-    </g>
-    <ellipse cx="44" cy="64" rx="28" ry="15" fill="#8f8479"/>
-    <!-- Saddle Blanket -->
-    <rect x="34" y="51" width="22" height="19" rx="3" fill="#c05824"/>
-    <path d="M34,55 h22 M34,63 h22" stroke="#f0b429" stroke-width="2"/>
-    <!-- Donkey Head & Long Ears -->
-    <path d="M60,62 L74,42 L82,48 L72,68 Z" fill="#8f8479"/>
-    <circle cx="78" cy="46" r="8.5" fill="#8f8479"/>
-    <path d="M72,42 L70,26 L76,40" fill="#6e645a"/>
-    <path d="M76,42 L78,26 L81,40" fill="#8f8479"/>
-    <circle cx="78" cy="44" r="1.6" fill="#111"/>
-    <!-- Boy Seated Proudly -->
-    <rect x="36" y="44" width="16" height="13" rx="3.5" fill="#2f5d8a"/>
-    <path d="M34,24 Q44,19 54,24 L56,46 Q44,50 32,46Z" fill="#c8452d"/>
-    <rect x="24" y="26" width="11" height="16" rx="3" fill="#3f7a45"/>
-    <path d="M50,30 L66,46" stroke="#7a4a2d" stroke-width="5" stroke-linecap="round"/>
-    <circle cx="44" cy="14" r="11" fill="#7a4a2d"/>
-    <circle cx="44" cy="12" r="13" fill="#16100d"/>
-    <circle cx="44" cy="15" r="11" fill="#7a4a2d"/>
-    <circle cx="49" cy="14" r="1.5" fill="#111"/>
-  </svg>`;
-}
-
-function makeActor(opts){
+function makeActor(opts, rides = []){
   const d = document.createElement('div'); d.className = 'actor'; d.dataset.dir = 'down';
-  d.innerHTML = `<div class="say"></div><div class="bob">${sprite(opts)}</div>`;
+  const mounts = rides.map(r => `<div class="mount ${r}">${r==='bike' ? bikeSVG(opts.bike) : donkeySVG('ride')}</div>`).join('');
+  d.innerHTML = `${mounts}<div class="say"></div><div class="rider"><div class="bob">${sprite(opts)}</div></div>`;
   objects.appendChild(d); return d;
 }
 
-// player state with velocity, inertia & momentum
-const P = {
-  x: SPAWN.x,
-  y: SPAWN.y,
-  vx: 0,
-  vy: 0,
-  dir: 'down',
-  walking: false,
-  sprinting: false,
-  mount: null,
-  leanAngle: 0
-};
+/* =====================================================
+   ARTICULATED RIDERS: bicycle and donkey, drawn joint by joint
+   (hands on the bars, feet on pedals, reins in hand)
+===================================================== */
+const NS = 'http://www.w3.org/2000/svg';
+function E(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for(const k in (attrs||{})) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+function shade(hex,k){ const n = parseInt(hex.slice(1),16); return `rgb(${((n>>16)&255)*k|0},${((n>>8)&255)*k|0},${(n&255)*k|0})`; }
+const setLine = (l,a,b) => { l.setAttribute('x1',a[0]); l.setAttribute('y1',a[1]); l.setAttribute('x2',b[0]); l.setAttribute('y2',b[1]); };
+const setPt = (e,p,dx=0,dy=0) => { e.setAttribute('cx',p[0]+dx); e.setAttribute('cy',p[1]+dy); };
+// two-bone inverse kinematics: returns the joint (knee/elbow) and the reachable end point
+function ik(h,p,l1,l2,s){
+  let dx = p[0]-h[0], dy = p[1]-h[1], d = Math.hypot(dx,dy) || 1; const mx = l1+l2-.01;
+  if(d > mx){ dx *= mx/d; dy *= mx/d; d = mx; }
+  const a = (l1*l1 - l2*l2 + d*d)/(2*d), hh = Math.sqrt(Math.max(0, l1*l1 - a*a)), ux = dx/d, uy = dy/d;
+  return { j:[h[0] + ux*a - uy*hh*s, h[1] + uy*a + ux*hh*s], e:[h[0]+dx, h[1]+dy] };
+}
+function ikPick(h,p,l1,l2,score){ const A = ik(h,p,l1,l2,1), B = ik(h,p,l1,l2,-1); return score(A.j) >= score(B.j) ? A : B; }
+
+function makeFigure(o){
+  const dark = '#2a1a10', f = {};
+  ['farLeg','farArm','body','nearLeg','nearArm'].forEach(n => { f['g' + n[0].toUpperCase() + n.slice(1)] = E('g'); });
+  const limb = (parent,leg,k) => ({
+    u:E('line',{stroke:shade(leg?o.bottom:o.top,k),'stroke-width':leg?9:7,'stroke-linecap':'round'},parent),
+    l:E('line',{stroke:shade(o.skin,k),'stroke-width':leg?6.5:5.5,'stroke-linecap':'round'},parent),
+    e:leg ? E('ellipse',{rx:5.5,ry:2.8,fill:dark},parent) : E('circle',{r:3.3,fill:shade(o.skin,k)},parent) });
+  f.fl = limb(f.gFarLeg,true,.7); f.nl = limb(f.gNearLeg,true,1); f.fa = limb(f.gFarArm,false,.7); f.na = limb(f.gNearArm,false,1);
+  f.bag    = E('rect',{x:-6.5,y:-8.5,width:13,height:17,rx:4,fill:o.bag},f.gBody);
+  f.torso  = E('line',{stroke:o.top,'stroke-linecap':'round'},f.gBody);
+  f.stripe = E('line',{stroke:o.stripe,'stroke-width':3.2,'stroke-linecap':'round'},f.gBody);
+  f.strap  = E('line',{stroke:o.bag,'stroke-width':3,'stroke-linecap':'round'},f.gBody);
+  f.bag2   = E('rect',{x:-7.5,y:-9,width:15,height:18,rx:4.5,fill:o.bag},f.gBody);
+  f.head   = E('circle',{r:10.5,fill:o.skin},f.gBody);
+  f.hair   = [0,1,2,3,4,5].map(() => E('circle',{fill:o.hair,r:0},f.gBody));
+  f.eyes   = [E('circle',{r:1.5,fill:dark},f.gBody), E('circle',{r:1.5,fill:dark},f.gBody)];
+  f.mouth  = E('path',{fill:'none',stroke:dark,'stroke-width':1.3,'stroke-linecap':'round'},f.gBody);
+  const HV = {
+    side:[[-3,-8,7.5],[-9,-3,6.5],[3,-10,6],[8,-6,5.2],[-8,3,5],[0,-4,9]],
+    down:[[-8,-6,6],[-3,-10,6.5],[3,-10,6.5],[8,-6,6],[0,-6,8],[0,-9,6]],
+    up:  [[0,-1,11.8],[-7,-5,6],[7,-5,6],[0,-9,7],[-6,4,5],[6,4,5]] };
+  f.update = (view,P) => {
+    const H = P.H, S = P.S, hd = P.hd, ft = view === 'side';
+    const leg = (L,pt,hip) => { setLine(L.u,hip,pt.j); setLine(L.l,pt.j,pt.e); setPt(L.e,pt.e,ft?4:0,3); };
+    leg(f.nl,P.nl,P.nH||H); leg(f.fl,P.fl,P.fH||H);
+    const arm = (A,sh,pt) => { setLine(A.u,sh,pt.j); setLine(A.l,pt.j,pt.e); setPt(A.e,pt.e); };
+    arm(f.na,P.nS||S,P.na); arm(f.fa,P.fS||S,P.fa);
+    setLine(f.torso,H,S); f.torso.setAttribute('stroke-width', ft ? 13 : 16);
+    const hx = H[0] + (S[0]-H[0])*.2, hy = H[1] + (S[1]-H[1])*.2;
+    setLine(f.stripe,[hx-7,hy],[hx+7,hy]); f.stripe.setAttribute('opacity', ft ? 0 : 1);
+    setPt(f.head,hd);
+    const hv = HV[view]; f.hair.forEach((c,i) => { setPt(c,hd,hv[i][0],hv[i][1]); c.setAttribute('r',hv[i][2]); });
+    const eye = (e,dx,dy,on) => { setPt(e,hd,dx,dy); e.setAttribute('opacity',on?1:0); };
+    if(ft){ eye(f.eyes[0],5.5,-1,1); eye(f.eyes[1],0,0,0); f.mouth.setAttribute('d',`M${hd[0]+4},${hd[1]+4.5} q2.5,1.6 5,0`); f.mouth.setAttribute('opacity',1); }
+    else if(view === 'down'){ eye(f.eyes[0],-4,-.5,1); eye(f.eyes[1],4,-.5,1); f.mouth.setAttribute('d',`M${hd[0]-3.2},${hd[1]+4} q3.2,3 6.4,0`); f.mouth.setAttribute('opacity',1); }
+    else { eye(f.eyes[0],0,0,0); eye(f.eyes[1],0,0,0); f.mouth.setAttribute('opacity',0); }
+    const t = (P.tilt||0)*Math.PI/180, mx = (H[0]+S[0])/2, my = (H[1]+S[1])/2;
+    f.bag.setAttribute('opacity', ft ? 1 : 0); f.bag2.setAttribute('opacity', view==='up' ? 1 : 0); f.strap.setAttribute('opacity', view==='down' ? 1 : 0);
+    if(ft) f.bag.setAttribute('transform',`translate(${mx-Math.cos(t)*9},${my-Math.sin(t)*9}) rotate(${P.tilt||0})`);
+    if(view==='up') f.bag2.setAttribute('transform',`translate(${mx},${my+1})`);
+    if(view==='down') setLine(f.strap,[S[0]-6,S[1]+2],[H[0]+7,H[1]-3]);
+  };
+  return f;
+}
+
+function makeBikeRig(o){
+  const svg = E('svg',{viewBox:'0 0 160 120','class':'rig'}), root = E('g',{},svg);
+  const dk = '#1d1d1f', col = o.bike || '#c8452d', frames = [], fills = [];
+  const RW=[44,94], FW=[105,94], BB=[74,96], HT=[93,64], SP=[61,65], GR=[100,57];
+  const wheel = (parent,c) => { const g = E('g',{},parent), cx = c[0], cy = c[1];
+    E('circle',{cx,cy,r:17,fill:'none',stroke:dk,'stroke-width':3.4},g);
+    E('circle',{cx,cy,r:13.5,fill:'none',stroke:'#b9b9b9','stroke-width':.8},g);
+    E('path',{d:`M${cx},${cy-13.5}V${cy+13.5}M${cx-13.5},${cy}H${cx+13.5}M${cx-9.5},${cy-9.5}L${cx+9.5},${cy+9.5}M${cx+9.5},${cy-9.5}L${cx-9.5},${cy+9.5}`,stroke:'#bdbdbd','stroke-width':.8},g);
+    E('circle',{cx,cy,r:2.4,fill:'#777'},g);
+    return { rot:d => g.setAttribute('transform',`rotate(${d.toFixed(1)} ${cx} ${cy})`) }; };
+  const ln = (parent,a,b,w,c,isFrame) => { const l = E('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:c,'stroke-width':w,'stroke-linecap':'round'},parent); if(isFrame) frames.push(l); return l; };
+  const grips = g => { ln(g,[63,58],[97,58],3.2,dk); E('circle',{cx:63,cy:58,r:3.3,fill:'#222'},g); E('circle',{cx:97,cy:58,r:3.3,fill:'#222'},g); };
+
+  // side view
+  const figS = makeFigure(o), side = E('g',{'data-v':'side'},root);
+  E('ellipse',{cx:76,cy:112,rx:46,ry:3.5,fill:'rgba(0,0,0,.22)'},side);
+  side.append(figS.gFarLeg, figS.gFarArm);
+  const bk = E('g',{},side);
+  const crankF = ln(bk,BB,BB,2.6,'#333'), pedF = E('rect',{width:8,height:3,rx:1.2,fill:'#222'},bk);
+  const rw = wheel(bk,RW), fw = wheel(bk,FW);
+  [[RW,BB],[RW,SP],[BB,SP],[SP,HT],[BB,HT],[HT,FW]].forEach(q => ln(bk,q[0],q[1],3.3,col,true));
+  ln(bk,SP,[61.5,62.5],3,dk); ln(bk,[54,62],[68,62],4.2,dk); ln(bk,HT,[95,56],3,dk); ln(bk,[94,56],[101,57.5],3,dk);
+  E('circle',{cx:BB[0],cy:BB[1],r:6,fill:'none',stroke:'#555','stroke-width':1.6},bk);
+  const crankN = ln(bk,BB,BB,2.6,'#333'), pedN = E('rect',{width:8,height:3,rx:1.2,fill:'#222'},bk);
+  side.append(figS.gBody, figS.gNearLeg, figS.gNearArm);
+
+  // front view (riding toward the viewer)
+  const figD = makeFigure(o), down = E('g',{'data-v':'down'},root);
+  E('ellipse',{cx:80,cy:112,rx:18,ry:3.5,fill:'rgba(0,0,0,.22)'},down);
+  down.append(figD.gFarLeg, figD.gNearLeg, figD.gBody);
+  E('ellipse',{cx:80,cy:94,rx:3.6,ry:17.5,fill:dk},down);
+  const treadD = E('ellipse',{cx:80,cy:94,rx:3.6,ry:17.5,fill:'none',stroke:'#777','stroke-width':1.3,'stroke-dasharray':'3 4'},down);
+  ln(down,[80,64],[80,94],3.5,col,true); fills.push(E('rect',{x:77.5,y:59,width:5,height:8,rx:2,fill:col},down));
+  grips(down); down.append(figD.gFarArm, figD.gNearArm);
+
+  // back view (riding away)
+  const figU = makeFigure(o), up = E('g',{'data-v':'up'},root);
+  E('ellipse',{cx:80,cy:112,rx:18,ry:3.5,fill:'rgba(0,0,0,.22)'},up);
+  grips(up);
+  E('ellipse',{cx:80,cy:94,rx:3.6,ry:17.5,fill:dk},up);
+  const treadU = E('ellipse',{cx:80,cy:94,rx:3.6,ry:17.5,fill:'none',stroke:'#777','stroke-width':1.3,'stroke-dasharray':'3 4'},up);
+  E('ellipse',{cx:80,cy:65,rx:9,ry:3.6,fill:'#222'},up);
+  up.append(figU.gFarLeg, figU.gNearLeg, figU.gFarArm, figU.gNearArm, figU.gBody);
+
+  return { svg,
+    setColor(c){ frames.forEach(l => l.setAttribute('stroke',c)); fills.forEach(r => r.setAttribute('fill',c)); },
+    update(st){
+      root.setAttribute('transform',`rotate(${st.rot.toFixed(2)} 78 112)`);
+      side.style.opacity = st.view==='side' ? 1 : 0; down.style.opacity = st.view==='down' ? 1 : 0; up.style.opacity = st.view==='up' ? 1 : 0;
+      const th = st.theta;
+      if(st.view === 'side'){
+        side.setAttribute('transform',`translate(76,0) scale(${st.faceT.toFixed(3)},1) translate(-76,0)`);
+        rw.rot(st.phi); fw.rot(st.phi);
+        const p1 = [BB[0]+9*Math.cos(th), BB[1]+9*Math.sin(th)], p2 = [BB[0]-9*Math.cos(th), BB[1]-9*Math.sin(th)];
+        setLine(crankN,BB,p1); setLine(crankF,BB,p2);
+        pedN.setAttribute('x',p1[0]-4); pedN.setAttribute('y',p1[1]-1.5); pedF.setAttribute('x',p2[0]-4); pedF.setAttribute('y',p2[1]-1.5);
+        const a = st.lean*Math.PI/180, H = [61,59], S = [H[0]+25*Math.sin(a), H[1]-25*Math.cos(a)], hd = [S[0]+12*Math.sin(a+.28), S[1]-12*Math.cos(a+.28)];
+        const fS = [S[0]-1.5, S[1]+.5];
+        figS.update('side',{H,S,hd,tilt:st.lean,
+          nl:ik(H,[p1[0]-.5,p1[1]-3],24,24,-1), fl:ik(H,[p2[0]-.5,p2[1]-3],24,24,-1),
+          na:ik(S,GR,16,16,1), fa:ik(fS,[GR[0]-1.5,GR[1]-.5],16,16,1), fS });
+      } else {
+        const dn = st.view === 'down', fig = dn ? figD : figU;
+        (dn ? treadD : treadU).setAttribute('stroke-dashoffset',(st.phi*.12).toFixed(1));
+        const sw = st.sway, yL = 96+9*Math.sin(th), yR = 96-9*Math.sin(th);
+        const H = [80+sw*.5,60], S = [80+sw,38], hd = [80+sw*1.2,27], hL = [74+sw*.5,60], hR = [86+sw*.5,60], sL = [71+sw,40], sR = [89+sw,40];
+        fig.update(st.view,{H,S,hd,tilt:0, nH:hR, fH:hL, nS:sR, fS:sL,
+          nl:ikPick(hR,[88,yR-2],24,24,j=>j[0]), fl:ikPick(hL,[72,yL-2],24,24,j=>-j[0]),
+          na:ikPick(sR,[97,58],16,16,j=>j[0]),   fa:ikPick(sL,[63,58],16,16,j=>-j[0]) });
+      }
+    } };
+}
+
+function makeDonkeyRig(o){
+  const svg = E('svg',{viewBox:'0 0 160 120','class':'rig'}), root = E('g',{},svg);
+  const figS = makeFigure(o), figD = makeFigure(o), figU = makeFigure(o);
+  const rope = parent => E('path',{fill:'none',stroke:'#7a4a22','stroke-width':1.9,'stroke-linecap':'round'},parent);
+  const pivotize = (e,org) => { e.style.transformBox = 'fill-box'; e.style.transformOrigin = org; };
+
+  // side view: the real donkey drawing, driven joint by joint
+  const side = E('g',{'data-v':'side'},root), dg = E('g',{transform:'translate(18,26)'});
+  dg.innerHTML = donkeyInner('ride');
+  side.append(figS.gFarLeg, dg, figS.gFarArm, figS.gBody, figS.gNearLeg);
+  const ropeS = rope(side); side.append(figS.gNearArm);
+  const legs = [...dg.querySelectorAll('.dleg')], head = dg.querySelector('.dhead'), tail = dg.querySelector('.dtail');
+
+  // front view
+  const down = E('g',{'data-v':'down'},root), df = E('g');
+  df.innerHTML = `<ellipse cx="80" cy="110" rx="26" ry="4" fill="rgba(0,0,0,.2)"/>
+    <g class="fl"><rect x="66" y="86" width="9" height="24" rx="3.5" fill="#7a7671"/><rect x="65.5" y="106" width="10" height="5" rx="1.5" fill="#2a2420"/></g>
+    <g class="fl"><rect x="85" y="86" width="9" height="24" rx="3.5" fill="#7a7671"/><rect x="84.5" y="106" width="10" height="5" rx="1.5" fill="#2a2420"/></g>
+    <ellipse cx="80" cy="78" rx="21" ry="26" fill="#938f89"/><ellipse cx="80" cy="86" rx="14" ry="16" fill="#bdb9b1"/>
+    <g class="fh"><path d="M70,58 L90,58 L88,84 L72,84Z" fill="#938f89"/><path d="M72,69 L66,48 L77,64Z" fill="#7a7671"/><path d="M88,69 L94,48 L83,64Z" fill="#7a7671"/>
+      <ellipse cx="80" cy="82" rx="9" ry="15" fill="#938f89"/><path d="M80,64 L80,76" stroke="#4a4540" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="80" cy="94" rx="6.5" ry="5.5" fill="#d9d3c9"/><circle cx="74.5" cy="79" r="1.7" fill="#111"/><circle cx="85.5" cy="79" r="1.7" fill="#111"/>
+      <circle cx="78" cy="94" r="1" fill="#6a6661"/><circle cx="82" cy="94" r="1" fill="#6a6661"/></g>`;
+  down.append(figD.gBody, df, figD.gFarLeg, figD.gNearLeg);
+  const ropeDL = rope(down), ropeDR = rope(down); down.append(figD.gFarArm, figD.gNearArm);
+  const fls = [...df.querySelectorAll('.fl')], fh = df.querySelector('.fh');
+  fls.forEach(e => pivotize(e,'50% 100%')); pivotize(fh,'50% 20%');
+
+  // back view
+  const up = E('g',{'data-v':'up'},root), dbk = E('g');
+  dbk.innerHTML = `<ellipse cx="80" cy="110" rx="26" ry="4" fill="rgba(0,0,0,.2)"/>
+    <g class="bl"><rect x="66" y="88" width="9" height="22" rx="3.5" fill="#7a7671"/><rect x="65.5" y="106" width="10" height="5" rx="1.5" fill="#2a2420"/></g>
+    <g class="bl"><rect x="85" y="88" width="9" height="22" rx="3.5" fill="#7a7671"/><rect x="84.5" y="106" width="10" height="5" rx="1.5" fill="#2a2420"/></g>
+    <g class="rump"><ellipse cx="80" cy="78" rx="21" ry="26" fill="#938f89"/><ellipse cx="80" cy="82" rx="12" ry="18" fill="#a09c95"/>
+    <path d="M60,56 Q80,48 100,56 L98,76 Q80,82 62,76Z" fill="#c8452d"/><path d="M62,68 Q80,74 98,68" stroke="#f0b429" stroke-width="3" fill="none"/>
+    <g class="bt"><path d="M80,64 Q76,80 79,94" stroke="#6f6c68" stroke-width="3.4" fill="none" stroke-linecap="round"/><ellipse cx="79" cy="96" rx="3.5" ry="5" fill="#4a4540"/></g></g>`;
+  up.append(dbk, figU.gFarLeg, figU.gNearLeg, figU.gFarArm, figU.gNearArm, figU.gBody);
+  const bls = [...dbk.querySelectorAll('.bl')], bt = dbk.querySelector('.bt'), rump = dbk.querySelector('.rump');
+  bls.forEach(e => pivotize(e,'50% 100%')); pivotize(bt,'50% 0%');
+
+  const legsFB = (fig,view,H,S,hd,sw,by,g,A) => {
+    const hL = [74+sw,54+by], hR = [86+sw,54+by], sL = [71+sw,34+by], sR = [89+sw,34+by];
+    const ankL = [61+Math.sin(g)*2*A,86], ankR = [99-Math.sin(g)*2*A,86];
+    return { H,S,hd,tilt:0, nH:hR, fH:hL, nS:sR, fS:sL,
+      nl:ikPick(hR,ankR,22,22,j=>j[0]), fl:ikPick(hL,ankL,22,22,j=>-j[0]), sL, sR };
+  };
+
+  return { svg,
+    update(st){
+      root.setAttribute('transform',`rotate(${st.rot.toFixed(2)} 80 112)`);
+      side.style.opacity = st.view==='side' ? 1 : 0; down.style.opacity = st.view==='down' ? 1 : 0; up.style.opacity = st.view==='up' ? 1 : 0;
+      const g = st.gait, A = st.amp, by = -Math.abs(Math.sin(g))*2.4*A, sw = Math.sin(g)*1.6*A;
+      const tailSw = Math.sin(st.t*2.1)*7 + Math.sin(g)*8*A;
+      if(st.view === 'side'){
+        side.setAttribute('transform',`translate(80,0) scale(${st.faceT.toFixed(3)},1) translate(-80,0)`);
+        legs.forEach(l => { const ph = l.classList.contains('a') ? 0 : Math.PI; l.style.transform = `rotate(${(Math.sin(g+ph)*24*A).toFixed(1)}deg)`; });
+        const nod = Math.sin(g*2)*2.5*A + st.pull*7;
+        head.style.transform = `rotate(${nod.toFixed(1)}deg)`; tail.style.transform = `rotate(${tailSw.toFixed(1)}deg)`;
+        const a = .1, H = [76,54+by], S = [H[0]+24*Math.sin(a), H[1]-24*Math.cos(a)], hd = [S[0]+2.5,S[1]-13], fS = [S[0]-1,S[1]+.5];
+        const A1 = [84+3*Math.sin(g)*A,79], A2 = [80-3*Math.sin(g)*A,80];
+        const hand = [93-st.tension*3,49+by], fhand = [91-st.tension*3,48+by];
+        figS.update('side',{H,S,hd,tilt:6, nl:ik(H,A1,19,19,-1), fl:ik(H,A2,19,19,-1), na:ik(S,hand,14,14,1), fa:ik(fS,fhand,14,14,1), fS});
+        // the rope runs from the hand to the donkey's mouth and goes taut when steering
+        const ang = nod*Math.PI/180, px = 110, py = 75, mx0 = 144-px, my0 = 59-py;
+        const mouth = [px + mx0*Math.cos(ang) - my0*Math.sin(ang), py + mx0*Math.sin(ang) + my0*Math.cos(ang)];
+        const mid = [(hand[0]+mouth[0])/2, (hand[1]+mouth[1])/2], sag = (1-st.tension)*26 + 3;
+        ropeS.setAttribute('d',`M${hand[0]},${hand[1]} Q${mid[0]},${mid[1]+sag} ${mouth[0]},${mouth[1]}`);
+      } else if(st.view === 'down'){
+        fls.forEach((l,i) => { const lift = Math.max(0, Math.sin(g + i*Math.PI))*5*A; l.style.transform = `translateY(${(-lift).toFixed(1)}px)`; });
+        fh.style.transform = `translateY(${(Math.sin(g*2)*1.5*A).toFixed(1)}px) rotate(${(st.pull*8).toFixed(1)}deg)`;
+        const H = [80+sw,54+by], S = [80+sw*1.1,31+by], hd = [80+sw*1.2,20+by], sh = st.pull*4;
+        const P = legsFB(figD,'down',H,S,hd,sw,by,g,A);
+        const hl = [78+sh,62+by], hr = [82+sh,62+by];
+        figD.update('down',Object.assign(P,{ na:ikPick(P.sR,hr,14,14,j=>j[0]), fa:ikPick(P.sL,hl,14,14,j=>-j[0]) }));
+        const mouth = [80+st.pull*5,94], spread = (1-st.tension)*8;
+        ropeDL.setAttribute('d',`M${hl[0]},${hl[1]} Q${79-spread},80 ${mouth[0]},${mouth[1]}`);
+        ropeDR.setAttribute('d',`M${hr[0]},${hr[1]} Q${81+spread},80 ${mouth[0]},${mouth[1]}`);
+      } else {
+        bls.forEach((l,i) => { const lift = Math.max(0, Math.sin(g + i*Math.PI))*5*A; l.style.transform = `translateY(${(-lift).toFixed(1)}px)`; });
+        bt.style.transform = `rotate(${tailSw.toFixed(1)}deg)`; rump.style.transform = `translateX(${sw.toFixed(1)}px)`;
+        const H = [80+sw,54+by], S = [80+sw*1.1,31+by], hd = [80+sw*1.2,20+by];
+        const P = legsFB(figU,'up',H,S,hd,sw,by,g,A);
+        figU.update('up',Object.assign(P,{ na:ikPick(P.sR,[84+st.pull*3,58+by],14,14,j=>j[0]), fa:ikPick(P.sL,[76+st.pull*3,58+by],14,14,j=>-j[0]) }));
+      }
+    } };
+}
+
+// the rider controller turns velocity into pedalling, wheel spin, steering, banking and rein tension
+function makeRider(kind,o){
+  const rig = kind === 'bike' ? makeBikeRig(o) : makeDonkeyRig(o);
+  const st = { view:'side', face:1, faceT:1, theta:0, phi:0, gait:0, bank:0, lean:34, pull:0, tension:0, sway:0, amp:0, rot:0, t:0, prevH:null, spd:0 };
+  return { svg:rig.svg,
+    setColor(c){ if(rig.setColor) rig.setColor(c); },
+    reset(face){ st.face = st.faceT = face; st.prevH = null; st.spd = 0; st.bank = 0; st.tension = 0; st.pull = 0; st.view = 'side'; },
+    step(dt,vx,vy,active,sprint){
+      const speed = Math.hypot(vx,vy); let turn = 0; st.t += dt;
+      if(speed > 25){
+        const h = Math.atan2(vy,vx);
+        if(st.prevH !== null){ let d = h - st.prevH; while(d > Math.PI) d -= 6.2832; while(d < -Math.PI) d += 6.2832; turn = d/Math.max(dt,.001); }
+        st.prevH = h; const c = Math.cos(h), sn = Math.sin(h);
+        if(Math.abs(c) >= .5){ st.view = 'side'; st.face = c < 0 ? -1 : 1; } else st.view = sn > 0 ? 'down' : 'up';
+      } else st.prevH = null;
+      const k = Math.min(1,dt*16); st.faceT += (st.face - st.faceT)*k;
+      const acc = (speed - st.spd)/Math.max(dt,.001); st.spd = speed;
+      st.bank += (clamp(turn*speed*.016,-12,12) - st.bank)*Math.min(1,dt*7);
+      st.tension += (clamp(Math.abs(turn)/2,0,1) - st.tension)*Math.min(1,dt*8);
+      st.pull += (clamp(turn/2.5,-1,1) - st.pull)*Math.min(1,dt*8);
+      const dist = speed*dt;
+      st.phi += dist/110*360; st.gait += dist/110*6.2832;
+      if(active) st.theta += dist/110*6.2832*.55;
+      st.amp = clamp(speed/120,0,1);
+      st.lean += ((34 + (sprint?14:0) + clamp(acc/300,-1,1)*5) - st.lean)*Math.min(1,dt*6);
+      st.sway = Math.sin(st.theta)*1.8;
+      st.rot = st.view === 'side' ? st.bank*.3 : st.bank*(st.view === 'down' ? -1 : 1);
+      rig.update(st);
+    } };
+}
+
+// player
+const P = { x:SPAWN.x, y:SPAWN.y, dir:'down', walking:false, mount:null, ride:null, face:'right', lock:0, approach:null };
 const player = makeActor({skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'});
+const LOOK = {skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'};
+const riders = { bike:makeRider('bike',LOOK), donkey:makeRider('donkey',LOOK) };
+['bike','donkey'].forEach(k => { riders[k].svg.style.display = 'none'; player.appendChild(riders[k].svg); });
 const sayPlayer = player.querySelector('.say');
 sayPlayer.classList.add('go'); sayPlayer.setAttribute('role','button');
 
 // villager walking the path
 const mama = makeActor({skin:'#8a5636',hair:'#1a1210',top:'#2f7a5a',stripe:'#f4ead0',wrap:'#e8a41c',bag:'#a85a2a',dress:true});
 const sayMama = mama.querySelector('.say');
-const NPC = { i:60, dir:1, wait:0 };
+const movers = [];
+function addMover(m){ const o = Object.assign({i:30,dir:1,wait:0,speed:50,off:[0,0],x:0,y:0}, m); movers.push(o); return o; }
+mama.style.setProperty('--gait','.4s');
+const MAMA = addMover({el:mama, actor:true, i:60, speed:52, off:[26,12]});
 
-/* =====================================================
-   6. ANIMALS OF THE VILLAGE (COWS, DOGS, DUCKS, CHICKENS)
-===================================================== */
+// a boy cycling up and down the main road (same articulated bike as the player)
+const CYC = {skin:'#8a5636',hair:'#16100d',top:'#2a6fb0',stripe:'#f4ead0',bottom:'#6b4429',bag:'#e8a41c',bike:'#2e7d4f'};
+const cyclist = makeActor(CYC);
+const cycRider = makeRider('bike', CYC); cyclist.appendChild(cycRider.svg); cyclist.classList.add('rigged');
+addMover({el:cyclist, actor:true, rider:cycRider, i:300, dir:-1, speed:135, off:[-26,22]});
+
+// a farmer leading a donkey loaded with baskets
+const packEl = document.createElement('div'); packEl.className = 'animal'; packEl.style.cssText = 'width:130px;height:90px';
+packEl.innerHTML = donkeySVG('pack'); objects.appendChild(packEl); packEl.style.setProperty('--hoof','.6s');
+const packM = addMover({el:packEl, actor:false, i:140, speed:40, off:[0,-20]});
+const farmer = makeActor({skin:'#6b4429',hair:'#111',top:'#8b5a2b',stripe:'#e8d9a8',bottom:'#3d4a63',bag:'#777'});
+farmer.style.setProperty('--gait','.44s');
+addMover({el:farmer, actor:true, leader:packM, lead:9, off:[0,-20]});
+
+// animals
 function chickenSVG(c){ return `<svg viewBox="0 0 30 30"><ellipse cx="15" cy="28" rx="10" ry="2.5" fill="rgba(0,0,0,.2)"/><g class="bob"><ellipse cx="14" cy="19" rx="9" ry="7" fill="${c}"/><circle cx="21" cy="12" r="5" fill="${c}"/><path d="M20,6 q2,-3 3,0 q1,-2 2,1" fill="#d6372a"/><path d="M25,12 l4,1.5 l-4,1.5z" fill="#f0a020"/><circle cx="22.5" cy="11" r="1" fill="#111"/><path d="M5,17 q-4,-3 -3,-7 q4,2 6,6" fill="${c}"/><path d="M12,26 v-5 M17,26 v-5" stroke="#d98b1c" stroke-width="1.5"/></g></svg>`; }
-function chickSVG(){ return `<svg viewBox="0 0 18 18"><ellipse cx="9" cy="16" rx="6" ry="1.5" fill="rgba(0,0,0,.15)"/><g class="bob"><circle cx="8" cy="10" r="5.5" fill="#ffd34d"/><circle cx="12" cy="7" r="3.5" fill="#ffd34d"/><path d="M15,7 l3,1 l-3,1z" fill="#f0883e"/><circle cx="13" cy="6" r="0.8" fill="#111"/><path d="M7,15 v-3 M10,15 v-3" stroke="#f0883e" stroke-width="1"/></g></svg>`; }
 function goatSVG(){ return `<svg viewBox="0 0 54 44"><ellipse cx="27" cy="42" rx="20" ry="3" fill="rgba(0,0,0,.2)"/><g class="bob"><rect x="12" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="18" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="32" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="38" y="28" width="3" height="13" fill="#6b5a4a"/><ellipse cx="26" cy="26" rx="17" ry="9" fill="#e8dfd0"/><path d="M38,22 L46,10 L52,14 L48,26Z" fill="#e8dfd0"/><path d="M44,10 q0,-7 6,-8 M47,11 q2,-6 7,-5" stroke="#6b5a4a" stroke-width="2" fill="none"/><circle cx="49" cy="15" r="1.2" fill="#111"/><path d="M48,25 q1,6 -1,7" stroke="#e8dfd0" stroke-width="2" fill="none"/><path d="M9,23 q-4,-2 -5,-6" stroke="#e8dfd0" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg>`; }
-function dogSVG(){ return `<svg viewBox="0 0 46 36"><ellipse cx="23" cy="34" rx="16" ry="2.5" fill="rgba(0,0,0,.2)"/><g class="bob"><rect x="10" y="22" width="3" height="11" fill="#c47b1c"/><rect x="15" y="22" width="3" height="11" fill="#a86514"/><rect x="28" y="22" width="3" height="11" fill="#c47b1c"/><rect x="33" y="22" width="3" height="11" fill="#a86514"/><ellipse cx="22" cy="19" rx="13" ry="7.5" fill="#e8a41c"/><ellipse cx="34" cy="13" rx="6.5" ry="5.5" fill="#e8a41c"/><path d="M30,10 L28,5 L33,9" fill="#9e5c10"/><ellipse cx="38" cy="15" rx="3.5" ry="2.5" fill="#4a2c18"/><circle cx="35" cy="12" r="1" fill="#111"/><path d="M9,19 Q4,12 8,8" stroke="#e8a41c" stroke-width="2.5" fill="none" stroke-linecap="round"/></g></svg>`; }
-function ankoleCowSVG(){ return `<svg viewBox="0 0 96 74"><ellipse cx="48" cy="70" rx="36" ry="4.5" fill="rgba(0,0,0,.22)"/><g class="bob"><rect x="22" y="46" width="5.5" height="24" rx="2" fill="#5a3820"/><rect x="32" y="46" width="5.5" height="24" rx="2" fill="#442a18"/><rect x="62" y="46" width="5.5" height="24" rx="2" fill="#5a3820"/><rect x="72" y="46" width="5.5" height="24" rx="2" fill="#442a18"/><ellipse cx="48" cy="40" rx="30" ry="16" fill="#8c4a30"/><ellipse cx="44" cy="38" rx="20" ry="10" fill="#a65839"/><path d="M72,36 L84,18 L92,26 L80,44 Z" fill="#8c4a30"/><circle cx="86" cy="24" r="7" fill="#8c4a30"/><ellipse cx="92" cy="28" rx="5" ry="4" fill="#3b2011"/><!-- Giant Inyambo / Ankole Horns --><path d="M84,18 Q74,-8 58,-10 Q78,-4 86,16" fill="#f4ead0" stroke="#4a2c18" stroke-width="1.2"/><path d="M88,18 Q98,-8 114,-10 Q94,-4 86,16" fill="#f4ead0" stroke="#4a2c18" stroke-width="1.2"/><circle cx="86" cy="22" r="1.6" fill="#111"/><path d="M18,36 Q12,50 15,58" stroke="#5a3820" stroke-width="3" fill="none"/><circle cx="15" cy="58" r="3" fill="#1c1513"/></g></svg>`; }
-function duckSVG(){ return `<svg viewBox="0 0 32 26"><ellipse cx="16" cy="22" rx="11" ry="3" fill="rgba(0,0,0,.15)"/><g class="bob"><ellipse cx="15" cy="15" rx="10" ry="7" fill="#2d6e4f"/><circle cx="22" cy="9" r="5" fill="#1e5239"/><path d="M26,10 l5,1.5 l-5,1.5z" fill="#f59e0b"/><circle cx="23" cy="8" r="1" fill="#fff"/><circle cx="23.5" cy="8" r="0.6" fill="#111"/><ellipse cx="11" cy="15" rx="6" ry="3.5" fill="#8d5c36"/></g></svg>`; }
+function donkeyInner(mode){
+  const leg = (cls,x) => `<g class="dleg ${cls}"><rect x="${x}" y="56" width="7" height="27" rx="3" fill="#7a7671"/><rect x="${x-.5}" y="81" width="8" height="5" rx="1.5" fill="#2a2420"/></g>`;
+  const cover = mode==='ride'
+    ? `<path d="M42,31 Q62,25 82,31 L80,46 L44,46Z" fill="#c8452d"/><path d="M44,40 H80" stroke="#f0b429" stroke-width="3"/>`
+    : mode==='pack'
+    ? `<rect x="40" y="36" width="22" height="26" rx="5" fill="#a85a2a" stroke="#6b3a1a" stroke-width="2"/><rect x="64" y="38" width="18" height="24" rx="5" fill="#d9a441" stroke="#8a6a2c" stroke-width="2"/><path d="M38,32 Q62,26 84,32" stroke="#6b3a1a" stroke-width="4" fill="none"/>` : '';
+  return `<ellipse cx="62" cy="86" rx="44" ry="4" fill="rgba(0,0,0,.2)"/>
+    ${leg('b',30)}${leg('a',78)}
+    <g class="dtail"><path d="M26,40 Q10,48 14,72" stroke="#6f6c68" stroke-width="3.5" fill="none" stroke-linecap="round"/><circle cx="14" cy="73" r="3.5" fill="#4a4540"/></g>
+    <ellipse cx="62" cy="50" rx="38" ry="20" fill="#938f89"/><ellipse cx="62" cy="59" rx="30" ry="10" fill="#bdb9b1"/>
+    <g class="dhead"><path d="M86,40 L103,17 L117,24 L104,54Z" fill="#938f89"/><path d="M103,17 L124,22 L127,35 L112,37Z" fill="#938f89"/><ellipse cx="124" cy="31" rx="5.5" ry="5" fill="#d9d3c9"/>
+    <path d="M105,17 L102,2 L110,15Z" fill="#7a7671"/><path d="M110,18 L113,3 L118,19Z" fill="#6a6661"/>
+    <circle cx="114" cy="25" r="1.6" fill="#111"/><path d="M90,38 Q98,14 105,17" stroke="#4a4540" stroke-width="4" fill="none" stroke-linecap="round"/></g>
+    ${cover}${leg('a',40)}${leg('b',88)}`;
+}
+function donkeySVG(mode){ return `<svg viewBox="0 0 130 90">${donkeyInner(mode)}</svg>`; }
+function bikeSVG(c = '#c8452d'){
+  const wheel = cx => `<g class="wheel"><circle cx="${cx}" cy="58" r="17" fill="none" stroke="#1d1d1f" stroke-width="3.5"/><circle cx="${cx}" cy="58" r="2.5" fill="#888"/><path d="M${cx},41 V75 M${cx-17},58 H${cx+17} M${cx-12},46 L${cx+12},70 M${cx+12},46 L${cx-12},70" stroke="#b5b5b5" stroke-width="1"/></g>`;
+  return `<svg viewBox="0 0 120 80"><ellipse cx="60" cy="77" rx="46" ry="3" fill="rgba(0,0,0,.2)"/>
+    ${wheel(26)}${wheel(94)}
+    <path d="M26,58 L50,32 M26,58 L56,58 M56,58 L50,32 M50,32 L84,32 M56,58 L84,32 M84,32 L94,58" stroke="${c}" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <path d="M50,32 L48,26" stroke="#222" stroke-width="3"/><rect x="40" y="23" width="16" height="4" rx="2" fill="#222"/>
+    <path d="M84,32 L82,22 L90,20" stroke="#222" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <g class="wheel"><circle cx="56" cy="58" r="4" fill="#555"/><path d="M56,58 L50,66 M56,58 L62,50" stroke="#222" stroke-width="2.5" stroke-linecap="round"/></g></svg>`;
+}
+function cowSVG(){
+  const leg = (cls,x) => `<g class="dleg ${cls}"><rect x="${x}" y="42" width="8" height="22" rx="2" fill="#e9e3d6"/><rect x="${x-.5}" y="61" width="9" height="5" rx="1" fill="#2a2420"/></g>`;
+  return `<svg viewBox="0 0 100 70"><ellipse cx="48" cy="67" rx="40" ry="4" fill="rgba(0,0,0,.2)"/>
+    ${leg('b',24)}${leg('a',60)}
+    <path class="dtail" d="M18,26 Q6,34 9,54" stroke="#2b2522" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <rect x="16" y="18" width="60" height="32" rx="15" fill="#f1ece0"/><ellipse cx="34" cy="30" rx="10" ry="7" fill="#2b2522"/><ellipse cx="60" cy="38" rx="9" ry="6" fill="#2b2522"/>
+    <g class="dhead"><path d="M72,22 L90,20 L95,40 L76,44Z" fill="#f1ece0"/><ellipse cx="92" cy="38" rx="6.5" ry="5.5" fill="#e8b9a4"/>
+    <path d="M78,21 q-3,-9 4,-10 M84,20 q1,-8 7,-8" stroke="#d9d3c9" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M76,26 q-8,2 -6,8 q7,0 8,-5Z" fill="#2b2522"/><circle cx="86" cy="28" r="1.6" fill="#111"/></g>
+    ${leg('a',34)}${leg('b',66)}</svg>`;
+}
+function duckSVG(){ return `<svg viewBox="0 0 26 22"><ellipse cx="13" cy="20" rx="10" ry="2" fill="rgba(0,0,0,.18)"/><g class="bob"><ellipse cx="12" cy="14" rx="9" ry="6" fill="#f2efe6"/><path d="M5,13 q-4,-1 -4,-4 q4,0 6,3Z" fill="#f2efe6"/><circle cx="19" cy="7" r="4.5" fill="#2f7a55"/><path d="M22,7 l4,1.5 l-4,1.5z" fill="#f0a020"/><circle cx="20" cy="6" r="1" fill="#111"/><path d="M10,15 q4,3 8,0" stroke="#d6d0c0" fill="none"/></g></svg>`; }
+function dogSVG(){ return `<svg viewBox="0 0 44 32"><ellipse cx="22" cy="30" rx="16" ry="2.5" fill="rgba(0,0,0,.2)"/><g class="bob"><path class="tail" d="M8,16 Q1,10 3,5" stroke="#9a6a3a" stroke-width="3.5" fill="none" stroke-linecap="round"/><rect x="11" y="20" width="4" height="9" rx="1.5" fill="#8a5a2c"/><rect x="26" y="20" width="4" height="9" rx="1.5" fill="#8a5a2c"/><ellipse cx="20" cy="18" rx="14" ry="7" fill="#b07a42"/><circle cx="33" cy="12" r="6.5" fill="#b07a42"/><path d="M36,13 l6,2 l-1,3 l-6,-1z" fill="#d9a56a"/><path d="M29,7 l-3,6 l5,0z" fill="#6e4524"/><circle cx="35" cy="10.5" r="1.2" fill="#111"/><circle cx="42" cy="15" r="1.3" fill="#111"/><rect x="13" y="22" width="4" height="8" rx="1.5" fill="#b07a42"/><rect x="28" y="22" width="4" height="8" rx="1.5" fill="#b07a42"/></g></svg>`; }
 
+const KINDS = {
+  chicken:{svg:c => chickenSVG(c), sp:50, r:70,  w:28,  h:28},
+  goat:   {svg:() => goatSVG(),    sp:40, r:90,  w:54,  h:44},
+  donkey: {svg:() => donkeySVG('ride'), sp:30, r:100, w:130, h:90},
+  cow:    {svg:() => cowSVG(),     sp:22, r:120, w:100, h:70},
+  duck:   {svg:() => duckSVG(),    sp:28, r:70,  w:26,  h:22},
+  dog:    {svg:() => dogSVG(),     sp:85, r:140, w:44,  h:32}
+};
 const animals = [];
-function addAnimal(kind,x,y,w,h,color){
-  const d = document.createElement('div'); d.className = 'animal'; d.style.cssText = `width:${w}px;height:${h}px`;
-  if(kind==='goat') d.innerHTML = goatSVG();
-  else if(kind==='dog') d.innerHTML = dogSVG();
-  else if(kind==='cow') d.innerHTML = ankoleCowSVG();
-  else if(kind==='chick') d.innerHTML = chickSVG();
-  else if(kind==='duck') d.innerHTML = duckSVG();
-  else d.innerHTML = chickenSVG(color);
-  objects.appendChild(d);
-  animals.push({el:d,hx:x,hy:y,x,y,tx:x,ty:y,wait:rr(0,3),sp:kind==='cow'?15:kind==='dog'?65:kind==='goat'?40:kind==='duck'?25:48,r:kind==='cow'?40:kind==='dog'?120:kind==='duck'?30:70});
+function addAnimal(kind,x,y,color,extra){
+  const k = KINDS[kind], d = document.createElement('div');
+  d.className = 'animal'; d.style.cssText = `width:${k.w}px;height:${k.h}px`;
+  d.innerHTML = k.svg(color); objects.appendChild(d);
+  d.style.setProperty("--hoof", kind==="cow" ? ".8s" : kind==="donkey" ? ".55s" : ".45s");
+  const a = Object.assign({kind,el:d,hx:x,hy:y,x,y,tx:x,ty:y,wait:rr(0,3),sp:k.sp,r:k.r,taken:false}, extra||{});
+  animals.push(a); return a;
 }
-
-// Spawn animals around the village
-['#f4efe6','#b9702f','#e9e1d0','#7a4a2a'].forEach((c,i) => addAnimal('chicken', 520+i*40, 770+(i%2)*30, 28, 28, c));
-for(let i=0;i<4;i++) addAnimal('chick', 540+i*18, 790+(i%2)*10, 18, 18);
-addAnimal('dog', 1120, 360, 46, 36);
-addAnimal('dog', 1220, 1820, 46, 36);
-addAnimal('cow', 1940, 1160, 96, 74);
-addAnimal('cow', 2080, 1260, 96, 74);
-addAnimal('goat', 330, 1400, 54, 44);
-addAnimal('goat', 420, 1450, 54, 44);
-addAnimal('duck', POND.cx-50, POND.cy-10, 32, 26);
-addAnimal('duck', POND.cx+40, POND.cy+20, 32, 26);
-addAnimal('chicken', 1330, 640, 28, 28, '#f4efe6');
-addAnimal('chicken', 1370, 670, 28, 28, '#b9702f');
+const bikes = [];
+function addBike(x,y,c){
+  const el = document.createElement('div'); el.className = 'ride-world';
+  el.style.cssText = `left:${x}px;top:${y}px;width:120px;height:80px;z-index:${Math.round(y)}`;
+  el.innerHTML = bikeSVG(c); objects.appendChild(el);
+  bikes.push({kind:'bike',el,x,y,taken:false,color:c});
+}
+['#f4efe6','#b9702f','#e9e1d0','#7a4a2a'].forEach((c,i) => addAnimal('chicken', 520+i*40, 770+(i%2)*30, c));
+addAnimal('chicken',1330,640,'#f4efe6'); addAnimal('chicken',1370,670,'#b9702f');
+addAnimal('goat',330,1400); addAnimal('goat',420,1450);
+addAnimal('cow',2010,1520); addAnimal('cow',2160,1570);
+[0,1,2].forEach(i => addAnimal('duck', 1880+i*40, 430+(i%2)*30));
+addAnimal('dog',1120,300,null,{follow:true});
+addAnimal('donkey',1340,430,null,{rideable:true});
+addAnimal('donkey',560,1010,null,{rideable:true});
+addAnimal('donkey',2000,1060,null,{rideable:true});
+addAnimal('donkey',760,1950,null,{rideable:true,drink:{x:608,y:1812}});
+addAnimal('cow',740,1700,null,{drink:{x:596,y:1750}});
+addAnimal('goat',770,2020); addAnimal('goat',700,2050);
+addAnimal('duck',380,1790,null,{r:50}); addAnimal('duck',460,1810,null,{r:50});
+addBike(800,1890,'#d9a21b');
+addBike(1085,340,'#c8452d'); addBike(560,700,'#2e7d4f'); addBike(855,1350,'#e8a41c'); addBike(1440,1700,'#2a6fb0');
 
 /* =====================================================
-   7. MOUNT / DISMOUNT LOGIC
-===================================================== */
-const mountHudPill = $('#mountHudPill');
-const mountHudIcon = $('#mountHudIcon');
-const mountHudLabel = $('#mountHudLabel');
-
-function mountPlayer(m){
-  P.mount = m;
-  if(mountEls[m.id]) mountEls[m.id].style.display = 'none';
-
-  player.classList.add('mounted', m.type==='bike' ? 'mounted-bike' : 'mounted-donkey');
-  const bob = player.querySelector('.bob');
-  bob.innerHTML = m.type==='bike' ? spriteMountedBike() : spriteMountedDonkey();
-
-  mountHudIcon.textContent = m.icon;
-  mountHudLabel.textContent = `Riding ${m.name}`;
-  mountHudPill.classList.add('active');
-
-  if(m.type==='bike') chime(784);
-  else tone(220, .6, .08, 'sawtooth');
-
-  toast(`Mounted ${m.name}! Speed increased 🚀 (Press F to dismount)`);
-}
-
-function dismountPlayer(){
-  if(!P.mount) return;
-  const m = P.mount;
-  P.mount = null;
-
-  if(mountEls[m.id]){
-    mountEls[m.id].style.left = (P.x + 36) + 'px';
-    mountEls[m.id].style.top = (P.y + 4) + 'px';
-    mountEls[m.id].style.display = 'block';
-  }
-
-  player.classList.remove('mounted', 'mounted-bike', 'mounted-donkey');
-  const bob = player.querySelector('.bob');
-  bob.innerHTML = sprite({skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'});
-
-  mountHudPill.classList.remove('active');
-  chime(392);
-  toast(`Dismounted from ${m.name}. Walking on foot.`);
-}
-
-mountHudPill.addEventListener('click', dismountPlayer);
-
-/* =====================================================
-   8. REALISTIC KINEMATICS, MOMENTUM & MOVEMENT
+   5. COLLISION & MOVEMENT
 ===================================================== */
 function blocked(x,y){
   if(x<30 || x>W-30 || y<110 || y>H-12) return true;
@@ -1062,6 +1173,8 @@ function tryMove(dx,dy){
 const keys = new Set();
 let padV = [0,0];
 let route = [], pending = null, stuck = 0, modalOpen = true, introOpen = true;
+const SPEEDS = {foot:[150,285], bike:[270,410], donkey:[140,230]};   // [walk/cruise, sprint] px per second
+const ACCEL  = {foot:1100, bike:420, donkey:560};                     // bikes and donkeys take time to get going and to stop
 
 function inputVec(){
   let vx=0, vy=0;
@@ -1074,168 +1187,151 @@ function inputVec(){
 }
 function setDir(el, vx, vy){ el.dataset.dir = Math.abs(vx) > Math.abs(vy) ? (vx<0?'left':'right') : (vy<0?'up':'down'); }
 
-let stepClock = 0, dustClock = 0;
-
+let stepClock = 0, dustClock = 0, stamina = 1, tired = false, padRun = false;
+const vel = {x:0, y:0};
+const stamEl = $('#stam'), stamFill = $('#stamFill');
 function updatePlayer(dt){
-  if(modalOpen){
-    P.walking = false;
-    P.vx = 0; P.vy = 0;
-    player.classList.remove('walking');
-    return;
-  }
-
-  let [ix, iy] = inputVec();
-  const isSprinting = keys.has('shift');
-  P.sprinting = isSprinting;
-
-  // Max Speed & Acceleration based on mount & sprint mode
-  let targetMaxSpeed = 185; // Base Walk speed
-  let accelRate = 950;
-  let friction = 12.0;
-
-  if(P.mount){
-    if(P.mount.type === 'bike'){
-      targetMaxSpeed = isSprinting ? 420 : 310;
-      accelRate = 750;
-      friction = 3.5; // Coasts smoothly like a real bicycle!
-    } else if(P.mount.type === 'donkey'){
-      targetMaxSpeed = isSprinting ? 330 : 230; // Trot vs Walk
-      accelRate = 800;
-      friction = 8.5;
-    }
-  } else {
-    // On Foot
-    if(isSprinting){
-      targetMaxSpeed = 295; // Athletic sprint speed
-      accelRate = 1200;
-      friction = 10.0;
+  const kind = P.mount || 'foot';
+  if(P.lock > 0) P.lock -= dt;
+  if(P.approach && !blocked(P.approach.x,P.approach.y)){ const k = Math.min(1,dt*10); P.x += (P.approach.x-P.x)*k; P.y += (P.approach.y-P.y)*k; }
+  let tx = 0, ty = 0, usingInput = false, wantRun = false, arrive = 1;
+  if(!modalOpen && !(P.lock > 0)){
+    const [ix,iy] = inputVec(); usingInput = !!(ix || iy);
+    wantRun = keys.has('shift') || padRun;
+    if(usingInput){ route = []; pending = null; const l = Math.hypot(ix,iy); tx = ix/l; ty = iy/l; }
+    else if(route.length){
+      const t = route[0], dx = t.x-P.x, dy = t.y-P.y, d = Math.hypot(dx,dy), last = route.length === 1;
+      if(d < (last ? 10 : 28)){ route.shift(); stuck = 0; if(!route.length && pending){ const k = pending; pending = null; openHut(k); } }
+      else { tx = dx/d; ty = dy/d; if(last) arrive = clamp(d/70, .25, 1); wantRun = route.length > 8; }
     }
   }
+  const moving = !!(tx || ty);
+  const canRun = wantRun && moving && !tired && stamina > 0;
+  if(canRun) stamina = Math.max(0, stamina - dt*(kind==='foot' ? .26 : .2));
+  else stamina = Math.min(1, stamina + dt*(moving ? .09 : .22));
+  if(stamina <= .001) tired = true; else if(tired && stamina > .3) tired = false;
 
-  let usingInput = ix !== 0 || iy !== 0;
+  const sp = SPEEDS[kind], maxS = (canRun ? sp[1] : sp[0]) * arrive;
+  const wx = tx*maxS, wy = ty*maxS, ex = wx-vel.x, ey = wy-vel.y, el = Math.hypot(ex,ey);
+  const stepA = ACCEL[kind]*dt*(moving ? 1 : 1.4);
+  if(el <= stepA){ vel.x = wx; vel.y = wy; } else { vel.x += ex/el*stepA; vel.y += ey/el*stepA; }
 
-  // Pathfinding route handling
-  if(usingInput){ route = []; pending = null; }
-  else if(route.length){
-    const t = route[0], dx = t.x - P.x, dy = t.y - P.y, d = Math.hypot(dx,dy);
-    if(d < 16){
-      route.shift(); stuck = 0;
-      if(!route.length && pending){ const k = pending; pending = null; openHut(k); }
-    } else {
-      ix = dx / d; iy = dy / d;
-    }
+  const bx = P.x, by = P.y;
+  if(vel.x){ if(!blocked(P.x+vel.x*dt, P.y)) P.x += vel.x*dt; else vel.x = 0; }
+  if(vel.y){ if(!blocked(P.x, P.y+vel.y*dt)) P.y += vel.y*dt; else vel.y = 0; }
+  const speed = Math.hypot(vel.x,vel.y), real = Math.hypot(P.x-bx, P.y-by) / Math.max(dt,.001);
+  if(route.length && !usingInput){
+    if(real < maxS*.25){ stuck += dt; if(stuck > .6){ route.shift(); stuck = 0; if(!route.length) pending = null; } } else stuck = 0;
   }
 
-  // Smooth Inertial Velocity Update
-  if(ix !== 0 || iy !== 0){
-    const len = Math.hypot(ix, iy) || 1;
-    const targetVx = (ix / len) * targetMaxSpeed;
-    const targetVy = (iy / len) * targetMaxSpeed;
-
-    P.vx = lerp(P.vx, targetVx, clamp(accelRate * dt / targetMaxSpeed, 0, 1));
-    P.vy = lerp(P.vy, targetVy, clamp(accelRate * dt / targetMaxSpeed, 0, 1));
-    setDir(player, P.vx, P.vy);
-  } else {
-    // Natural deceleration / braking
-    P.vx = lerp(P.vx, 0, clamp(friction * dt, 0, 1));
-    P.vy = lerp(P.vy, 0, clamp(friction * dt, 0, 1));
+  const walking = speed > 12, running = walking && canRun && speed > sp[0]*1.15;
+  P.walking = walking;
+  player.classList.toggle('walking', walking);
+  player.classList.toggle('running', running);
+  if(speed > 18){
+    if(Math.abs(vel.x) > 10) P.face = vel.x < 0 ? 'left' : 'right';
+    if(P.mount) player.dataset.dir = P.face; else setDir(player, vel.x, vel.y);
   }
 
-  const currentSpeed = Math.hypot(P.vx, P.vy);
-  let moved = false;
+  // animation timing follows real speed: faster legs, wheels and hooves when going faster
+  let gait = .32;
+  if(walking){
+    gait = kind==='foot' ? clamp(54/speed,.15,.5) : kind==='donkey' ? clamp(70/speed,.26,.55) : clamp(96/speed,.12,.6);
+    player.style.setProperty('--gait', gait.toFixed(3)+'s');
+    player.style.setProperty('--spin', clamp(107/speed,.08,.9).toFixed(3)+'s');
+    player.style.setProperty('--hoof', clamp(70/speed,.26,.55).toFixed(3)+'s');
+    const side = player.dataset.dir === 'left' || player.dataset.dir === 'right';
+    const lean = (running && side) ? (kind==='foot' ? 9 : 5) * (P.face==='left' ? -1 : 1) : 0;
+    player.style.setProperty('--lean', lean + 'deg');
+  } else player.style.setProperty('--lean','0deg');
 
-  if(currentSpeed > 6){
-    const bx = P.x, by = P.y;
-    moved = tryMove(P.vx * dt, P.vy * dt);
-
-    // Realistic banking / leaning in turns
-    const targetLean = clamp(P.vx * 0.05, -12, 12);
-    P.leanAngle = lerp(P.leanAngle, targetLean, 0.2);
-
-    if(route.length && !usingInput){
-      if(Math.hypot(P.x-bx, P.y-by) < currentSpeed * dt * 0.3){
-        stuck += dt;
-        if(stuck > 0.5){ route.shift(); stuck = 0; if(!route.length && pending) pending = null; }
-      } else stuck = 0;
-    }
-  } else {
-    P.leanAngle = lerp(P.leanAngle, 0, 0.25);
+  if(walking){
+    dustClock += dt; stepClock += dt;
+    if(dustClock > (running ? .09 : .2)){ dustClock = 0; dust(P.x + rr(-6,6), P.y-2, running ? 1.7 : kind==='foot' ? 1 : 1.3); }
+    if(stepClock > gait){ stepClock = 0; footstep(); }
   }
+  if(P.mount && player.classList.contains('rigged')) riders[P.mount].step(dt, vel.x, vel.y, moving, running);
+  stamEl.classList.toggle('show', stamina < .98 || canRun);
+  stamEl.classList.toggle('tired', tired);
+  stamFill.style.transform = `scaleX(${stamina.toFixed(3)})`;
 
-  P.walking = moved && currentSpeed > 8;
-  player.classList.toggle('walking', P.walking);
-
-  // Apply dynamic body lean & sprint posture
-  const bob = player.querySelector('.bob');
-  if(bob){
-    const pitchLean = isSprinting ? (P.dir === 'up' ? -6 : 6) : 0;
-    bob.style.transform = `rotate(${P.leanAngle}deg) skewX(${pitchLean}deg)`;
-  }
-
-  // Dust Particle Emitter & Footstep Frequency Modulation
-  if(moved){
-    dustClock += dt;
-    stepClock += dt;
-
-    const dustInterval = (isSprinting || P.mount) ? 0.12 : 0.22;
-    if(dustClock > dustInterval){
-      dustClock = 0;
-      dust(P.x + rr(-8,8), P.y - 2);
-      if(isSprinting && !P.mount) dust(P.x - (P.vx > 0 ? 8 : -8), P.y - 4); // Extra sprint kick-up
-    }
-
-    const stepInterval = clamp(0.35 / (currentSpeed / 160), 0.14, 0.4);
-    if(stepClock > stepInterval){
-      stepClock = 0;
-      footstep();
-    }
-  }
-
-  player.style.left = P.x + 'px';
-  player.style.top = P.y + 'px';
-  player.style.zIndex = Math.round(P.y);
+  player.style.left = P.x + 'px'; player.style.top = P.y + 'px'; player.style.zIndex = Math.round(P.y);
+}
+function dust(x,y,sc=1){
+  const d = document.createElement('div'); d.className='dust';
+  d.style.cssText = `left:${x}px;top:${y}px;width:${14*sc}px;height:${8*sc}px;z-index:${Math.round(y)-1}`;
+  objects.appendChild(d); setTimeout(() => d.remove(), 600);
 }
 
 function routeTo(x,y,enterKey){
-  const i = nearestSample(P.x,P.y), j = nearestSample(x,y), step = i<=j ? 1 : -1;
   route = [];
-  for(let k=i; step>0 ? k<=j : k>=j; k+=step*6) route.push({x:S[k][0], y:S[k][1]});
-  route.push({x:S[j][0], y:S[j][1]}, {x,y});
-  pending = enterKey || null; stuck = 0;
+  const nearMain = (px,py) => { const k = nearestSample(px,py); return [k, Math.hypot(S[k][0]-px, S[k][1]-py)]; };
+  const nearBr = (px,py) => { let b = {d:1e9,bi:-1,pi:0}; BR.forEach((br,bi) => br.pts.forEach((q,pi) => { const d = Math.hypot(q[0]-px,q[1]-py); if(d < b.d) b = {d,bi,pi}; })); return b; };
+  const addMain = (a,b) => { const st = a<=b ? 1 : -1; for(let k=a; st>0 ? k<=b : k>=b; k+=st*6) route.push({x:S[k][0],y:S[k][1]}); route.push({x:S[b][0],y:S[b][1]}); };
+  const addBr = (bi,from,to) => { const br = BR[bi], st = from<=to ? 1 : -1; for(let k=from; st>0 ? k<=to : k>=to; k+=st*6) route.push({x:br.pts[k][0],y:br.pts[k][1]}); route.push({x:br.pts[to][0],y:br.pts[to][1]}); };
+  const pm = nearMain(P.x,P.y), pb = nearBr(P.x,P.y), onBr = pb.d < pm[1]-30 ? pb : null;
+  const tm = nearMain(x,y),    tb = nearBr(x,y),     toBr = tb.d < tm[1]-30 ? tb : null;
+  let cur = pm[0];
+  if(onBr){ addBr(onBr.bi, onBr.pi, 0); cur = BR[onBr.bi].j; }
+  if(toBr){
+    if(onBr && onBr.bi === toBr.bi){ route = []; addBr(onBr.bi, onBr.pi, toBr.pi); }
+    else { addMain(cur, BR[toBr.bi].j); addBr(toBr.bi, 0, toBr.pi); }
+  } else addMain(cur, tm[0]);
+  route.push({x,y}); pending = enterKey || null; stuck = 0;
 }
 function goToHut(key, enter){
   const h = HUTS.find(h => h.key===key);
   routeTo(h.front.x, h.front.y, enter ? key : null);
 }
 
-/* NPC villager */
-function updateMama(dt){
-  if(NPC.wait > 0){ NPC.wait -= dt; mama.classList.remove('walking'); }
-  else {
-    NPC.i += NPC.dir * 52 * dt / 12;
-    if(NPC.i >= S.length-2){ NPC.i = S.length-2; NPC.dir = -1; NPC.wait = 4; }
-    if(NPC.i <= 2){ NPC.i = 2; NPC.dir = 1; NPC.wait = 4; }
-    mama.classList.add('walking');
-    const a = S[Math.floor(NPC.i)], b = S[Math.floor(NPC.i)+1];
-    setDir(mama, (b[0]-a[0])*NPC.dir, (b[1]-a[1])*NPC.dir);
+/* path walkers: villager, cyclist, farmer + loaded donkey */
+function updateMovers(dt){
+  for(const m of movers){
+    let walking;
+    if(m.leader){ const L = m.leader; m.dir = L.dir; m.i = clamp(L.i + L.dir*m.lead, 2, S.length-3); walking = L.wait <= 0; }
+    else if(m.wait > 0){ m.wait -= dt; walking = false; }
+    else {
+      m.i += m.dir * m.speed * dt / 12; walking = true;
+      if(m.i >= S.length-3){ m.i = S.length-3; m.dir = -1; m.wait = 4; }
+      else if(m.i <= 2){ m.i = 2; m.dir = 1; m.wait = 4; }
+    }
+    const i0 = Math.floor(m.i), a = S[i0], b = S[Math.min(S.length-1, i0+1)], f = m.i - i0;
+    const vx = (b[0]-a[0]) * m.dir, vy = (b[1]-a[1]) * m.dir;
+    m.x = lerp(a[0],b[0],f) + m.off[0]; m.y = lerp(a[1],b[1],f) + m.off[1];
+    if(m.actor){
+      m.el.classList.toggle('walking', walking);
+      if(m.rider){ const l = Math.hypot(vx,vy) || 1, sp = walking ? m.speed : 0; m.rider.step(dt, vx/l*sp, vy/l*sp, walking, false); }
+      else if(walking || m.leader) setDir(m.el, vx, vy);
+    } else {
+      m.el.classList.toggle('moving', walking);
+      if(walking) m.el.classList.toggle('flip', vx < 0);
+    }
+    m.el.style.left = m.x+'px'; m.el.style.top = m.y+'px'; m.el.style.zIndex = Math.round(m.y);
   }
-  const a = S[Math.floor(NPC.i)], b = S[Math.min(S.length-1,Math.floor(NPC.i)+1)], f = NPC.i % 1;
-  const x = lerp(a[0],b[0],f) + 26, y = lerp(a[1],b[1],f) + 12;
-  mama.style.left = x+'px'; mama.style.top = y+'px'; mama.style.zIndex = Math.round(y);
-  mama._x = x; mama._y = y;
-  const near = Math.hypot(P.x-x, P.y-y) < 130 && !modalOpen;
+  const near = Math.hypot(P.x-MAMA.x, P.y-MAMA.y) < 130 && !modalOpen;
   if(near){
     const n = visited.size;
-    sayMama.textContent = n===0 ? 'Muraho! Welcome. Try riding a bike or visiting the Workshop.' : n<5 ? `Muraho! ${5-n} hut${5-n>1?'s':''} left to visit.` : 'You saw it all. Go say hello at the fire!';
+    sayMama.textContent = n===0 ? 'Muraho! Welcome. Try the Workshop first.' : n<HUTS.length ? `Muraho! ${HUTS.length-n} place${HUTS.length-n>1?'s':''} left to visit.` : 'You saw it all. Go say hello at the fire!';
   }
   sayMama.classList.toggle('on', near);
 }
 function updateAnimals(dt){
   for(const a of animals){
-    if(a.wait > 0){ a.wait -= dt; a.el.classList.remove('moving'); }
+    if(a.taken) continue;
+    if(a.follow){
+      const dx = P.x-a.x, dy = P.y-a.y, d = Math.hypot(dx,dy);
+      if(d > 110){ const sp = a.sp * (d>500 ? 4 : d>260 ? 2.4 : 1.6); a.x += dx/d*sp*dt; a.y += dy/d*sp*dt; a.el.classList.add('moving'); a.el.classList.toggle('flip', dx<0); }
+      else a.el.classList.remove('moving');
+    } else if(a.wait > 0){ a.wait -= dt; a.el.classList.remove('moving'); }
     else {
+      a.el.classList.remove('drinking');
       const dx = a.tx-a.x, dy = a.ty-a.y, d = Math.hypot(dx,dy);
-      if(d < 4){ a.wait = rr(1.5,5); a.tx = a.hx + rr(-a.r,a.r); a.ty = a.hy + rr(-a.r*.6,a.r*.6); }
+      if(d < 4){
+        const atDrink = a.drink && a.tx === a.drink.x && a.ty === a.drink.y;
+        if(atDrink){ a.el.classList.add('drinking'); a.wait = rr(4,7); } else a.wait = rr(1.5,5);
+        if(a.drink && !atDrink && rand() < .45){ a.tx = a.drink.x; a.ty = a.drink.y; }
+        else { a.tx = a.hx + rr(-a.r,a.r); a.ty = a.hy + rr(-a.r*.6,a.r*.6); }
+      }
       else { a.x += dx/d*a.sp*dt; a.y += dy/d*a.sp*dt; a.el.classList.add('moving'); a.el.classList.toggle('flip', dx<0); }
     }
     a.el.style.left = a.x+'px'; a.el.style.top = a.y+'px'; a.el.style.zIndex = Math.round(a.y);
@@ -1243,7 +1339,7 @@ function updateAnimals(dt){
 }
 
 /* =====================================================
-   9. CAMERA & PROXIMITY (HUTS & MOUNTS)
+   6. CAMERA + PROXIMITY
 ===================================================== */
 const cam = { x:0, y:0 };
 let vw = 0, vh = 0;
@@ -1255,57 +1351,77 @@ function updateCamera(snap){
   world.style.transform = `translate3d(${-cam.x}px,${-cam.y}px,0)`;
 }
 
-let nearKey = null;
-let nearMount = null;
+let nearKey = null, nearRide = null, promptState = '';
+function findRide(){
+  let best = null, bd = 95;
+  for(const r of bikes.concat(animals.filter(a => a.rideable))){
+    if(r.taken) continue;
+    const d = Math.hypot(P.x-r.x, (P.y-r.y)*1.3);
+    if(d < bd){ bd = d; best = r; }
+  }
+  return best;
+}
+function mount(r){
+  r.taken = true; r.el.classList.remove('near');
+  P.mount = r.kind; P.ride = r; route = []; pending = null; P.lock = .55; P.approach = {x:r.x, y:r.y};
+  if(Math.abs(r.x-P.x) > 6) P.face = r.x > P.x ? 'right' : 'left';
+  player.dataset.dir = P.face; player.classList.add('mounting-' + r.kind);
+  if(r.kind === 'bike'){ riders.bike.setColor(r.color); tone(1760,.28,.05); tone(2093,.3,.04,'sine',.12); toast('On the bicycle: fast, but slow to start and stop. Press F to get off.'); }
+  else { tone(520,.18,.04,'sawtooth'); tone(260,.32,.04,'sawtooth',.2); toast('On the donkey: hold the rope, slow and steady. Press F to get off.'); }
+  setTimeout(() => {                      // the boy has swung a leg over: swap to the riding pose
+    if(P.ride !== r) return;
+    r.el.style.display = 'none'; P.approach = null;
+    player.classList.remove('mounting-' + r.kind); player.classList.add('mounted','ride-' + r.kind,'rigged');
+    riders[r.kind].reset(P.face === 'left' ? -1 : 1); riders[r.kind].svg.style.display = 'block';
+  }, 260);
+  nearRide = null; promptState = '';
+}
+function dismount(){
+  const r = P.ride; if(!r) return;
+  const side = P.face === 'left' ? -1 : 1, d = r.kind === 'bike' ? 62 : 72;
+  const spots = [[P.x+side*d,P.y],[P.x-side*d,P.y],[P.x,P.y+58],[P.x,P.y-58]];
+  const spot = spots.find(c => !blocked(c[0],c[1])) || spots[0];
+  r.x = spot[0]; r.y = spot[1]; r.taken = false;
+  if(r.kind === 'bike'){ r.el.style.left = r.x+'px'; r.el.style.top = r.y+'px'; r.el.style.zIndex = Math.round(r.y); }
+  else { r.hx = r.tx = r.x; r.hy = r.ty = r.y; r.wait = 2; }
+  r.el.style.display = '';
+  const kind = r.kind;
+  riders[kind].svg.style.display = 'none';
+  player.classList.remove('mounted','ride-bike','ride-donkey','rigged','walking','running','mounting-bike','mounting-donkey');
+  player.classList.add('dismounting-' + kind); setTimeout(() => player.classList.remove('dismounting-' + kind), 480);
+  P.mount = null; P.ride = null; P.approach = null; P.lock = .45; promptState = '';
+  setDir(player, P.face==='left' ? -1 : 1, 0);
+}
+function toggleRide(){
+  if(modalOpen || P.lock > 0) return;
+  if(P.mount) return dismount();
+  const r = findRide();
+  if(r) mount(r); else toast('No ride close enough. Look for a bicycle or a donkey.');
+}
 
 function updateProximity(){
-  // Check Huts
-  let bestHut = null, bd = 1e9;
-  for(const h of HUTS){ const d = Math.hypot(P.x-h.talk.x, P.y-h.talk.y); if(d < bd){ bd = d; bestHut = h; } }
-  const k = (bd < 130 && !modalOpen) ? bestHut.key : null;
-
-  // Check Mounts
-  let bestMount = null, md = 1e9;
-  for(const m of MOUNTS){
-    if(P.mount && P.mount.id === m.id) continue;
-    const d = Math.hypot(P.x - m.x, P.y - m.y);
-    if(d < md){ md = d; bestMount = m; }
-  }
-  const nm = (md < 95 && !modalOpen) ? bestMount : null;
-
-  // Highlight mounts
-  MOUNTS.forEach(m => {
-    if(mountEls[m.id]) mountEls[m.id].classList.toggle('near', nm && nm.id === m.id);
-  });
-
-  if(k !== nearKey || nm !== nearMount){
+  let best = null, bd = 1e9;
+  for(const h of HUTS){ const d = Math.hypot(P.x-h.talk.x, P.y-h.talk.y); if(d < bd){ bd = d; best = h; } }
+  const k = (bd < 130 && !modalOpen) ? best.key : null;
+  const r = (!modalOpen && !P.mount) ? findRide() : null;
+  if(r !== nearRide){ if(nearRide) nearRide.el.classList.remove('near'); nearRide = r; if(r) r.el.classList.add('near'); }
+  if(k !== nearKey){
     nearKey = k;
-    nearMount = nm;
-
-    for(const h of HUTS){
-      signEls[h.key].classList.toggle('near', h.key===k);
-      hutEls[h.key].classList.toggle('near', h.key===k);
-    }
+    for(const h of HUTS){ signEls[h.key].classList.toggle('near', h.key===k); hutEls[h.key].classList.toggle('near', h.key===k); }
     document.querySelectorAll('#fast button').forEach(b => b.classList.toggle('here', b.dataset.key===k));
-
-    if(P.mount){
-      sayPlayer.innerHTML = `Dismount ${P.mount.name}<small>Press F or click here to walk</small>`;
-      sayPlayer.classList.add('on');
-    } else if(nm){
-      sayPlayer.innerHTML = `Ride ${nm.name} ${nm.icon}<small>Press F or click to mount</small>`;
-      sayPlayer.classList.add('on');
-    } else if(k){
-      const h = HUTS.find(h => h.key===k);
-      sayPlayer.innerHTML = `Enter ${h.name}<small>${coarse ? 'Tap here or press GO' : 'Press E or click'} · ${h.blurb}</small>`;
-      sayPlayer.classList.add('on');
-    } else {
-      sayPlayer.classList.remove('on');
-    }
+  }
+  const st = k ? 'h'+k : (r ? 'r'+r.kind : '');
+  if(st !== promptState){
+    promptState = st;
+    if(k){ const h = HUTS.find(h => h.key===k);
+      sayPlayer.innerHTML = `${h.verb || 'Enter'} ${h.name}<small>${coarse ? 'Tap here or press GO' : 'Press E or click'} · ${h.blurb}</small>`; }
+    else if(r){ sayPlayer.innerHTML = `Hop on the ${r.kind==='bike' ? 'bicycle' : 'donkey'}<small>${coarse ? 'Tap here or press RIDE' : 'Press F'}</small>`; }
+    sayPlayer.classList.toggle('on', !!(k || r));
   }
 }
 
 /* =====================================================
-   10. DAY / NIGHT & LIGHTING CANVAS
+   7. DAY / NIGHT (sunset, stars, moon, lights)
 ===================================================== */
 const stars = $('#stars');
 for(let i=0;i<95;i++){
@@ -1314,8 +1430,7 @@ for(let i=0;i<95;i++){
   stars.appendChild(s);
 }
 let A = 0, targetA = 0;
-const DAY_LEN = 5.2;
-
+const DAY_LEN = 5.2;     // seconds for a full sunset / sunrise
 function applySky(){
   const dusk = clamp(1 - Math.abs(A - .42)/.4, 0, 1);
   root.style.setProperty('--a', A.toFixed(3));
@@ -1377,7 +1492,7 @@ function drawNight(t){
 }
 
 /* =====================================================
-   11. SOUND (Kalimba, Footsteps, Bicycle Bell)
+   8. SOUND (small kalimba-like loop, footsteps, crickets)
 ===================================================== */
 let ac = null, soundOn = false, loopTimer = null;
 function ctx(){ if(!ac){ const C = window.AudioContext || window.webkitAudioContext; if(C) ac = new C(); } if(ac && ac.state==='suspended') ac.resume(); return ac; }
@@ -1389,12 +1504,7 @@ function tone(f, dur=.7, vol=.05, type='sine', when=0){
   o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur);
 }
 const chime = f => tone(f,.45,.06);
-function footstep(){
-  if(!soundOn) return;
-  if(P.mount && P.mount.type==='bike'){ tone(rr(160,220),.05,.02,'triangle'); }
-  else if(P.mount && P.mount.type==='donkey'){ tone(rr(110,160),.09,.04,'sawtooth'); }
-  else { tone(rr(90,130),.07,.03,'triangle'); }
-}
+function footstep(){ if(!soundOn || P.mount==='bike') return; if(P.mount==='donkey') tone(rr(150,190),.09,.05,'triangle'); else tone(P.walking && player.classList.contains('running') ? rr(110,150) : rr(90,130),.07,.03,'triangle'); }
 const SCALE = [392,440,523.25,587.33,659.25,783.99,880];
 function melody(){
   if(!soundOn) return;
@@ -1411,7 +1521,7 @@ soundBtn.addEventListener('click', () => {
 });
 
 /* =====================================================
-   12. HUT INTERIORS (CONTENT)
+   9. HUT INTERIORS (content)
 ===================================================== */
 const PROJECTS = [
   { name:'Pharma Finder', tag:'Backend · PostgreSQL',
@@ -1483,13 +1593,28 @@ const CONTENT = {
 };
 
 /* =====================================================
-   13. MODAL, PROGRESS & INPUT
+   10. MODAL, PROGRESS, FAST TRAVEL, TOAST
 ===================================================== */
+const WORDS = [['Amahoro','peace'],['Ubumwe','unity'],['Ubwenge','wisdom'],['Umurava','courage, valor'],['Kwihangana','patience, perseverance'],['Murakoze','thank you'],['Urugendo','journey'],['Gukora','to work'],['Ejo hazaza','the future'],['Ishuri','school'],['Murakaza neza','welcome'],['Inshuti','friend'],['Ibyishimo','joy'],['Urukundo','love'],['Icyizere','hope']];
+const LINES = ['Small steps still leave footprints.','Ship it small, then make it better.','A slow donkey still reaches the market.','Every expert once wrote a program that did not compile.','Rest is part of the road, not a detour.','Water finds its way by never stopping.','Read the error message. It is trying to help you.','Tests are letters from your future self.','Progress is quiet until it is obvious.','Be patient with the code and with yourself.','Ask for help early; a well is shared.','Consistency beats intensity.','A clear name is a small act of kindness.','Light the next step; the rest of the road will show itself.','Build for the person in front of you.','Today\'s bug is tomorrow\'s story.'];
+const dayIdx = Math.floor(Date.now()/86400000);
+let mLine = dayIdx % LINES.length;
+window.marigotNext = () => { mLine = (mLine + 1 + ((Math.random()*(LINES.length-1))|0)) % LINES.length; const e = document.getElementById('mLine'); if(e) e.textContent = LINES[mLine]; };
+CONTENT.marigot = () => { const w = WORDS[dayIdx % WORDS.length];
+  return `<div class="kicker">The Marigot · Rest stop</div><h2 id="modalTitle">Drink, rest, read</h2>
+  <p>You kneel at the edge, drink the cool water and sit on the warm stone for a minute. <strong>Your stamina is back.</strong></p>
+  <div class="grid">
+    <div class="card"><span class="when">Word of the day · Kinyarwanda</span><div class="big">${w[0]}</div><p><span class="mean">${w[1]}</span></p></div>
+    <div class="card"><span class="when">Words to carry</span><p class="motto" id="mLine">${LINES[mLine]}</p>
+      <button class="btn" style="align-self:flex-start;padding:8px 18px;font-size:.8rem;box-shadow:none" onclick="marigotNext()">Another one</button></div>
+  </div>`; };
+
 const visited = new Set();
 const modal = $('#modal'), body = $('#modalBody'), intro = $('#intro');
 function openHut(key){
   if(!CONTENT[key]) return;
   route = []; pending = null; keys.clear(); padV = [0,0];
+  if(key === 'marigot'){ stamina = 1; tired = false; }
   body.innerHTML = CONTENT[key]();
   modal.classList.add('open'); modalOpen = true; chime(659.25);
   modal.querySelector('.sheet').scrollTop = 0;
@@ -1503,7 +1628,7 @@ function openHut(key){
 function closeModal(){
   if(!modal.classList.contains('open')) return;
   modal.classList.remove('open'); modalOpen = false; chime(330);
-  nearKey = null;
+  nearKey = null; promptState = '';
 }
 function updateProgress(){ $('#progress').textContent = `Explored ${visited.size}/${HUTS.length}`; }
 $('#closeBtn').addEventListener('click', closeModal);
@@ -1523,25 +1648,18 @@ HUTS.forEach(h => {
 let toastT;
 function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3400); }
 
-/* KEYBOARD & CONTROLS */
+/* =====================================================
+   11. INPUT
+===================================================== */
 window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if(introOpen){ if(k==='enter' || k===' '){ e.preventDefault(); startGame(); } return; }
   if(modalOpen){ if(k==='escape') closeModal(); return; }
   if(e.metaKey || e.ctrlKey || e.altKey) return;
-
   if(['arrowleft','arrowright','arrowup','arrowdown','z','q','s','d','w','a'].includes(k)){ keys.add(k); e.preventDefault(); }
   else if(k==='shift'){ keys.add('shift'); }
-  else if(k==='f'){
-    e.preventDefault();
-    if(P.mount) dismountPlayer();
-    else if(nearMount) mountPlayer(nearMount);
-  }
-  else if(k==='e' || k===' ' || k==='enter'){
-    if(nearKey){ e.preventDefault(); openHut(nearKey); }
-    else if(nearMount && !P.mount){ e.preventDefault(); mountPlayer(nearMount); }
-    else if(P.mount && (k==='f')){ e.preventDefault(); dismountPlayer(); }
-  }
+  else if(k==='f'){ toggleRide(); }
+  else if(k==='e' || k===' ' || k==='enter'){ if(nearKey){ e.preventDefault(); openHut(nearKey); } }
 });
 window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur', () => keys.clear());
@@ -1553,21 +1671,14 @@ document.querySelectorAll('#dpad [data-v]').forEach(b => {
   const up = () => { padV = [0,0]; };
   b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
 });
+$('#actBtn').addEventListener('click', () => { if(nearKey) openHut(nearKey); });
+$('#rideBtn').addEventListener('click', toggleRide);
+const runBtn = $('#runBtn');
+runBtn.addEventListener('pointerdown', e => { e.preventDefault(); runBtn.setPointerCapture(e.pointerId); padRun = true; });
+['pointerup','pointercancel'].forEach(ev => runBtn.addEventListener(ev, () => { padRun = false; }));
+sayPlayer.addEventListener('click', e => { e.stopPropagation(); if(nearKey) openHut(nearKey); else if(nearRide) mount(nearRide); });
 
-$('#actBtn').addEventListener('click', () => {
-  if(P.mount) dismountPlayer();
-  else if(nearMount) mountPlayer(nearMount);
-  else if(nearKey) openHut(nearKey);
-});
-
-sayPlayer.addEventListener('click', e => {
-  e.stopPropagation();
-  if(P.mount) dismountPlayer();
-  else if(nearMount) mountPlayer(nearMount);
-  else if(nearKey) openHut(nearKey);
-});
-
-// click/tap the world
+// click/tap the world: walk there, or walk to a hut/sign and go in
 viewport.addEventListener('click', e => {
   if(modalOpen || e.target.closest('.say')) return;
   const hs = e.target.closest('.hut, .sign');
@@ -1577,7 +1688,7 @@ viewport.addEventListener('click', e => {
 });
 
 /* =====================================================
-   14. MAIN LOOP
+   12. MAIN LOOP
 ===================================================== */
 window.addEventListener('resize', () => { resize(); updateCamera(true); });
 resize();
@@ -1590,7 +1701,7 @@ updateCamera(true);
 let last = performance.now();
 function frame(now){
   const dt = Math.min(.05, (now-last)/1000); last = now;
-  updatePlayer(dt); updateMama(dt); updateAnimals(dt); updateDay(dt);
+  updatePlayer(dt); updateMovers(dt); updateAnimals(dt); updateDay(dt);
   updateCamera(false); updateProximity(); drawNight(now/1000);
   requestAnimationFrame(frame);
 }
