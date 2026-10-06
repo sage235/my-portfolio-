@@ -1,1086 +1,1601 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASDODJI Le Sage | Software Engineer</title>
-    <meta name="description" content="Portfolio of ASDODJI Le Sage — Software Engineering student passionate about backend development, clean architecture, and building things that matter.">
-    <!-- Fonts: Lora for warmth, Inter for readability -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <style>
-        /* =============================================
-           DESIGN TOKENS — warm, human palette
-        ============================================= */
-        :root {
-            --cream:       #faf7f2;
-            --cream-dark:  #f0ebe1;
-            --sand:        #e8ddd0;
-            --warm-brown:  #7c5c3e;
-            --rust:        #c0622b;
-            --rust-light:  #e07a45;
-            --forest:      #3d6b4f;
-            --forest-light:#5a9470;
-            --ink:         #2c2118;
-            --ink-soft:    #5c4a38;
-            --muted:       #9c8878;
-            --white:       #ffffff;
-
-            --font-serif:  'Lora', Georgia, serif;
-            --font-sans:   'Inter', system-ui, sans-serif;
-
-            --radius-sm:   8px;
-            --radius-md:   16px;
-            --radius-lg:   28px;
-            --radius-xl:   40px;
-
-            --shadow-sm:   0 2px 10px rgba(124, 92, 62, 0.08);
-            --shadow-md:   0 8px 32px rgba(124, 92, 62, 0.13);
-            --shadow-lg:   0 20px 60px rgba(124, 92, 62, 0.18);
-
-            --transition:  all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* =============================================
-           RESET & BASE
-        ============================================= */
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: var(--font-sans);
-            font-size: 16px;
-            line-height: 1.7;
-            color: var(--ink);
-            background: var(--cream);
-            overflow-x: hidden;
-        }
-
-        /* Subtle paper texture overlay */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* =============================================
-           SCROLLBAR
-        ============================================= */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--cream-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--sand); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
-        /* =============================================
-           NAVIGATION
-        ============================================= */
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(250, 247, 242, 0.88);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--sand);
-            padding: 16px 24px;
-        }
-
-        .nav-container {
-            max-width: 1100px;
-            margin: auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-logo {
-            font-family: var(--font-serif);
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--ink);
-            text-decoration: none;
-            letter-spacing: -0.3px;
-        }
-
-        .nav-logo span { color: var(--rust); }
-
-        nav ul {
-            display: flex;
-            gap: 28px;
-            list-style: none;
-        }
-
-        nav a {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--ink-soft);
-            text-decoration: none;
-            transition: var(--transition);
-            padding: 4px 0;
-            position: relative;
-        }
-
-        nav a::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--rust);
-            border-radius: 2px;
-            transition: var(--transition);
-        }
-
-        nav a:hover { color: var(--rust); }
-        nav a:hover::after { width: 100%; }
-
-        /* =============================================
-           HERO SECTION
-        ============================================= */
-        header {
-            position: relative;
-            padding: 80px 24px 70px;
-            background: var(--cream);
-            overflow: hidden;
-        }
-
-        header::before {
-            content: '';
-            position: absolute;
-            top: -120px;
-            right: -100px;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(192, 98, 43, 0.09) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        header::after {
-            content: '';
-            position: absolute;
-            bottom: -80px;
-            left: -80px;
-            width: 380px;
-            height: 380px;
-            background: radial-gradient(circle, rgba(61, 107, 79, 0.08) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .hero-container {
-            max-width: 1100px;
-            margin: auto;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 60px;
-            align-items: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--rust);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 18px;
-        }
-
-        .hero-eyebrow::before {
-            content: '';
-            width: 24px;
-            height: 2px;
-            background: var(--rust);
-            border-radius: 2px;
-        }
-
-        .hero-text h1 {
-            font-family: var(--font-serif);
-            font-size: 3.8rem;
-            font-weight: 700;
-            line-height: 1.15;
-            letter-spacing: -1px;
-            color: var(--ink);
-            margin-bottom: 20px;
-        }
-
-        .hero-text h1 em {
-            font-style: italic;
-            color: var(--rust);
-        }
-
-        .hero-tagline {
-            font-size: 1.15rem;
-            color: var(--ink-soft);
-            font-weight: 400;
-            margin-bottom: 14px;
-            max-width: 520px;
-        }
-
-        .hero-tech {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 36px;
-        }
-
-        .tech-pill {
-            font-size: 0.8rem;
-            font-weight: 600;
-            background: var(--cream-dark);
-            border: 1px solid var(--sand);
-            color: var(--ink-soft);
-            padding: 5px 14px;
-            border-radius: 50px;
-            transition: var(--transition);
-        }
-
-        .tech-pill:hover {
-            background: var(--rust);
-            border-color: var(--rust);
-            color: white;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-
-        /* =============================================
-           BUTTONS
-        ============================================= */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 13px 26px;
-            border-radius: var(--radius-lg);
-            font-family: var(--font-sans);
-            font-size: 0.92rem;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-            transition: var(--transition);
-        }
-
-        .btn-primary {
-            background: var(--rust);
-            color: white;
-            box-shadow: 0 4px 18px rgba(192, 98, 43, 0.3);
-        }
-
-        .btn-primary:hover {
-            background: var(--rust-light);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(192, 98, 43, 0.4);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--ink);
-            border: 1.5px solid var(--sand);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--rust);
-            color: var(--rust);
-            background: rgba(192, 98, 43, 0.05);
-        }
-
-        .btn svg {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-        }
-
-        /* =============================================
-           PROFILE IMAGE
-        ============================================= */
-        .hero-image { position: relative; }
-
-        .photo-frame {
-            position: relative;
-            width: 280px;
-            height: 320px;
-        }
-
-        .photo-frame::before {
-            content: '';
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            width: 100%;
-            height: 100%;
-            background: var(--sand);
-            border-radius: var(--radius-lg);
-            z-index: 0;
-            transition: var(--transition);
-        }
-
-        .photo-frame:hover::before {
-            top: 20px;
-            left: 20px;
-        }
-
-        #profile-photo {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: var(--radius-lg);
-            border: 4px solid var(--white);
-            box-shadow: var(--shadow-md);
-            display: block;
-            background: var(--sand);
-        }
-
-        .photo-badge {
-            position: absolute;
-            bottom: -16px;
-            right: -16px;
-            z-index: 2;
-            background: var(--forest);
-            color: white;
-            padding: 10px 18px;
-            border-radius: var(--radius-md);
-            font-size: 0.8rem;
-            font-weight: 600;
-            box-shadow: var(--shadow-sm);
-            white-space: nowrap;
-            letter-spacing: 0.02em;
-        }
-
-        /* =============================================
-           SECTION WRAPPERS
-        ============================================= */
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            padding: 0 24px 100px;
-        }
-
-        section {
-            padding-top: 80px;
-            scroll-margin-top: 80px;
-        }
-
-        .section-header { margin-bottom: 40px; }
-
-        .section-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--rust);
-            margin-bottom: 10px;
-        }
-
-        .section-label::before {
-            content: '';
-            width: 20px;
-            height: 2px;
-            background: var(--rust);
-            border-radius: 2px;
-        }
-
-        .section-header h2 {
-            font-family: var(--font-serif);
-            font-size: 2.4rem;
-            font-weight: 700;
-            color: var(--ink);
-            letter-spacing: -0.5px;
-            line-height: 1.25;
-        }
-
-        /* =============================================
-           ABOUT SECTION
-        ============================================= */
-        #about .about-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-            align-items: start;
-        }
-
-        .about-text {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: 36px;
-            border: 1px solid var(--sand);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .about-text p {
-            font-size: 1.05rem;
-            color: var(--ink-soft);
-            line-height: 1.85;
-        }
-
-        .about-text p + p { margin-top: 16px; }
-
-        .about-aside {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .stat-card {
-            background: var(--white);
-            border: 1px solid var(--sand);
-            border-radius: var(--radius-md);
-            padding: 24px 28px;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .stat-number {
-            font-family: var(--font-serif);
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: var(--rust);
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 0.88rem;
-            color: var(--muted);
-            font-weight: 500;
-        }
-
-        /* =============================================
-           SKILLS SECTION
-        ============================================= */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 22px;
-        }
-
-        .skill-card {
-            background: var(--white);
-            border: 1px solid var(--sand);
-            border-radius: var(--radius-lg);
-            padding: 30px;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .skill-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--sand);
-            transition: var(--transition);
-        }
-
-        .skill-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .skill-card:hover::after { background: var(--rust); }
-
-        .skill-card-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-            font-size: 1.3rem;
-        }
-
-        .icon-rust   { background: rgba(192, 98, 43, 0.1); }
-        .icon-forest { background: rgba(61, 107, 79, 0.1); }
-        .icon-warm   { background: rgba(124, 92, 62, 0.1); }
-
-        .skill-card h3 {
-            font-family: var(--font-serif);
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--ink);
-            margin-bottom: 16px;
-        }
-
-        .skill-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .skill-tag {
-            font-size: 0.82rem;
-            font-weight: 500;
-            background: var(--cream-dark);
-            border: 1px solid var(--sand);
-            color: var(--ink-soft);
-            padding: 5px 12px;
-            border-radius: 50px;
-            transition: var(--transition);
-        }
-
-        .skill-tag:hover {
-            background: var(--rust);
-            border-color: var(--rust);
-            color: white;
-        }
-
-        /* =============================================
-           PROJECTS SECTION
-        ============================================= */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 26px;
-        }
-
-        .project-card {
-            background: var(--white);
-            border: 1px solid var(--sand);
-            border-radius: var(--radius-lg);
-            padding: 32px;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .project-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-md);
-            border-color: rgba(192, 98, 43, 0.25);
-        }
-
-        .project-number {
-            font-family: var(--font-serif);
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--cream-dark);
-            line-height: 1;
-            user-select: none;
-        }
-
-        .project-card h3 {
-            font-family: var(--font-serif);
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--ink);
-            line-height: 1.3;
-        }
-
-        .project-card p {
-            font-size: 0.95rem;
-            color: var(--ink-soft);
-            line-height: 1.75;
-            flex: 1;
-        }
-
-        .project-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-top: 16px;
-            border-top: 1px solid var(--cream-dark);
-        }
-
-        .project-stack {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--rust);
-            letter-spacing: 0.02em;
-        }
-
-        .project-arrow {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--cream-dark);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-            color: var(--ink-soft);
-            flex-shrink: 0;
-        }
-
-        .project-card:hover .project-arrow {
-            background: var(--rust);
-            color: white;
-        }
-
-        /* =============================================
-           EDUCATION SECTION
-        ============================================= */
-        .edu-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 22px;
-        }
-
-        .edu-card {
-            background: var(--white);
-            border: 1px solid var(--sand);
-            border-radius: var(--radius-lg);
-            padding: 32px;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-        }
-
-        .edu-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .edu-year-badge {
-            display: inline-block;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--forest);
-            background: rgba(61, 107, 79, 0.1);
-            padding: 4px 12px;
-            border-radius: 50px;
-            margin-bottom: 14px;
-        }
-
-        .edu-card h3 {
-            font-family: var(--font-serif);
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--ink);
-            margin-bottom: 8px;
-            line-height: 1.3;
-        }
-
-        .edu-institution {
-            font-size: 0.95rem;
-            color: var(--ink-soft);
-            font-weight: 500;
-        }
-
-        /* =============================================
-           CONTACT SECTION
-        ============================================= */
-        .contact-wrapper {
-            background: var(--ink);
-            border-radius: var(--radius-xl);
-            padding: 56px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .contact-wrapper::before {
-            content: '';
-            position: absolute;
-            top: -60px;
-            right: -60px;
-            width: 280px;
-            height: 280px;
-            border-radius: 50%;
-            background: rgba(192, 98, 43, 0.12);
-        }
-
-        .contact-wrapper::after {
-            content: '';
-            position: absolute;
-            bottom: -40px;
-            left: 60px;
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: rgba(61, 107, 79, 0.1);
-        }
-
-        .contact-inner {
-            position: relative;
-            z-index: 1;
-        }
-
-        .contact-heading {
-            font-family: var(--font-serif);
-            font-size: 2.6rem;
-            font-weight: 700;
-            color: var(--cream);
-            margin-bottom: 12px;
-            line-height: 1.2;
-        }
-
-        .contact-heading em {
-            font-style: italic;
-            color: var(--rust-light);
-        }
-
-        .contact-subtext {
-            font-size: 1rem;
-            color: rgba(250, 247, 242, 0.6);
-            margin-bottom: 40px;
-            max-width: 500px;
-        }
-
-        .contact-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-        }
-
-        .contact-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: var(--cream);
-            padding: 14px 22px;
-            border-radius: var(--radius-md);
-            font-size: 0.92rem;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .contact-link:hover {
-            background: var(--rust);
-            border-color: var(--rust);
-            transform: translateY(-2px);
-        }
-
-        .contact-link svg {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-            opacity: 0.8;
-        }
-
-        .contact-link:hover svg { opacity: 1; }
-
-        /* =============================================
-           FOOTER
-        ============================================= */
-        footer {
-            background: var(--ink);
-            color: rgba(250, 247, 242, 0.4);
-            text-align: center;
-            padding: 28px 24px;
-            font-size: 0.85rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        footer span { color: var(--rust-light); }
-
-        /* =============================================
-           ANIMATIONS
-        ============================================= */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(28px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .hero-text > * { animation: fadeInUp 0.6s ease both; }
-        .hero-eyebrow  { animation-delay: 0.05s; }
-        .hero-text h1  { animation-delay: 0.15s; }
-        .hero-tagline  { animation-delay: 0.25s; }
-        .hero-tech     { animation-delay: 0.35s; }
-        .hero-buttons  { animation-delay: 0.45s; }
-        .hero-image    { animation: fadeInUp 0.7s 0.2s ease both; }
-
-        /* =============================================
-           RESPONSIVE
-        ============================================= */
-        @media (max-width: 1024px) {
-            .hero-text h1 { font-size: 3rem; }
-            #about .about-grid { grid-template-columns: 1fr; }
-            .skills-grid { grid-template-columns: 1fr 1fr; }
-            .projects-grid { grid-template-columns: 1fr; }
-            .edu-wrapper { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 768px) {
-            .hero-container {
-                grid-template-columns: 1fr;
-                gap: 40px;
-                text-align: center;
-            }
-            .hero-text h1   { font-size: 2.6rem; }
-            .hero-eyebrow   { justify-content: center; }
-            .hero-tech      { justify-content: center; }
-            .hero-buttons   { justify-content: center; }
-            .hero-image     { display: flex; justify-content: center; }
-            .photo-frame    { width: 220px; height: 260px; }
-            .skills-grid    { grid-template-columns: 1fr; }
-            .contact-wrapper { padding: 36px 24px; }
-            .contact-heading { font-size: 2rem; }
-            .nav-container  { flex-direction: column; gap: 12px; }
-            nav ul          { gap: 18px; flex-wrap: wrap; justify-content: center; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ASDODJI Le Sage — The Village Walk | Interactive Portfolio</title>
+<meta name="description" content="Interactive RPG portfolio of ASDODJI Le Sage, software engineering student at AUCA (Rwanda). Walk or ride bicycles and donkeys through the village, visit each hut, and experience the day/night cycle.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* =====================================================
+   1. TOKENS
+===================================================== */
+:root{
+  --a:0;                 /* 0 = noon, 1 = deep night */
+  --dusk:0; --night:0; --sunp:0; --moonp:0;
+  --sky-h:clamp(150px,24vh,230px);
+
+  --ink:#2a1c14; --ink-soft:#6a5446;
+  --panel:rgba(252,246,236,.93); --panel-solid:#fcf6ec;
+  --line:#e3d2bb;
+  --accent:#b83a26; --accent-ink:#fff;
+  --gold:#e8a41c; --leaf:#2f6b3a;
+  --wood:#6b4429; --wood-dark:#3b2314;
+
+  --f-display:'Fraunces',Georgia,serif;
+  --f-ui:'Plus Jakarta Sans',system-ui,sans-serif;
+  --f-sign:'Space Mono',ui-monospace,monospace;
+}
+body[data-theme="night"]{
+  --ink:#f3ece4; --ink-soft:#bfb2c8;
+  --panel:rgba(22,20,44,.93); --panel-solid:#16142c;
+  --line:#352f5a;
+  --accent:#e0553d;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#12101f;font-family:var(--f-ui);color:var(--ink);-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* =====================================================
+   2. SKY (sun, sunset, moon, stars)
+===================================================== */
+#sky{position:fixed;left:0;right:0;top:0;height:var(--sky-h);overflow:hidden;z-index:1}
+.sky-layer{position:absolute;inset:0}
+.sky-day{background:linear-gradient(180deg,#5fb0e8 0%,#a6d7f2 60%,#f6ecc9 100%)}
+.sky-dusk{background:linear-gradient(180deg,#34296a 0%,#9a3f72 42%,#f0804a 78%,#ffc468 100%);opacity:var(--dusk)}
+.sky-night{background:linear-gradient(180deg,#05071a 0%,#0e1235 55%,#241c4a 100%);opacity:var(--night)}
+
+.sun{position:absolute;right:16%;width:88px;height:88px;border-radius:50%;
+  top:calc(14px + var(--sunp) * (var(--sky-h) - 34px));
+  background:radial-gradient(circle,#fff6c0 0%,#ffd34d 55%,#f7b32b 100%);
+  box-shadow:0 0 60px 22px rgba(255,205,80,.55);
+  opacity:calc(1 - var(--night))}
+.sun::after{content:'';position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle,#ffb347 0%,#ff6a3d 70%,#e03a2a 100%);
+  box-shadow:0 0 90px 36px rgba(255,100,50,.55);opacity:var(--dusk)}
+
+.moon{position:absolute;right:30%;width:70px;height:70px;border-radius:50%;
+  top:calc(var(--sky-h) - var(--moonp) * (var(--sky-h) - 26px));
+  background:radial-gradient(circle at 32% 30%,#fff 0%,#e8ecf5 55%,#aab3c8 100%);
+  box-shadow:0 0 40px 8px rgba(220,230,255,.45);opacity:var(--night)}
+.moon::before{content:'';position:absolute;top:16px;left:18px;width:14px;height:14px;border-radius:50%;background:rgba(120,130,160,.35);box-shadow:26px 20px 0 -3px rgba(120,130,160,.3)}
+
+#stars{position:absolute;inset:0;pointer-events:none}
+.star{position:absolute;border-radius:50%;
+  opacity:clamp(0, calc((var(--a) - var(--t)) * 7), 1)}
+.star::after{content:'';display:block;width:100%;height:100%;border-radius:50%;background:#fff;
+  box-shadow:0 0 6px 1px rgba(255,244,200,.8);animation:tw 2.6s ease-in-out infinite alternate;animation-delay:var(--d)}
+@keyframes tw{from{opacity:.35;transform:scale(.8)}to{opacity:1;transform:scale(1.15)}}
+
+.shoot{position:absolute;top:14%;left:62%;width:90px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),#fff);opacity:0;transform:rotate(28deg);
+  animation:shoot 11s linear infinite}
+@keyframes shoot{0%,86%{opacity:0;transform:translate(0,0) rotate(28deg)}
+  88%{opacity:calc(var(--night));transform:translate(0,0) rotate(28deg)}
+  97%{opacity:0;transform:translate(-220px,120px) rotate(28deg)}100%{opacity:0}}
+
+.cloud{position:absolute;height:26px;border-radius:30px;background:rgba(255,255,255,.85);
+  opacity:calc(.9 - var(--a)*.8);animation:drift linear infinite}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%}
+.cloud::before{width:34px;height:34px;left:14px;top:-16px}
+.cloud::after{width:26px;height:26px;right:16px;top:-10px}
+@keyframes drift{from{transform:translateX(-160px)}to{transform:translateX(calc(100vw + 160px))}}
+
+.bird{position:absolute;width:22px;height:10px;opacity:calc(1 - var(--a)*2.2);animation:fly linear infinite}
+.bird path{animation:flap .5s ease-in-out infinite alternate;transform-origin:11px 8px}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(-.5)}}
+@keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(calc(100vw + 40px))}}
+
+.hills{position:absolute;left:0;bottom:-1px;width:100%;height:58px;display:block;
+  filter:brightness(calc(1 - var(--night)*.7)) saturate(calc(1 - var(--night)*.3))}
+
+/* =====================================================
+   3. HUD & MOUNT BADGES
+===================================================== */
+.hud{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:50;
+  width:calc(100% - 24px);max-width:1180px;display:flex;align-items:center;gap:14px;justify-content:space-between;
+  padding:8px 12px 8px 10px;background:var(--panel);border:1px solid var(--line);border-radius:999px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 28px rgba(0,0,0,.2);transition:background 1.2s,border-color 1.2s}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex:none}
+.avatar.fallback{display:grid;place-items:center;background:var(--accent);color:#fff;font-weight:800;font-size:.8rem}
+.who b{display:block;font-family:var(--f-display);font-size:1.05rem;line-height:1.1;white-space:nowrap}
+.who small{display:block;font-size:.72rem;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.fast{display:flex;gap:4px;list-style:none}
+.fast button{background:none;border:0;padding:7px 12px;border-radius:999px;font-size:.82rem;font-weight:600;transition:background .2s,color .2s;white-space:nowrap}
+.fast button:hover,.fast button.here{background:var(--accent);color:var(--accent-ink)}
+.fast button .tick{display:none;margin-left:5px;font-size:.7rem}
+.fast button.seen .tick{display:inline}
+
+.tools{display:flex;align-items:center;gap:6px;flex:none}
+.chip{font-size:.74rem;font-weight:700;padding:6px 11px;border-radius:999px;background:rgba(0,0,0,.06);white-space:nowrap}
+body[data-theme="night"] .chip{background:rgba(255,255,255,.09)}
+
+/* Mount Status Pill in HUD */
+.mount-pill{display:none;align-items:center;gap:6px;background:var(--accent);color:#fff;font-size:.74rem;font-weight:800;padding:6px 12px;border-radius:999px;cursor:pointer;animation:popMount .3s cubic-bezier(.34,1.56,.64,1)}
+.mount-pill.active{display:inline-flex}
+@keyframes popMount{from{transform:scale(.8)}to{transform:scale(1)}}
+
+.ibtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--panel-solid);display:grid;place-items:center;
+  font-size:.74rem;font-weight:800;text-decoration:none;transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .2s}
+.ibtn:hover{transform:scale(1.1);border-color:var(--accent)}
+.ibtn svg{width:18px;height:18px}
+#themeBtn .i-moon{display:none}
+body[data-theme="night"] #themeBtn .i-sun{display:none}
+body[data-theme="night"] #themeBtn .i-moon{display:block}
+#soundBtn[aria-pressed="false"] .waves{display:none}
+
+@media (max-width:900px){
+  .fast{position:fixed;top:68px;left:12px;right:12px;overflow-x:auto;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:999px;backdrop-filter:blur(12px);scrollbar-width:none}
+  .fast::-webkit-scrollbar{display:none}
+  .links{display:none}
+  .who small{display:none}
+}
+@media (max-width:520px){ .chip{display:none} }
+
+/* =====================================================
+   4. THE WORLD
+===================================================== */
+#viewport{position:fixed;left:0;right:0;bottom:0;top:var(--sky-h);overflow:hidden;z-index:2;background:#6f9c4c;touch-action:none;cursor:crosshair}
+#world{position:absolute;left:0;top:0;will-change:transform;user-select:none;-webkit-user-select:none}
+#ground{position:absolute;left:0;top:0;display:block}
+#objects{position:absolute;left:0;top:0;width:0;height:0}
+#night{position:absolute;inset:0;pointer-events:none;z-index:20}
+
+.obj{position:absolute;transform:translate(-50%,-100%);pointer-events:none}
+.obj svg{display:block;width:100%;height:100%;overflow:visible}
+
+/* huts */
+.hut{pointer-events:auto;cursor:pointer;transform:translate(-50%,-100%);transition:filter .25s}
+.hut:hover,.hut.near{filter:brightness(1.08) drop-shadow(0 0 14px rgba(255,200,90,.55))}
+.lit{fill-opacity:calc(.3 + var(--a)*.7)}
+.hut svg .lit{filter:drop-shadow(0 0 calc(var(--a)*7px) #ffc24d)}
+.flames{transform-box:fill-box;transform-origin:50% 100%;animation:flick .5s ease-in-out infinite alternate}
+@keyframes flick{from{transform:scale(1,.9) skewX(-3deg)}to{transform:scale(1.06,1.1) skewX(3deg)}}
+.smoke{position:absolute;width:16px;height:16px;border-radius:50%;background:rgba(235,235,235,.7);opacity:0;animation:puff 4s ease-out infinite}
+@keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.5)}15%{opacity:.7}100%{opacity:0;transform:translate(26px,-90px) scale(2.6)}}
+
+/* signs in front of the doors */
+.sign{transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 4px rgba(0,0,0,.3));transition:transform .25s}
+.sign.near{transform:translate(-50%,-100%) scale(1.07)}
+.board{position:relative;min-width:126px;padding:7px 14px 8px;text-align:center;color:#f7ead2;line-height:1.1;
+  background:linear-gradient(180deg,#8d5c36,#6a4127);border:2px solid #4a2c18;border-radius:7px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.board i{display:block;font-style:normal;font-family:var(--f-sign);font-size:.62rem;opacity:.75;letter-spacing:.04em}
+.board b{display:block;font-family:var(--f-display);font-weight:700;font-size:1.02rem;margin-top:2px;white-space:nowrap}
+.board::before,.board::after{content:'';position:absolute;top:6px;width:5px;height:5px;border-radius:50%;background:#d9b04a;box-shadow:0 1px 1px rgba(0,0,0,.5)}
+.board::before{left:5px}.board::after{right:5px}
+.pole{width:9px;height:30px;background:linear-gradient(90deg,#4b2d19,#6b4429);border-radius:0 0 2px 2px}
+.lantern{position:absolute;right:-16px;top:-10px;width:14px;height:20px;border-radius:4px 4px 6px 6px;background:#3b2314;border-top:3px solid #3b2314}
+.lantern::before{content:'';position:absolute;left:2px;top:2px;width:10px;height:14px;border-radius:3px;background:#ffd36a;
+  opacity:calc(.25 + var(--a)*.75);box-shadow:0 0 calc(var(--a)*16px) calc(var(--a)*6px) rgba(255,190,70,.8)}
+
+/* gate */
+.gate{width:300px;height:170px;pointer-events:none}
+.gate .post{position:absolute;bottom:0;width:24px;height:140px;background:linear-gradient(90deg,#4b2d19,#6b4429);border-radius:4px 4px 0 0}
+.gate .p1{left:20px}.gate .p2{right:20px}
+.gate .beam{position:absolute;left:8px;right:8px;top:6px;height:50px;background:linear-gradient(180deg,#8d5c36,#6a4127);border:2px solid #4a2c18;border-radius:8px;
+  display:grid;place-items:center;color:#f7ead2;font-family:var(--f-display);font-weight:700;font-size:1.02rem;text-align:center;line-height:1.1}
+.gate .beam small{display:block;font-family:var(--f-sign);font-weight:400;font-size:.6rem;opacity:.75;margin-bottom:2px}
+
+/* =====================================================
+   5. ACTORS & MOUNTS (BOY, BICYCLE, DONKEY, ANIMALS)
+===================================================== */
+:root {
+  --cadence: 0.32s;
+  --stride-rot: 32deg;
+  --arm-rot: 36deg;
+}
+
+.actor{position:absolute;width:60px;height:90px;transform:translate(-50%,-100%);pointer-events:none;transition:width .2s, height .2s}
+.actor .bob{width:100%;height:100%;transform-origin:50% 100%;will-change:transform}
+.sp{width:100%;height:100%;overflow:visible;display:block}
+.v{display:none}
+[data-dir=down] .v-fb,[data-dir=up] .v-fb,[data-dir=left] .v-side,[data-dir=right] .v-side{display:inline}
+[data-dir=up] .front{display:none}
+[data-dir=down] .back{display:none}
+[data-dir=left] .sp{transform:scaleX(-1)}
+.sp g[class^=leg],.sp g[class^=arm]{transform-box:fill-box;transform-origin:50% 0}
+
+/* Idle Breathing */
+.actor:not(.walking) .bob{animation:breathe 2.4s ease-in-out infinite alternate}
+@keyframes breathe{from{transform:scaleY(1)}to{transform:scaleY(1.02) translateY(-1px)}}
+
+/* Realistic On-Foot Walking & Athletic Sprinting */
+.actor:not(.mounted).walking .bob{animation:bobWalk var(--cadence) cubic-bezier(.45,0,.55,1) infinite alternate}
+.actor:not(.mounted).walking.sprinting .bob{animation:bobSprint var(--cadence) cubic-bezier(.45,0,.55,1) infinite alternate}
+
+/* Side Gait (True Bipedal Knee & Arm Swing) */
+.actor:not(.mounted).walking .v-side .legL{animation:swingLegL var(--cadence) ease-in-out infinite alternate}
+.actor:not(.mounted).walking .v-side .legR{animation:swingLegR var(--cadence) ease-in-out infinite alternate}
+.actor:not(.mounted).walking .v-side .armL{animation:swingArmL var(--cadence) ease-in-out infinite alternate}
+.actor:not(.mounted).walking .v-side .armR{animation:swingArmR var(--cadence) ease-in-out infinite alternate}
+
+/* Front/Back Gait (Hip & Stride Dip) */
+.actor:not(.mounted).walking .v-fb .legL{animation:stepFB_L var(--cadence) ease-in-out infinite alternate}
+.actor:not(.mounted).walking .v-fb .legR{animation:stepFB_R var(--cadence) ease-in-out infinite alternate}
+.actor:not(.mounted).walking .v-fb .armL{animation:armFB_L var(--cadence) ease-in-out infinite alternate}
+.actor:not(.mounted).walking .v-fb .armR{animation:armFB_R var(--cadence) ease-in-out infinite alternate}
+
+@keyframes bobWalk{
+  0%{transform:translateY(0) scale(1,1)}
+  50%{transform:translateY(-3.5px) scale(0.98,1.02)}
+  100%{transform:translateY(0) scale(1.02,0.98)}
+}
+@keyframes bobSprint{
+  0%{transform:translateY(0) scale(1,1)}
+  50%{transform:translateY(-6px) scale(0.96,1.04)}
+  100%{transform:translateY(0) scale(1.04,0.96)}
+}
+
+@keyframes swingLegL{0%{transform:rotate(var(--stride-rot))}100%{transform:rotate(calc(-1 * var(--stride-rot)))}}
+@keyframes swingLegR{0%{transform:rotate(calc(-1 * var(--stride-rot)))}100%{transform:rotate(var(--stride-rot))}}
+@keyframes swingArmL{0%{transform:rotate(var(--arm-rot))}100%{transform:rotate(calc(-1 * var(--arm-rot)))}}
+@keyframes swingArmR{0%{transform:rotate(calc(-1 * var(--arm-rot)))}100%{transform:rotate(var(--arm-rot))}}
+
+@keyframes stepFB_L{0%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-7px) scaleY(.92)}100%{transform:translateY(0) scaleY(1.02)}}
+@keyframes stepFB_R{0%{transform:translateY(-7px) scaleY(.92)}50%{transform:translateY(0) scaleY(1)}100%{transform:translateY(-7px) scaleY(.92)}}
+@keyframes armFB_L{0%{transform:translateY(-3px)}100%{transform:translateY(3px)}}
+@keyframes armFB_R{0%{transform:translateY(3px)}100%{transform:translateY(-3px)}}
+
+/* =====================================================
+   REALISTIC MOUNTS (BICYCLE & DONKEY)
+===================================================== */
+.actor.mounted-bike{width:82px;height:98px}
+.actor.mounted-donkey{width:92px;height:106px}
+
+/* Bicycle Animations */
+.actor.mounted-bike .wheel{transform-box:fill-box;transform-origin:center;will-change:transform}
+.actor.mounted-bike.pedaling .wheel{animation:spinWheel var(--cadence) linear infinite}
+.actor.mounted-bike.pedaling .crankL{animation:pedalStrokeL var(--cadence) linear infinite;transform-box:fill-box;transform-origin:center}
+.actor.mounted-bike.pedaling .crankR{animation:pedalStrokeR var(--cadence) linear infinite;transform-box:fill-box;transform-origin:center}
+.actor.mounted-bike.coasting .wheel{animation:spinWheel calc(var(--cadence) * 1.6) linear infinite}
+
+@keyframes spinWheel{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes pedalStrokeL{0%{transform:rotate(0deg)}50%{transform:rotate(180deg)}100%{transform:rotate(360deg)}}
+@keyframes pedalStrokeR{0%{transform:rotate(180deg)}50%{transform:rotate(360deg)}100%{transform:rotate(540deg)}}
+
+/* Donkey Quadruped Anatomical Trot (Diagonal Pairs) */
+.actor.mounted-donkey .donkeyLegFL{transform-box:fill-box;transform-origin:50% 0}
+.actor.mounted-donkey .donkeyLegBR{transform-box:fill-box;transform-origin:50% 0}
+.actor.mounted-donkey .donkeyLegFR{transform-box:fill-box;transform-origin:50% 0}
+.actor.mounted-donkey .donkeyLegBL{transform-box:fill-box;transform-origin:50% 0}
+.actor.mounted-donkey .donkeyHead{transform-box:fill-box;transform-origin:20% 80%}
+.actor.mounted-donkey .donkeyTail{transform-box:fill-box;transform-origin:100% 0}
+.actor.mounted-donkey .donkeyEar{transform-box:fill-box;transform-origin:50% 100%}
+
+.actor.mounted-donkey.walking .donkeyLegFL,
+.actor.mounted-donkey.walking .donkeyLegBR{animation:quadTrotA var(--cadence) ease-in-out infinite alternate}
+
+.actor.mounted-donkey.walking .donkeyLegFR,
+.actor.mounted-donkey.walking .donkeyLegBL{animation:quadTrotB var(--cadence) ease-in-out infinite alternate}
+
+.actor.mounted-donkey.walking .donkeyHead{animation:headBob var(--cadence) ease-in-out infinite alternate}
+.actor.mounted-donkey.walking .donkeyTail{animation:tailSway calc(var(--cadence) * 1.5) ease-in-out infinite alternate}
+.actor.mounted-donkey.walking .donkeyEar{animation:earTwitch 1.2s ease-in-out infinite alternate}
+
+@keyframes quadTrotA{0%{transform:rotate(-24deg)}50%{transform:rotate(4deg) translateY(-2px)}100%{transform:rotate(24deg)}}
+@keyframes quadTrotB{0%{transform:rotate(24deg)}50%{transform:rotate(4deg) translateY(-2px)}100%{transform:rotate(-24deg)}}
+@keyframes headBob{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(-3.5px) rotate(-4deg)}}
+@keyframes tailSway{0%{transform:rotate(-18deg)}100%{transform:rotate(22deg)}}
+@keyframes earTwitch{0%,80%{transform:rotate(0deg)}90%{transform:rotate(-12deg)}100%{transform:rotate(8deg)}}
+
+/* Stamina Bar over Player */
+.stamina-meter{position:absolute;left:50%;top:-10px;transform:translateX(-50%);width:48px;height:6px;background:rgba(0,0,0,.5);border:1.5px solid #2a1a10;border-radius:999px;overflow:hidden;opacity:0;transition:opacity .25s;pointer-events:none;z-index:10}
+.stamina-meter.on{opacity:1}
+.stamina-fill{height:100%;width:100%;background:linear-gradient(90deg,#e8a41c,#ff5722);border-radius:999px;transition:width .08s linear}
+.stamina-fill.tired{background:#e53935}
+
+/* Wind / Speed Streaks */
+.speed-streak{position:absolute;height:2px;border-radius:2px;background:rgba(255,255,255,.75);pointer-events:none;animation:streak .35s ease-out forwards}
+@keyframes streak{0%{opacity:.8;transform:scaleX(1)}100%{opacity:0;transform:scaleX(2.5) translateX(var(--streak-dx))}}
+
+/* Parked Mount Interactive Objects */
+.mount-obj{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25));transition:filter .2s, transform .2s}
+.mount-obj:hover,.mount-obj.near{filter:brightness(1.14) drop-shadow(0 0 14px var(--gold));transform:translate(-50%,-100%) scale(1.06)}
+.mount-obj svg{display:block;width:100%;height:100%}
+
+/* Animals */
+.animal{position:absolute;transform:translate(-50%,-100%);pointer-events:none}
+.animal svg{display:block;width:100%;height:100%;overflow:visible}
+.animal.flip svg{transform:scaleX(-1)}
+.animal.moving .bob{animation:hop .26s ease-in-out infinite alternate}
+@keyframes hop{from{transform:translateY(0)}to{transform:translateY(-4px)}}
+
+.dust{position:absolute;width:14px;height:8px;border-radius:50%;background:rgba(214,170,120,.7);transform:translate(-50%,-50%);pointer-events:none;animation:dust .55s ease-out forwards}
+@keyframes dust{to{opacity:0;transform:translate(-50%,-90%) scale(2.4)}}
+
+.say{position:absolute;left:50%;bottom:100%;margin-bottom:6px;transform:translateX(-50%) scale(0);transform-origin:50% 100%;
+  background:#fff8e6;color:#2a1c14;border:2px solid #4a2c18;border-radius:14px;padding:6px 12px;font-size:.78rem;font-weight:700;line-height:1.3;white-space:nowrap;
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:3;box-shadow:0 5px 14px rgba(0,0,0,.3);text-align:center}
+.say.on{transform:translateX(-50%) scale(1)}
+.say::after{content:'';position:absolute;left:50%;top:100%;margin-left:-6px;border:6px solid transparent;border-top-color:#4a2c18}
+.say.go{background:var(--gold);cursor:pointer;pointer-events:auto;padding:8px 14px}
+.say.go small{display:block;font-weight:600;opacity:.8;font-size:.7rem}
+
+.firefly{position:absolute;width:5px;height:5px;border-radius:50%;background:#e9ff7a;box-shadow:0 0 10px 3px rgba(230,255,100,.8);
+  opacity:clamp(0, calc((var(--a) - .6) * 3), 1);animation:wander var(--dur) ease-in-out infinite alternate;pointer-events:none}
+@keyframes wander{from{transform:translate(0,0)}50%{transform:translate(var(--dx),calc(var(--dy)*-.5))}to{transform:translate(calc(var(--dx)*-.6),var(--dy))}}
+
+/* =====================================================
+   6. CONTROLS & HUD
+===================================================== */
+.hint{position:fixed;left:16px;bottom:16px;z-index:40;display:flex;gap:10px;align-items:center;padding:9px 16px;border-radius:999px;
+  background:rgba(30,20,16,.85);color:#fbf3e6;font-size:.78rem;font-weight:600;backdrop-filter:blur(8px)}
+.hint kbd{font-family:var(--f-sign);font-size:.72rem;background:rgba(255,255,255,.18);padding:2px 7px;border-radius:5px}
+
+.dpad{position:fixed;right:14px;bottom:18px;z-index:40;display:none;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:5px;padding:10px;border-radius:26px;background:rgba(30,20,16,.75);backdrop-filter:blur(8px);touch-action:none}
+.dpad button{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.12);color:#fff;border-radius:14px;font-size:1.1rem;touch-action:none}
+.dpad button:active{background:var(--accent)}
+.dpad .u{grid-column:2;grid-row:1}.dpad .l{grid-column:1;grid-row:2}.dpad .o{grid-column:2;grid-row:2;font-weight:800;font-size:.8rem}.dpad .r{grid-column:3;grid-row:2}.dpad .d{grid-column:2;grid-row:3}
+@media (pointer:coarse){ .dpad{display:grid} .hint{display:none} }
+
+.toast{position:fixed;left:50%;top:calc(var(--sky-h) + 20px);transform:translate(-50%,-30px);z-index:60;background:#1c1411;color:#fbf3e6;padding:10px 20px;border-radius:999px;font-weight:700;font-size:.85rem;opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 10px 28px rgba(0,0,0,.4);max-width:calc(100% - 32px);text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* =====================================================
+   7. MODAL / DIALOGS
+===================================================== */
+.overlay{position:fixed;inset:0;z-index:100;background:rgba(14,10,8,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .35s}
+.overlay.open{opacity:1;pointer-events:auto}
+.sheet{position:relative;background:var(--panel-solid);color:var(--ink);border:1px solid var(--line);border-radius:28px;width:100%;max-width:940px;max-height:88vh;overflow:auto;padding:40px 40px 36px;box-shadow:0 30px 80px rgba(0,0,0,.5);transform:translateY(22px) scale(.97);transition:transform .4s cubic-bezier(.2,.8,.2,1);user-select:text;-webkit-user-select:text}
+.overlay.open .sheet{transform:none}
+.sheet.small{max-width:520px;text-align:left}
+.x{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.07);font-size:1.15rem;transition:background .2s,transform .25s}
+body[data-theme="night"] .x{background:rgba(255,255,255,.1)}
+.x:hover{background:var(--accent);color:#fff;transform:rotate(90deg)}
+.sheet .kicker{font-family:var(--f-sign);font-size:.78rem;color:var(--accent);margin-bottom:6px}
+.sheet h2{font-family:var(--f-display);font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.15;margin-bottom:14px;padding-right:44px}
+.sheet p{line-height:1.75;color:var(--ink-soft);max-width:68ch}
+.sheet p+p{margin-top:12px}
+.sheet strong{color:var(--ink)}
+.quote{margin-top:22px;padding:14px 18px;border-left:4px solid var(--accent);background:rgba(184,58,38,.08);border-radius:0 14px 14px 0;font-family:var(--f-display);font-style:italic;max-width:62ch}
+
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:18px}
+@media (max-width:720px){.grid{grid-template-columns:1fr}.sheet{padding:30px 22px 26px}}
+.card{border:1px solid var(--line);border-radius:18px;padding:18px 20px;background:rgba(0,0,0,.025);display:flex;flex-direction:column;gap:6px;transition:transform .2s,border-color .2s}
+body[data-theme="night"] .card{background:rgba(255,255,255,.035)}
+.card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.card h4{font-family:var(--f-display);font-size:1.2rem}
+.card p{font-size:.9rem;line-height:1.6}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:6px}
+.tags span{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(47,107,58,.14);color:var(--leaf)}
+body[data-theme="night"] .tags span{color:#8fd19a;background:rgba(143,209,154,.12)}
+.card .lnk{align-self:flex-start;margin-top:6px;font-size:.82rem;font-weight:800;color:var(--accent);text-decoration:none;border-bottom:2px solid currentColor}
+.skill-list{list-style:none;display:flex;flex-direction:column;gap:9px;margin-top:8px;font-size:.92rem;color:var(--ink-soft);line-height:1.5}
+.skill-list b{color:var(--ink)}
+.timeline{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.when{font-family:var(--f-sign);font-size:.76rem;color:var(--leaf);font-weight:700}
+body[data-theme="night"] .when{color:#8fd19a}
+.school-name{color:var(--accent);font-weight:700;font-size:.92rem}
+
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:22px;max-width:520px}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 20px;border-radius:999px;border:0;background:var(--accent);color:#fff;font-weight:800;font-size:.92rem;text-decoration:none;box-shadow:0 6px 18px rgba(184,58,38,.3);transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(184,58,38,.4)}
+.btn.alt{background:var(--wood)}
+.btn.in{background:#0a66c2;box-shadow:0 6px 18px rgba(10,102,194,.3)}
+.btn.gh{background:#24292f}
+.open-to{margin-top:20px;font-size:.9rem}
+
+@media (prefers-reduced-motion:reduce){
+  .cloud,.bird,.firefly,.shoot,.smoke{animation:none}
+  .star::after{animation:none}
+}
+</style>
 </head>
-<body>
+<body data-theme="day">
 
-    <!-- ===== NAVIGATION ===== -->
-    <nav>
-        <div class="nav-container">
-            <a href="#" class="nav-logo">Le <span>Sage</span></a>
-            <ul>
-                <li><a href="#about">About</a></li>
-                <li><a href="#skills">Skills</a></li>
-                <li><a href="#projects">Projects</a></li>
-                <li><a href="#education">Education</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
+<!-- ============ SKY ============ -->
+<div id="sky" aria-hidden="true">
+  <div class="sky-layer sky-day"></div>
+  <div class="sky-layer sky-dusk"></div>
+  <div class="sky-layer sky-night"></div>
+  <div id="stars"></div>
+  <div class="shoot"></div>
+  <div class="sun"></div>
+  <div class="moon"></div>
+  <div class="cloud" style="top:34px;width:92px;animation-duration:95s;animation-delay:-20s"></div>
+  <div class="cloud" style="top:78px;width:64px;animation-duration:130s;animation-delay:-70s"></div>
+  <div class="cloud" style="top:52px;width:110px;animation-duration:160s;animation-delay:-120s"></div>
+  <svg class="bird" style="top:60px;animation-duration:38s;animation-delay:-6s" viewBox="0 0 22 10"><path d="M1,8 Q6,0 11,6 Q16,0 21,8" fill="none" stroke="#3a2d26" stroke-width="1.6" stroke-linecap="round"/></svg>
+  <svg class="bird" style="top:90px;animation-duration:52s;animation-delay:-30s" viewBox="0 0 22 10"><path d="M1,8 Q6,0 11,6 Q16,0 21,8" fill="none" stroke="#3a2d26" stroke-width="1.6" stroke-linecap="round"/></svg>
+  <svg class="hills" viewBox="0 0 1200 60" preserveAspectRatio="none">
+    <path d="M0,34 Q150,6 320,30 T640,24 T960,32 T1200,18 L1200,60 L0,60Z" fill="#7da35c"/>
+    <path d="M0,46 Q220,22 420,44 T820,40 T1200,36 L1200,60 L0,60Z" fill="#5f8a45"/>
+  </svg>
+</div>
 
-    <!-- ===== HERO ===== -->
-    <header>
-        <div class="hero-container">
-            <div class="hero-text">
-                <div class="hero-eyebrow">Software Engineering Student</div>
-                <h1>Hi, I'm <em>Le Sage</em><br>ASDODJI</h1>
-                <p class="hero-tagline">I build reliable backend systems and enjoy turning complex problems into clean, thoughtful code.</p>
-                <div class="hero-tech">
-                    <span class="tech-pill">Java</span>
-                    <span class="tech-pill">Spring Boot</span>
-                    <span class="tech-pill">PostgreSQL</span>
-                    <span class="tech-pill">PHP</span>
-                    <span class="tech-pill">Python</span>
-                </div>
-                <div class="hero-buttons">
-                    <a class="btn btn-primary" href="https://github.com/sage235" target="_blank" rel="noopener">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                        GitHub Profile
-                    </a>
-                    <a class="btn btn-outline" href="ASDODJI_Le_Sage_Resume.pdf" download="ASDODJI_Le_Sage_Resume.pdf">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
-                        Download Resume
-                    </a>
-                </div>
-            </div>
-
-            <div class="hero-image">
-                <div class="photo-frame">
-                    <img src="photo.jpg" alt="ASDODJI Le Sage" id="profile-photo">
-                    <div class="photo-badge">📍 Rwanda · AUCA</div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
-
-        <!-- ===== ABOUT ===== -->
-        <section id="about">
-            <div class="section-header">
-                <div class="section-label">Get to know me</div>
-                <h2>A little about me</h2>
-            </div>
-            <div class="about-grid">
-                <div class="about-text">
-                    <p>I'm a Software Engineering student at the Adventist University of Central Africa (AUCA), where I'm building a strong foundation in backend systems, databases, and software architecture.</p>
-                    <p>I love the process of breaking down a complex real-world problem and crafting a solution that's not just functional, but clean and maintainable. My main language is Java, and I'm most at home with Spring Boot and REST API design.</p>
-                    <p>Outside of code, I'm curious about data analysis, cybersecurity, and making technology more accessible in my community.</p>
-                </div>
-                <div class="about-aside">
-                    <div class="stat-card">
-                        <div class="stat-number">2027</div>
-                        <div class="stat-label">Expected graduation year</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">4+</div>
-                        <div class="stat-label">Projects built &amp; shipped</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">5+</div>
-                        <div class="stat-label">Technologies in my stack</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== SKILLS ===== -->
-        <section id="skills">
-            <div class="section-header">
-                <div class="section-label">What I work with</div>
-                <h2>My skills</h2>
-            </div>
-            <div class="skills-grid">
-                <div class="skill-card">
-                    <div class="skill-card-icon icon-rust">⚙️</div>
-                    <h3>Backend</h3>
-                    <div class="skill-tags">
-                        <span class="skill-tag">Java</span>
-                        <span class="skill-tag">Spring Boot</span>
-                        <span class="skill-tag">Hibernate</span>
-                        <span class="skill-tag">REST APIs</span>
-                    </div>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-card-icon icon-forest">🗄️</div>
-                    <h3>Databases</h3>
-                    <div class="skill-tags">
-                        <span class="skill-tag">PostgreSQL</span>
-                        <span class="skill-tag">MySQL</span>
-                        <span class="skill-tag">JPA</span>
-                    </div>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-card-icon icon-warm">🎨</div>
-                    <h3>Frontend</h3>
-                    <div class="skill-tags">
-                        <span class="skill-tag">HTML &amp; CSS</span>
-                        <span class="skill-tag">JavaScript</span>
-                        <span class="skill-tag">Bootstrap</span>
-                        <span class="skill-tag">React ✦ learning</span>
-                        <span class="skill-tag">Tailwind ✦ learning</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== PROJECTS ===== -->
-        <section id="projects">
-            <div class="section-header">
-                <div class="section-label">Things I've built</div>
-                <h2>Projects</h2>
-            </div>
-            <div class="projects-grid">
-                <div class="project-card">
-                    <div class="project-number">01</div>
-                    <h3>Rent House Management System</h3>
-                    <p>A full Spring Boot application for managing rental properties — covering users, locations, amenities, and role-based access control for landlords and tenants.</p>
-                    <div class="project-footer">
-                        <span class="project-stack">Java · Spring Boot · PostgreSQL · JUnit</span>
-                        <div class="project-arrow">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-number">02</div>
-                    <h3>Hotel Management System</h3>
-                    <p>A hotel booking and management platform built with PHP — featuring authentication, room management, reservations, and an admin dashboard.</p>
-                    <div class="project-footer">
-                        <span class="project-stack">PHP · MySQL · Bootstrap · JavaScript</span>
-                        <div class="project-arrow">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-number">03</div>
-                    <h3>Football Data Analytics</h3>
-                    <p>Data cleaning, visualization, and predictive modelling on real football datasets. Explored performance trends and match outcome predictions.</p>
-                    <div class="project-footer">
-                        <span class="project-stack">Python · Pandas · Google Colab</span>
-                        <div class="project-arrow">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-number">04</div>
-                    <h3>VAPT Security Project</h3>
-                    <p>Vulnerability assessment and penetration testing of virtual machines — identifying attack vectors, exploiting weaknesses, and writing security recommendations.</p>
-                    <div class="project-footer">
-                        <span class="project-stack">Linux · Cybersecurity · Networking</span>
-                        <div class="project-arrow">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== EDUCATION ===== -->
-        <section id="education">
-            <div class="section-header">
-                <div class="section-label">My journey</div>
-                <h2>Education</h2>
-            </div>
-            <div class="edu-wrapper">
-                <div class="edu-card">
-                    <span class="edu-year-badge">2023 – 2027 (Expected)</span>
-                    <h3>Bachelor of Software Engineering</h3>
-                    <p class="edu-institution">Adventist University of Central Africa (AUCA), Rwanda</p>
-                </div>
-                <div class="edu-card">
-                    <span class="edu-year-badge">Graduated 2023</span>
-                    <h3>High School Diploma</h3>
-                    <p class="edu-institution">Complexe Scolaire Frère Polycarpe</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== CONTACT ===== -->
-        <section id="contact">
-            <div class="contact-wrapper">
-                <div class="contact-inner">
-                    <h2 class="contact-heading">Let's build something<br><em>together.</em></h2>
-                    <p class="contact-subtext">Whether it's a new project, an internship opportunity, or just a conversation about tech — my inbox is always open.</p>
-                    <div class="contact-links">
-                        <a href="mailto:lesageasdodji@gmail.com" class="contact-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                            lesageasdodji@gmail.com
-                        </a>
-                        <a href="tel:+250735562281" class="contact-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.13 12 19.79 19.79 0 0 1 1.06 3.38 2 2 0 0 1 3.04 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                            </svg>
-                            +250 735 562 281
-                        </a>
-                        <a href="https://github.com/sage235" target="_blank" rel="noopener" class="contact-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-                            </svg>
-                            github.com/sage235
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
+<!-- ============ HUD ============ -->
+<header class="hud">
+  <div class="who">
+    <img class="avatar" src="photo.jpg" alt="ASDODJI Le Sage"
+         onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'avatar fallback',textContent:'LS'}))">
+    <div>
+      <b>ASDODJI Le Sage</b>
+      <small>Software engineer · AUCA, Rwanda</small>
     </div>
+  </div>
 
-    <!-- ===== FOOTER ===== -->
-    <footer>
-        <p>© 2026 <span>ASDODJI Le Sage</span>. All rights reserved.</p>
-    </footer>
+  <ul class="fast" id="fast" aria-label="Walk to a hut"></ul>
 
+  <div class="tools">
+    <span class="mount-pill" id="mountHudPill" title="Click or press F to dismount">
+      <span id="mountHudIcon">🚲</span>
+      <span id="mountHudLabel">Riding Bicycle</span>
+      <span style="opacity:.75;font-size:.68rem">✕</span>
+    </span>
+
+    <span class="chip" id="progress">Explored 0/5</span>
+    <a class="ibtn links" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener" aria-label="LinkedIn profile" title="LinkedIn">in</a>
+    <a class="ibtn links" href="https://github.com/sage235" target="_blank" rel="noopener" aria-label="GitHub profile" title="GitHub">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.58.24 2.75.12 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+    </a>
+    <button class="ibtn" id="soundBtn" aria-pressed="false" aria-label="Toggle village music" title="Music">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path class="waves" d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+    </button>
+    <button class="ibtn" id="themeBtn" aria-label="Switch between day and night" title="Day / night">
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M1.5 12H4M20 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ============ WORLD ============ -->
+<main id="viewport" aria-label="Interactive village. Walk, ride bicycles and donkeys to visit each hut.">
+  <div id="world">
+    <svg id="ground"></svg>
+    <div id="objects"></div>
+  </div>
+  <canvas id="night"></canvas>
+</main>
+
+<div class="hint">
+  <span>Walk / Sprint</span> <kbd>WASD</kbd> + <kbd>Shift</kbd>
+  <span>· Mount / Dismount</span> <kbd>F</kbd>
+  <span>· Bell</span> <kbd>B</kbd>
+  <span>· Bray</span> <kbd>H</kbd>
+  <span>· Enter door</span> <kbd>E</kbd>
+</div>
+
+<div class="dpad" id="dpad">
+  <button class="u" data-v="0,-1" aria-label="Up">▲</button>
+  <button class="l" data-v="-1,0" aria-label="Left">◀</button>
+  <button class="o" id="actBtn" aria-label="Action">GO</button>
+  <button class="r" data-v="1,0" aria-label="Right">▶</button>
+  <button class="d" data-v="0,1" aria-label="Down">▼</button>
+  <button class="sprint-btn" id="sprintBtn" aria-label="Toggle Sprint" style="grid-column:1;grid-row:3;font-size:.85rem;background:rgba(232,164,28,.25)">⚡</button>
+  <button class="mount-act-btn" id="mountActBtn" aria-label="Bell or Bray" style="grid-column:3;grid-row:3;font-size:.85rem;background:rgba(184,58,38,.25)">🔔</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Intro -->
+<div class="overlay open" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="sheet small">
+    <div class="kicker">Portfolio of ASDODJI Le Sage</div>
+    <h2 id="introTitle">Welcome to the Living Village.</h2>
+    <p>Explore my portfolio through a living African village. Walk, sprint, or <strong>ride bicycles 🚲 and donkeys 🫏</strong> to discover each hut: my background, backend projects, technical skills, education at AUCA Kigali, and contacts.</p>
+    <p><strong>Move &amp; Sprint:</strong> Arrow keys, WASD / ZQSD (<kbd>Shift</kbd> to sprint or gallop).<br>
+       <strong>Mount / Dismount (Vélo &amp; Âne):</strong> Press <kbd>F</kbd> or click the mount.<br>
+       <strong>Bicycle Bell / Donkey Call:</strong> Press <kbd>B</kbd> to ring bell 🔔, <kbd>H</kbd> to bray 🫏.<br>
+       <strong>Enter doors:</strong> Press <kbd>E</kbd> or click the door sign.<br>
+       <strong>Day / Night:</strong> Click the sun/moon button to watch the sunset.</p>
+    <div class="actions"><button class="btn" id="startBtn">Enter the Village 🛖</button></div>
+  </div>
+</div>
+
+<!-- Hut interior modal -->
+<div class="overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="sheet">
+    <button class="x" id="closeBtn" aria-label="Close and go back outside">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* =====================================================
+   0. HELPERS
+===================================================== */
+const $ = s => document.querySelector(s);
+const root = document.documentElement;
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const lerp = (a,b,t) => a + (b-a)*t;
+const smooth = (a,b,x) => { const t = clamp((x-a)/(b-a),0,1); return t*t*(3-2*t); };
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const rand = rng(235);
+const rr = (a,b) => a + rand()*(b-a);
+const coarse = matchMedia('(pointer:coarse)').matches;
+
+const W = 2400, H = 2150;
+const viewport = $('#viewport'), world = $('#world'), objects = $('#objects'), ground = $('#ground');
+ground.setAttribute('width', W); ground.setAttribute('height', H); ground.setAttribute('viewBox', `0 0 ${W} ${H}`);
+world.style.width = W + 'px'; world.style.height = H + 'px';
+
+/* =====================================================
+   1. WORLD DATA
+===================================================== */
+const HUTS = [
+  { key:'about',    x:700,  y:560,  type:'round',   sign:['Hut I','About me'],        label:'About',    name:'the Hut of Wisdom',  blurb:'Who I am and how I work', col:[-115,-70,230,70] },
+  { key:'workshop', x:1650, y:900,  type:'forge',   sign:['Hut II','The Workshop'],   label:'Projects', name:'the Workshop',       blurb:'7 projects built so far', col:[-120,-70,240,70] },
+  { key:'skills',   x:700,  y:1280, type:'granary', sign:['Hut III','The Granary'],   label:'Skills',   name:'the Granary',        blurb:'My tools and skills',      col:[-110,-60,220,60] },
+  { key:'school',   x:1650, y:1620, type:'school',  sign:['Hut IV','The School'],     label:'Education',name:'the School',         blurb:'Where I study',            col:[-115,-70,230,70] },
+  { key:'contact',  x:1150, y:1880, type:'tree',    sign:['Fireside','Palaver Tree'], label:'Contact',  name:'the Palaver Tree',   blurb:'Come and say hello',       col:[-48,-60,96,60] }
+];
+const SPAWN = { x:1200, y:270 };
+const MAIN_PATH = [[1200,170],[1200,340],[960,500],[700,660],[860,820],[1250,900],[1650,1000],[1500,1130],[1150,1230],[700,1380],[900,1500],[1300,1560],[1650,1720],[1500,1850],[1150,1980]];
+const POND = { cx:1960, cy:430, rx:175, ry:95 };
+const WELL = { x:390, y:940 };
+const BRANCHES = [ [[1200,340],[1450,395],[1730,470]], [[700,660],[540,790],[430,900]] ];
+
+function smoothPath(pts){
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||p2;
+    d += ` C${p1[0]+(p2[0]-p0[0])/6},${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6},${p2[1]-(p3[1]-p1[1])/6} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+
+/* =====================================================
+   2. GROUND (grass, savanna, pond, dirt paths)
+===================================================== */
+let g = `<defs>
+  <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86b45a"/><stop offset=".5" stop-color="#78a84f"/><stop offset="1" stop-color="#6c9a47"/></linearGradient>
+  <pattern id="rows" width="26" height="26" patternUnits="userSpaceOnUse"><rect width="26" height="26" fill="#8a6a3a"/><rect y="0" width="26" height="12" fill="#5f9b3c"/><path d="M4,6 q3,-5 6,0 M14,6 q3,-5 6,0" stroke="#8cd05a" stroke-width="2" fill="none"/></pattern>
+</defs>
+<rect width="${W}" height="${H}" fill="url(#gr)"/>`;
+for(let i=0;i<110;i++){
+  const c = rand()<.5 ? '#9cc767' : '#5d8f3f';
+  g += `<ellipse cx="${rr(0,W)}" cy="${rr(0,H)}" rx="${rr(60,200)}" ry="${rr(30,100)}" fill="${c}" opacity="${rr(.1,.22)}"/>`;
+}
+for(let i=0;i<650;i++){
+  const x=rr(0,W), y=rr(0,H);
+  g += `<path d="M${x},${y} l-3,-9 M${x},${y} l0,-11 M${x},${y} l3,-9" stroke="${rand()<.5?'#5a8c3b':'#9fcf6e'}" stroke-width="1.8" stroke-linecap="round" opacity=".75"/>`;
+}
+const FLOWER = ['#f4d03f','#ffffff','#e8618c','#f0883e','#b58cf0'];
+for(let i=0;i<190;i++){
+  const x=rr(20,W-20), y=rr(20,H-20), c=FLOWER[(rand()*FLOWER.length)|0];
+  g += `<circle cx="${x}" cy="${y}" r="3.2" fill="${c}"/><circle cx="${x}" cy="${y}" r="1.2" fill="#c47b1c"/>`;
+}
+// crop field
+g += `<rect x="1850" y="1130" width="420" height="270" rx="16" fill="url(#rows)" stroke="#6b4a28" stroke-width="4"/>`;
+// pond
+g += `<ellipse cx="${POND.cx}" cy="${POND.cy+8}" rx="${POND.rx+14}" ry="${POND.ry+12}" fill="#b9a36f"/>
+<ellipse cx="${POND.cx}" cy="${POND.cy}" rx="${POND.rx}" ry="${POND.ry}" fill="#4f9bc2"/>
+<ellipse cx="${POND.cx-20}" cy="${POND.cy-14}" rx="${POND.rx*.7}" ry="${POND.ry*.6}" fill="#6bb6d8" opacity=".7"/>
+<ellipse class="ripple" cx="${POND.cx+40}" cy="${POND.cy+10}" rx="50" ry="22" fill="none" stroke="#fff" stroke-width="2" opacity=".5"><animate attributeName="rx" values="20;70" dur="4s" repeatCount="indefinite"/><animate attributeName="ry" values="9;32" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".6;0" dur="4s" repeatCount="indefinite"/></ellipse>`;
+for(let i=0;i<7;i++) g += `<ellipse cx="${POND.cx+rr(-110,110)}" cy="${POND.cy+rr(-50,50)}" rx="13" ry="7" fill="#4f9a45"/>`;
+// paths
+const mainD = smoothPath(MAIN_PATH);
+g += `<g id="paths" fill="none" stroke-linecap="round" stroke-linejoin="round">`;
+BRANCHES.forEach(b => { const d = smoothPath(b);
+  g += `<path d="${d}" stroke="#a9693f" stroke-width="52"/><path d="${d}" stroke="#cd9566" stroke-width="40"/>`; });
+g += `<path id="mainPath" d="${mainD}" stroke="#a9693f" stroke-width="82"/>
+<path d="${mainD}" stroke="#cd9566" stroke-width="68"/>
+<path d="${mainD}" stroke="#dcaa7b" stroke-width="34" opacity=".55"/>
+<path d="${mainD}" stroke="#b9794c" stroke-width="3" stroke-dasharray="3 22" opacity=".6"/></g>`;
+ground.innerHTML = g;
+
+// sample path
+const mp = $('#mainPath'), total = mp.getTotalLength();
+const S = [];
+for(let l=0; l<=total; l += 12){ const p = mp.getPointAtLength(l); S.push([p.x,p.y]); }
+function distToPath(x,y){ let m = 1e9; for(const s of S){ const d = (s[0]-x)**2 + (s[1]-y)**2; if(d<m) m=d; } return Math.sqrt(m); }
+function nearestSample(x,y){ let m=1e18,k=0; S.forEach((s,i)=>{ const d=(s[0]-x)**2+(s[1]-y)**2; if(d<m){m=d;k=i;} }); return k; }
+
+// pebbles along path edge
+let peb = '';
+for(let i=0;i<S.length;i+=2){
+  const a = rand()*6.28, r = rr(36,50);
+  peb += `<ellipse cx="${S[i][0]+Math.cos(a)*r}" cy="${S[i][1]+Math.sin(a)*r}" rx="${rr(2,5)}" ry="${rr(1.5,3.5)}" fill="${rand()<.5?'#9a8f80':'#c4b8a6'}"/>`;
+}
+ground.insertAdjacentHTML('beforeend', peb);
+
+/* =====================================================
+   3. OBJECTS (huts, signs, trees, gate…)
+===================================================== */
+const colliders = [];
+const lights = [];
+function addObj(html, x, y, w, h, cls = '', z = y){
+  const d = document.createElement('div');
+  d.className = 'obj ' + cls; d.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:${Math.round(z)}`;
+  d.innerHTML = html; objects.appendChild(d); return d;
+}
+
+const C = { thatch:'#b9923f', thatchD:'#8a6a2c', clay:'#cf8157', clayD:'#9c5a35', wood:'#4b2d19', stone:'#8f8a7e' };
+const SH = '<ellipse cx="160" cy="279" rx="135" ry="13" fill="rgba(0,0,0,.25)"/>';
+const rays = (cx,top,y,xs) => xs.map(x => `M${cx},${top} L${x},${y}`).join(' ');
+
+function hutSVG(type){
+  if(type==='round') return `<svg viewBox="0 0 320 290">${SH}
+    <path d="M62,150 L258,150 L250,276 Q160,290 70,276Z" fill="${C.clay}" stroke="${C.clayD}" stroke-width="3"/>
+    <path d="M80,192 Q160,203 240,192 M78,230 Q160,242 242,230" stroke="${C.clayD}" stroke-opacity=".35" stroke-width="2" fill="none"/>
+    <path d="M126,278 L126,212 Q160,182 194,212 L194,278Z" fill="${C.wood}"/><circle cx="184" cy="246" r="3" fill="#e8a41c"/>
+    <rect x="214" y="184" width="28" height="28" rx="7" fill="#2b1a10"/><rect class="lit" x="217" y="187" width="22" height="22" rx="5" fill="#ffd36a"/>
+    <path d="M84,262 q-12,-4 -10,-20 q2,-14 14,-14 q12,0 14,14 q2,16 -10,20Z" fill="#a24b2c"/>
+    <path d="M160,24 L26,162 Q160,182 294,162Z" fill="${C.thatch}" stroke="${C.thatchD}" stroke-width="4" stroke-linejoin="round"/>
+    <path d="${rays(160,24,168,[70,115,160,205,250])}" stroke="${C.thatchD}" stroke-opacity=".55" stroke-width="2.5" fill="none"/>
+    <path d="M60,160 Q160,176 260,160" stroke="${C.thatchD}" stroke-opacity=".5" stroke-width="3" fill="none"/>
+    <circle cx="160" cy="20" r="6" fill="${C.thatchD}"/></svg>`;
+  if(type==='forge') return `<svg viewBox="0 0 320 290">${SH}
+    <rect x="40" y="130" width="240" height="146" rx="10" fill="#c27a52" stroke="${C.clayD}" stroke-width="3"/>
+    <path d="M52,190 H268 M52,232 H268" stroke="${C.clayD}" stroke-opacity=".3" stroke-width="2"/>
+    <rect x="228" y="58" width="40" height="110" fill="${C.stone}" stroke="#6b665c" stroke-width="3"/>
+    <path d="M118,278 L118,196 Q160,170 202,196 L202,278Z" fill="#241408"/>
+    <path class="lit" d="M128,278 L128,204 Q160,182 192,204 L192,278Z" fill="#ff8a2a"/>
+    <path d="M68,270 h44 l-7,-15 h-30 z" fill="#3b3b3f"/>
+    <path d="M62,170 L62,216" stroke="${C.wood}" stroke-width="4"/><rect x="53" y="166" width="18" height="10" rx="2" fill="#585b60"/>
+    <path d="M232,176 L232,214" stroke="${C.wood}" stroke-width="4"/><path d="M224,214 h16" stroke="#585b60" stroke-width="5"/>
+    <path d="M20,142 L160,50 L300,142Z" fill="#8c4a30" stroke="#5e2f1e" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M100,98 L82,142 M140,74 L126,142 M180,74 L194,142 M220,98 L238,142" stroke="#5e2f1e" stroke-opacity=".5" stroke-width="3"/></svg>`;
+  if(type==='granary') return `<svg viewBox="0 0 320 290">${SH}
+    <rect x="84" y="208" width="10" height="70" fill="${C.wood}"/><rect x="226" y="208" width="10" height="70" fill="${C.wood}"/>
+    <rect x="118" y="208" width="9" height="70" fill="#3b2314"/><rect x="193" y="208" width="9" height="70" fill="#3b2314"/>
+    <path d="M66,116 Q54,196 84,210 L236,210 Q266,196 254,116Z" fill="#c9a24a" stroke="#8f6f26" stroke-width="3"/>
+    <path d="M62,140 Q160,150 258,140 M60,166 Q160,176 260,166 M64,192 Q160,202 256,192 M100,120 L96,206 M130,124 L128,208 M190,124 L192,208 M220,120 L224,206" stroke="#8f6f26" stroke-opacity=".5" stroke-width="2.5" fill="none"/>
+    <rect x="140" y="148" width="40" height="54" rx="6" fill="#2d1b10"/>
+    <rect x="124" y="204" width="72" height="9" rx="2" fill="${C.wood}"/>
+    <path d="M140,213 L140,278 M180,213 L180,278 M140,228 H180 M140,244 H180 M140,260 H180" stroke="#6b4429" stroke-width="5" stroke-linecap="round"/>
+    <path d="M160,18 L36,122 Q160,142 284,122Z" fill="#c9b050" stroke="#8a7a30" stroke-width="4" stroke-linejoin="round"/>
+    <path d="${rays(160,18,130,[70,115,160,205,250])}" stroke="#8a7a30" stroke-opacity=".55" stroke-width="2.5" fill="none"/></svg>`;
+  if(type==='school') return `<svg viewBox="0 0 320 290">${SH}
+    <rect x="50" y="150" width="220" height="126" fill="#d9a06f" stroke="${C.clayD}" stroke-width="3"/>
+    <path d="M50,200 H270" stroke="${C.clayD}" stroke-opacity=".25" stroke-width="2"/>
+    <path d="M138,278 L138,214 Q160,196 182,214 L182,278Z" fill="${C.wood}"/>
+    <rect x="70" y="186" width="42" height="36" rx="4" fill="#2b1a10"/><rect class="lit" x="74" y="190" width="34" height="28" fill="#ffd36a"/>
+    <rect x="208" y="186" width="42" height="36" rx="4" fill="#2b1a10"/><rect class="lit" x="212" y="190" width="34" height="28" fill="#ffd36a"/>
+    <path d="M91,190 V218 M74,204 H108 M229,190 V218 M212,204 H246" stroke="#2b1a10" stroke-width="2"/>
+    <rect x="146" y="164" width="28" height="18" rx="2" fill="#b83a26"/><path d="M160,164 v18" stroke="#f4ead0" stroke-width="2"/>
+    <rect x="126" y="270" width="68" height="8" fill="#b88a5e"/>
+    <path d="M150,72 L150,42 L170,42 L170,72" stroke="${C.wood}" stroke-width="4" fill="none"/><path d="M154,60 q0,-15 6,-15 q6,0 6,15z" fill="#e8a41c"/>
+    <path d="M24,160 L160,70 L296,160Z" fill="#a1583a" stroke="#6e3822" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M100,112 L84,158 M140,86 L128,158 M180,86 L192,158 M220,112 L236,158" stroke="#6e3822" stroke-opacity=".5" stroke-width="3"/></svg>`;
+  /* tree: palaver tree + campfire */
+  return `<svg viewBox="0 0 320 290"><ellipse cx="160" cy="279" rx="150" ry="13" fill="rgba(0,0,0,.25)"/>
+    <rect x="58" y="248" width="62" height="20" rx="9" fill="#6b4429"/><rect x="200" y="248" width="62" height="20" rx="9" fill="#6b4429"/>
+    <path d="M138,272 Q146,200 128,150 Q148,170 160,160 Q172,170 192,150 Q174,200 182,272Z" fill="#5a3820"/>
+    <circle cx="160" cy="84" r="70" fill="#3f7f3f"/><circle cx="98" cy="112" r="54" fill="#3a7a3c"/><circle cx="224" cy="110" r="56" fill="#3a7a3c"/>
+    <circle cx="130" cy="62" r="50" fill="#4f9a49"/><circle cx="196" cy="58" r="48" fill="#58a652"/><circle cx="160" cy="34" r="30" fill="#62b25a"/>
+    <ellipse cx="160" cy="268" rx="36" ry="10" fill="#7d776c"/><ellipse cx="160" cy="266" rx="28" ry="7" fill="#3b2c22"/>
+    <circle class="lit" cx="160" cy="250" r="26" fill="#ff9a2e" opacity=".25"/>
+    <g class="flames"><path d="M144,266 Q148,238 160,222 Q172,238 176,266Z" fill="#f59e0b"/><path d="M152,266 Q158,246 160,236 Q164,248 168,266Z" fill="#ef4444"/></g></svg>`;
+}
+
+// gate
+(() => {
+  const x = 1200, y = 200;
+  addObj(`<div class="post p1"></div><div class="post p2"></div><div class="beam"><div><small>Welcome, traveler</small>Le Sage's Village</div></div>`, x, y, 300, 170, 'gate');
+  colliders.push({x:x-130,y:y-28,w:28,h:28},{x:x+102,y:y-28,w:28,h:28});
+  lights.push({x:x-118,y:y-120,r:120,warm:.7},{x:x+118,y:y-120,r:120,warm:.7});
+})();
+
+// huts + signs
+const hutEls = {}, signEls = {};
+HUTS.forEach((h) => {
+  const el = addObj(hutSVG(h.type), h.x, h.y, 320, 290, 'hut');
+  el.dataset.key = h.key; el.setAttribute('role','button'); el.setAttribute('aria-label', 'Enter ' + h.name);
+  if(h.type==='forge') el.insertAdjacentHTML('beforeend', [0,1.3,2.6].map(d => `<span class="smoke" style="left:240px;top:56px;animation-delay:${d}s"></span>`).join(''));
+  hutEls[h.key] = el;
+  colliders.push({x:h.x+h.col[0], y:h.y+h.col[1], w:h.col[2], h:h.col[3]});
+
+  const sy = h.y + 56;
+  const s = addObj(`<div class="board"><span class="lantern"></span><i>${h.sign[0]}</i><b>${h.sign[1]}</b></div><div class="pole"></div>`, h.x, sy, 140, 80, 'sign', sy);
+  s.dataset.key = h.key; signEls[h.key] = s;
+  colliders.push({x:h.x-8, y:sy-12, w:16, h:12});
+
+  lights.push({x:h.x, y:h.y-70, r:h.type==='tree'?330:170, warm:h.type==='tree'?.9:.6, flick:h.type==='tree'||h.type==='forge'});
+  lights.push({x:h.x+56, y:sy-62, r:120, warm:.75});
+  h.front = { x:h.x, y:h.y+104 };
+  h.talk  = { x:h.x, y:h.y+62 };
+});
+
+// well
+addObj(`<svg viewBox="0 0 70 80"><ellipse cx="35" cy="76" rx="30" ry="6" fill="rgba(0,0,0,.25)"/><rect x="10" y="40" width="50" height="34" rx="6" fill="#8f8a7e" stroke="#6b665c" stroke-width="2"/><path d="M14,48 h42 M14,58 h42 M24,40 v34 M46,40 v34" stroke="#6b665c" stroke-opacity=".5"/><ellipse cx="35" cy="40" rx="25" ry="8" fill="#2c6d8f"/><rect x="8" y="10" width="6" height="40" fill="#4b2d19"/><rect x="56" y="10" width="6" height="40" fill="#4b2d19"/><path d="M4,14 L35,0 L66,14Z" fill="#b9923f" stroke="#8a6a2c" stroke-width="2"/><path d="M35,10 v22" stroke="#4b2d19" stroke-width="2"/><rect x="31" y="30" width="8" height="8" rx="2" fill="#7c5a2e"/></svg>`, WELL.x, WELL.y, 70, 80);
+colliders.push({x:WELL.x-28,y:WELL.y-22,w:56,h:22});
+
+// pond collider (ellipse)
+colliders.push({e:1, cx:POND.cx, cy:POND.cy, rx:POND.rx-6, ry:POND.ry-4});
+
+// trees
+const TREES = {
+  acacia: s => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="34" ry="6" fill="rgba(0,0,0,.22)"/><path d="M62,166 Q66,118 52,84 L60,80 Q72,108 76,118 Q82,100 94,76 L102,82 Q84,112 80,166Z" fill="#5a3b22"/><ellipse cx="70" cy="62" rx="64" ry="22" fill="#4f8f3d"/><ellipse cx="46" cy="52" rx="38" ry="15" fill="#5fa648"/><ellipse cx="98" cy="50" rx="34" ry="14" fill="#69b251"/></svg>`,
+  round:  s => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="34" ry="6" fill="rgba(0,0,0,.22)"/><rect x="63" y="100" width="14" height="66" fill="#5a3b22"/><circle cx="70" cy="70" r="46" fill="#3f8a45"/><circle cx="46" cy="84" r="30" fill="#4a9a4f"/><circle cx="96" cy="80" r="32" fill="#4a9a4f"/><circle cx="68" cy="48" r="26" fill="#5aab58"/></svg>`,
+  banana: s => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="28" ry="5" fill="rgba(0,0,0,.2)"/><rect x="65" y="80" width="10" height="86" rx="4" fill="#7c6a2a"/><path d="M70,84 Q20,60 8,104 Q40,82 70,94Z" fill="#5fb04a"/><path d="M70,84 Q120,60 132,104 Q100,82 70,94Z" fill="#4fa042"/><path d="M70,80 Q50,30 22,34 Q50,48 70,90Z" fill="#6cbd55"/><path d="M70,80 Q92,30 118,34 Q90,48 70,90Z" fill="#5aae48"/><path d="M70,78 Q66,20 70,12 Q84,40 72,88Z" fill="#74c75c"/><ellipse cx="78" cy="96" rx="7" ry="11" fill="#e8c43a"/></svg>`
+};
+const treeKeys = Object.keys(TREES), placed = [];
+function freeSpot(x,y,pad=0){
+  if(distToPath(x,y) < 110+pad) return false;
+  if(((x-POND.cx)/(POND.rx+60))**2 + ((y-POND.cy)/(POND.ry+60))**2 < 1) return false;
+  if(x>1820 && x<2300 && y>1100 && y<1430) return false;
+  if(Math.hypot(x-WELL.x,y-WELL.y) < 110) return false;
+  if(Math.hypot(x-SPAWN.x,y-SPAWN.y) < 200) return false;
+  for(const h of HUTS) if(Math.abs(x-h.x) < 210 && y > h.y-300 && y < h.y+150) return false;
+  return true;
+}
+let tries = 0;
+while(placed.length < 95 && tries++ < 4000){
+  const x = rr(50,W-50), y = rr(150,H-20);
+  if(!freeSpot(x,y)) continue;
+  if(placed.some(p => Math.hypot(p[0]-x,p[1]-y) < 85)) continue;
+  placed.push([x,y]);
+  const k = treeKeys[(rand()*treeKeys.length)|0], sc = rr(.8,1.3);
+  addObj(TREES[k](), x, y, 140*sc, 170*sc);
+  colliders.push({x:x-9*sc, y:y-11*sc, w:18*sc, h:11*sc});
+}
+// bushes & rocks
+for(let i=0,t=0;i<60 && t<2000;t++){
+  const x=rr(40,W-40), y=rr(150,H-20); if(!freeSpot(x,y,-30)) continue; i++;
+  if(rand()<.7) addObj(`<svg viewBox="0 0 60 40"><ellipse cx="30" cy="36" rx="26" ry="4" fill="rgba(0,0,0,.18)"/><circle cx="18" cy="26" r="13" fill="#4a8f45"/><circle cx="34" cy="22" r="15" fill="#58a152"/><circle cx="44" cy="29" r="10" fill="#4a8f45"/></svg>`, x, y, 60, 40);
+  else { addObj(`<svg viewBox="0 0 50 34"><ellipse cx="25" cy="31" rx="22" ry="3.5" fill="rgba(0,0,0,.2)"/><path d="M4,30 Q6,10 22,6 Q42,6 46,30Z" fill="#9b968b" stroke="#6b665c" stroke-width="2"/></svg>`, x, y, 50, 34); colliders.push({x:x-20,y:y-12,w:40,h:12}); }
+}
+
+// fireflies
+for(let i=0;i<34;i++){
+  const f = document.createElement('div'); f.className='firefly';
+  f.style.cssText = `left:${rr(60,W-60)}px;top:${rr(200,H-60)}px;z-index:9000;--dx:${rr(-60,60)}px;--dy:${rr(-50,50)}px;--dur:${rr(3,7)}s;animation-delay:${rr(-5,0)}s`;
+  objects.appendChild(f);
+}
+
+/* =====================================================
+   4. MOUNTS (BICYCLE & DONKEY SVG & DATA)
+===================================================== */
+function parkedBikeSVG(){
+  return `<svg viewBox="0 0 70 54">
+    <ellipse cx="35" cy="50" rx="30" ry="4" fill="rgba(0,0,0,.22)"/>
+    <!-- Wheels -->
+    <circle cx="16" cy="36" r="13" fill="none" stroke="#2a2a2e" stroke-width="3"/>
+    <circle cx="16" cy="36" r="11" fill="none" stroke="#8a8a92" stroke-width="1.2"/>
+    <circle cx="54" cy="36" r="13" fill="none" stroke="#2a2a2e" stroke-width="3"/>
+    <circle cx="54" cy="36" r="11" fill="none" stroke="#8a8a92" stroke-width="1.2"/>
+    <!-- Yellow / Terracotta Frame -->
+    <path d="M16,36 L34,36 L48,22 L30,22 Z" stroke="#e0553d" stroke-width="3.5" stroke-linejoin="round" fill="none"/>
+    <path d="M34,36 L48,16 M48,22 L54,36" stroke="#e0553d" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- Handlebars & Seat -->
+    <path d="M46,14 L50,14 M48,14 L48,18" stroke="#1f1f23" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M26,18 L34,18" stroke="#1f1f23" stroke-width="4" stroke-linecap="round"/>
+    <line x1="30" y1="22" x2="30" y2="18" stroke="#8a8a92" stroke-width="3"/>
+    <!-- Kickstand -->
+    <line x1="34" y1="36" x2="30" y2="48" stroke="#2a2a2e" stroke-width="2.5"/>
+  </svg>`;
+}
+
+function parkedDonkeySVG(){
+  return `<svg viewBox="0 0 76 68">
+    <ellipse cx="38" cy="62" rx="30" ry="5" fill="rgba(0,0,0,.22)"/>
+    <!-- Legs -->
+    <rect x="18" y="38" width="4.5" height="24" rx="2" fill="#756b62"/>
+    <rect x="26" y="38" width="4.5" height="24" rx="2" fill="#5e554d"/>
+    <rect x="46" y="38" width="4.5" height="24" rx="2" fill="#756b62"/>
+    <rect x="54" y="38" width="4.5" height="24" rx="2" fill="#5e554d"/>
+    <!-- Donkey Body -->
+    <ellipse cx="36" cy="34" rx="22" ry="13" fill="#8f8479"/>
+    <ellipse cx="36" cy="35" rx="16" ry="9" fill="#a4998e"/>
+    <!-- Saddle / Pack Blanket -->
+    <rect x="28" y="22" width="16" height="18" rx="3" fill="#c05824"/>
+    <path d="M28,26 h16 M28,34 h16" stroke="#f0b429" stroke-width="2"/>
+    <!-- Neck & Head with Long Ears -->
+    <path d="M48,32 L58,16 L66,22 L56,38 Z" fill="#8f8479"/>
+    <circle cx="62" cy="20" r="7" fill="#8f8479"/>
+    <ellipse cx="68" cy="24" rx="5" ry="4" fill="#d9cec1"/>
+    <!-- Long Ears -->
+    <path d="M56,16 L54,2 L60,14" fill="#6e645a"/>
+    <path d="M60,16 L62,2 L65,14" fill="#8f8479"/>
+    <circle cx="62" cy="18" r="1.5" fill="#1c1513"/>
+    <!-- Tail with Tuft -->
+    <path d="M14,32 Q10,44 12,50" stroke="#5e554d" stroke-width="2.5" fill="none"/>
+    <circle cx="12" cy="50" r="2.5" fill="#3a342e"/>
+  </svg>`;
+}
+
+// Interactive Mounts array in the village
+const MOUNTS = [
+  { id:'bike_workshop', type:'bike', name:'Village Bicycle', icon:'🚲', x:1520, y:990, speed:310, w:70, h:54 },
+  { id:'bike_school',   type:'bike', name:'Rwandan Blue Bike', icon:'🚲', x:1520, y:1710, speed:310, w:70, h:54 },
+  { id:'donkey_well',   type:'donkey', name:'Kind Donkey', icon:'🫏', x:490, y:970, speed:240, w:76, h:68 },
+  { id:'donkey_granary',type:'donkey', name:'Village Donkey', icon:'🫏', x:840, y:1350, speed:240, w:76, h:68 }
+];
+
+const mountEls = {};
+MOUNTS.forEach(m => {
+  const el = addObj(m.type==='bike' ? parkedBikeSVG() : parkedDonkeySVG(), m.x, m.y, m.w, m.h, 'mount-obj');
+  el.dataset.mountId = m.id;
+  el.setAttribute('role', 'button');
+  el.setAttribute('aria-label', `Mount ${m.name}`);
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if(P.mount) dismountPlayer();
+    else mountPlayer(m);
+  });
+  mountEls[m.id] = el;
+});
+
+/* =====================================================
+   5. CHARACTER SPRITES (ON FOOT & REALISTIC MOUNT SPRITES)
+===================================================== */
+function sprite(o){
+  const {skin,hair,top,stripe,bottom,bag,wrap,dress} = o, dk = '#1a0f0a';
+  const legsFB = `<g class="legL"><rect x="22" y="${dress?68:58}" width="7" height="${dress?16:26}" rx="3" fill="${skin}"/><ellipse cx="25.5" cy="85" rx="6" ry="3" fill="#2a1a10"/></g>
+    <g class="legR"><rect x="31" y="${dress?68:58}" width="7" height="${dress?16:26}" rx="3" fill="${skin}"/><ellipse cx="34.5" cy="85" rx="6" ry="3" fill="#2a1a10"/></g>`;
+  const bodyFB = dress
+    ? `<path d="M18,34 Q30,28 42,34 L50,76 Q30,83 10,76Z" fill="${top}"/><path d="M12,70 Q30,77 48,70 L50,76 Q30,83 10,76Z" fill="${stripe}"/>`
+    : `<rect x="20" y="52" width="20" height="13" rx="4" fill="${bottom}"/><path d="M19,34 Q30,28 41,34 L42,56 Q30,60 18,56Z" fill="${top}"/><path d="M18.4,50 Q30,54 41.6,50 L42,56 Q30,60 18,56Z" fill="${stripe}"/>`;
+  const armsFB = `<g class="armL"><rect x="12" y="34" width="6" height="22" rx="3" fill="${skin}"/></g><g class="armR"><rect x="42" y="34" width="6" height="22" rx="3" fill="${skin}"/></g>`;
+  const hairFront = wrap
+    ? `<path d="M17.5,22 Q16,5 30,5 Q44,5 42.5,22 Q38,13 30,14 Q22,13 17.5,22Z" fill="${hair}"/><path d="M16,17 Q17,1 30,1 Q43,1 44,17 Q30,9 16,17Z" fill="${wrap}"/><circle cx="42" cy="7" r="4.5" fill="${wrap}"/>`
+    : `<path d="M17.5,22 Q16,6 30,6 Q44,6 42.5,22 Q38,13 30,14 Q22,13 17.5,22Z" fill="${hair}"/><circle cx="20" cy="12" r="4.5" fill="${hair}"/><circle cx="26" cy="8" r="5" fill="${hair}"/><circle cx="34" cy="8" r="5" fill="${hair}"/><circle cx="40" cy="12" r="4.5" fill="${hair}"/>`;
+  const hairBack = `<circle cx="30" cy="21" r="13" fill="${hair}"/>` + (wrap ? `<path d="M16,17 Q17,1 30,1 Q43,1 44,17 Q30,11 16,17Z" fill="${wrap}"/><circle cx="42" cy="7" r="4.5" fill="${wrap}"/>` : '');
+  const fb = `<g class="v v-fb">${legsFB}${bodyFB}${armsFB}
+    <rect class="back" x="20" y="36" width="20" height="21" rx="5" fill="${bag}"/><path class="back" d="M20,43 Q30,48 40,43" stroke="rgba(0,0,0,.25)" fill="none" stroke-width="1.5"/>
+    <circle cx="30" cy="22" r="12" fill="${skin}"/>
+    <g class="front"><path d="M21,33 L39,57" stroke="${bag}" stroke-width="3.2" stroke-linecap="round"/>
+      <circle cx="25" cy="23" r="1.7" fill="${dk}"/><circle cx="35" cy="23" r="1.7" fill="${dk}"/><path d="M26,28.5 Q30,31.5 34,28.5" stroke="${dk}" stroke-width="1.4" fill="none" stroke-linecap="round"/>${hairFront}</g>
+    <g class="back">${hairBack}</g></g>`;
+  const bodySide = dress
+    ? `<path d="M21,34 Q30,29 39,34 L46,76 Q30,82 14,76Z" fill="${top}"/><path d="M15,70 Q30,76 45,70 L46,76 Q30,82 14,76Z" fill="${stripe}"/>`
+    : `<rect x="22" y="52" width="17" height="13" rx="4" fill="${bottom}"/><path d="M22,34 Q30,29 38,34 L39,56 Q30,60 21,56Z" fill="${top}"/><path d="M21.4,50 Q30,54 38.6,50 L39,56 Q30,60 21,56Z" fill="${stripe}"/>`;
+  const side = `<g class="v v-side">
+    <g class="legL"><rect x="25" y="${dress?68:58}" width="7" height="${dress?16:26}" rx="3" fill="${skin}" opacity=".85"/><ellipse cx="29" cy="85" rx="6" ry="3" fill="#2a1a10"/></g>
+    <g class="legR"><rect x="28" y="${dress?68:58}" width="7" height="${dress?16:26}" rx="3" fill="${skin}"/><ellipse cx="32" cy="85" rx="6" ry="3" fill="#2a1a10"/></g>
+    <rect x="13" y="37" width="12" height="20" rx="4" fill="${bag}"/>${bodySide}
+    <g class="armR"><rect x="27" y="34" width="6" height="22" rx="3" fill="${skin}"/></g>
+    <circle cx="31" cy="22" r="12" fill="${skin}"/>
+    <path d="M19,24 Q17,7 31,7 Q41,7 43,17 Q36,12 30,16 Q24,18 19,24Z" fill="${hair}"/><circle cx="22" cy="14" r="5.5" fill="${hair}"/><circle cx="28" cy="9" r="5.5" fill="${hair}"/><circle cx="21" cy="21" r="5" fill="${hair}"/>
+    ${wrap ? `<path d="M17,16 Q18,2 31,2 Q44,3 44,15 Q31,8 17,16Z" fill="${wrap}"/><circle cx="21" cy="8" r="4.5" fill="${wrap}"/>` : ''}
+    <circle cx="38" cy="22.5" r="1.7" fill="${dk}"/><path d="M43,23 q2.2,2 0,3.6" stroke="${dk}" stroke-width="1.2" fill="none"/><path d="M36,28 Q39,30 41,28" stroke="${dk}" stroke-width="1.3" fill="none" stroke-linecap="round"/></g>`;
+  return `<svg class="sp" viewBox="0 0 60 90"><ellipse cx="30" cy="87" rx="16" ry="4" fill="rgba(0,0,0,.28)"/>${fb}${side}</svg>`;
+}
+
+/* Realistic Mounted Sprite: Boy on Bicycle */
+function spriteMountedBike(){
+  return `<svg class="sp" viewBox="0 0 78 96">
+    <ellipse cx="39" cy="91" rx="34" ry="4.5" fill="rgba(0,0,0,.26)"/>
+    <!-- Bicycle Wheels with Rotating Spokes -->
+    <g class="wheel" style="transform-origin: 18px 74px;">
+      <circle cx="18" cy="74" r="14" fill="none" stroke="#252528" stroke-width="3"/>
+      <circle cx="18" cy="74" r="12" fill="none" stroke="#8a8a92" stroke-width="1"/>
+      <line x1="18" y1="60" x2="18" y2="88" stroke="#8a8a92" stroke-width="1.2"/>
+      <line x1="4" y1="74" x2="32" y2="74" stroke="#8a8a92" stroke-width="1.2"/>
+    </g>
+    <g class="wheel" style="transform-origin: 60px 74px;">
+      <circle cx="60" cy="74" r="14" fill="none" stroke="#252528" stroke-width="3"/>
+      <circle cx="60" cy="74" r="12" fill="none" stroke="#8a8a92" stroke-width="1"/>
+      <line x1="60" y1="60" x2="60" y2="88" stroke="#8a8a92" stroke-width="1.2"/>
+      <line x1="46" y1="74" x2="74" y2="74" stroke="#8a8a92" stroke-width="1.2"/>
+    </g>
+    <!-- Frame & Chain -->
+    <path d="M18,74 L38,74 L54,58 L34,58 Z" stroke="#e0553d" stroke-width="3.5" stroke-linejoin="round" fill="none"/>
+    <path d="M38,74 L54,48 M54,58 L60,74" stroke="#e0553d" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M50,46 L58,46" stroke="#1f1f23" stroke-width="4.5" stroke-linecap="round"/>
+    <!-- Boy Body Pedaling -->
+    <g class="pedalLeg" style="transform-origin: 38px 68px;">
+      <rect x="34" y="56" width="7.5" height="18" rx="3.5" fill="#7a4a2d"/>
+      <circle cx="37.5" cy="74" r="3.5" fill="#2a1a10"/>
+      <line x1="38" y1="68" x2="44" y2="74" stroke="#444" stroke-width="2.5"/>
+    </g>
+    <rect x="27" y="44" width="16" height="13" rx="4" fill="#2f5d8a"/>
+    <path d="M26,26 Q36,21 46,26 L48,47 Q36,51 24,47Z" fill="#c8452d"/>
+    <rect x="18" y="28" width="10" height="16" rx="3" fill="#3f7a45"/>
+    <path d="M42,32 L54,46" stroke="#7a4a2d" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="38" cy="16" r="11" fill="#7a4a2d"/>
+    <circle cx="38" cy="14" r="13" fill="#16100d"/>
+    <circle cx="38" cy="17" r="11" fill="#7a4a2d"/>
+    <circle cx="43" cy="16" r="1.5" fill="#111"/>
+  </svg>`;
+}
+
+/* Realistic Mounted Sprite: Boy on Trotting Donkey */
+function spriteMountedDonkey(){
+  return `<svg class="sp" viewBox="0 0 90 104">
+    <ellipse cx="45" cy="98" rx="36" ry="4.5" fill="rgba(0,0,0,.26)"/>
+    <!-- Donkey 4-Leg Gait -->
+    <g class="donkeyLegB" style="transform-origin: 24px 68px;">
+      <rect x="20" y="68" width="5.5" height="28" rx="2.5" fill="#756b62"/>
+      <ellipse cx="22.5" cy="95" rx="3.5" ry="2" fill="#3b2011"/>
+    </g>
+    <g class="donkeyLegF" style="transform-origin: 62px 68px;">
+      <rect x="60" y="68" width="5.5" height="28" rx="2.5" fill="#756b62"/>
+      <ellipse cx="62.5" cy="95" rx="3.5" ry="2" fill="#3b2011"/>
+    </g>
+    <ellipse cx="44" cy="64" rx="28" ry="15" fill="#8f8479"/>
+    <!-- Saddle Blanket -->
+    <rect x="34" y="51" width="22" height="19" rx="3" fill="#c05824"/>
+    <path d="M34,55 h22 M34,63 h22" stroke="#f0b429" stroke-width="2"/>
+    <!-- Donkey Head & Long Ears -->
+    <path d="M60,62 L74,42 L82,48 L72,68 Z" fill="#8f8479"/>
+    <circle cx="78" cy="46" r="8.5" fill="#8f8479"/>
+    <path d="M72,42 L70,26 L76,40" fill="#6e645a"/>
+    <path d="M76,42 L78,26 L81,40" fill="#8f8479"/>
+    <circle cx="78" cy="44" r="1.6" fill="#111"/>
+    <!-- Boy Seated Proudly -->
+    <rect x="36" y="44" width="16" height="13" rx="3.5" fill="#2f5d8a"/>
+    <path d="M34,24 Q44,19 54,24 L56,46 Q44,50 32,46Z" fill="#c8452d"/>
+    <rect x="24" y="26" width="11" height="16" rx="3" fill="#3f7a45"/>
+    <path d="M50,30 L66,46" stroke="#7a4a2d" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="44" cy="14" r="11" fill="#7a4a2d"/>
+    <circle cx="44" cy="12" r="13" fill="#16100d"/>
+    <circle cx="44" cy="15" r="11" fill="#7a4a2d"/>
+    <circle cx="49" cy="14" r="1.5" fill="#111"/>
+  </svg>`;
+}
+
+function makeActor(opts){
+  const d = document.createElement('div'); d.className = 'actor'; d.dataset.dir = 'down';
+  d.innerHTML = `<div class="say"></div><div class="bob">${sprite(opts)}</div>`;
+  objects.appendChild(d); return d;
+}
+
+// player state with velocity, inertia & momentum
+const P = {
+  x: SPAWN.x,
+  y: SPAWN.y,
+  vx: 0,
+  vy: 0,
+  dir: 'down',
+  walking: false,
+  sprinting: false,
+  mount: null,
+  leanAngle: 0
+};
+const player = makeActor({skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'});
+const sayPlayer = player.querySelector('.say');
+sayPlayer.classList.add('go'); sayPlayer.setAttribute('role','button');
+
+// villager walking the path
+const mama = makeActor({skin:'#8a5636',hair:'#1a1210',top:'#2f7a5a',stripe:'#f4ead0',wrap:'#e8a41c',bag:'#a85a2a',dress:true});
+const sayMama = mama.querySelector('.say');
+const NPC = { i:60, dir:1, wait:0 };
+
+/* =====================================================
+   6. ANIMALS OF THE VILLAGE (COWS, DOGS, DUCKS, CHICKENS)
+===================================================== */
+function chickenSVG(c){ return `<svg viewBox="0 0 30 30"><ellipse cx="15" cy="28" rx="10" ry="2.5" fill="rgba(0,0,0,.2)"/><g class="bob"><ellipse cx="14" cy="19" rx="9" ry="7" fill="${c}"/><circle cx="21" cy="12" r="5" fill="${c}"/><path d="M20,6 q2,-3 3,0 q1,-2 2,1" fill="#d6372a"/><path d="M25,12 l4,1.5 l-4,1.5z" fill="#f0a020"/><circle cx="22.5" cy="11" r="1" fill="#111"/><path d="M5,17 q-4,-3 -3,-7 q4,2 6,6" fill="${c}"/><path d="M12,26 v-5 M17,26 v-5" stroke="#d98b1c" stroke-width="1.5"/></g></svg>`; }
+function chickSVG(){ return `<svg viewBox="0 0 18 18"><ellipse cx="9" cy="16" rx="6" ry="1.5" fill="rgba(0,0,0,.15)"/><g class="bob"><circle cx="8" cy="10" r="5.5" fill="#ffd34d"/><circle cx="12" cy="7" r="3.5" fill="#ffd34d"/><path d="M15,7 l3,1 l-3,1z" fill="#f0883e"/><circle cx="13" cy="6" r="0.8" fill="#111"/><path d="M7,15 v-3 M10,15 v-3" stroke="#f0883e" stroke-width="1"/></g></svg>`; }
+function goatSVG(){ return `<svg viewBox="0 0 54 44"><ellipse cx="27" cy="42" rx="20" ry="3" fill="rgba(0,0,0,.2)"/><g class="bob"><rect x="12" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="18" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="32" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="38" y="28" width="3" height="13" fill="#6b5a4a"/><ellipse cx="26" cy="26" rx="17" ry="9" fill="#e8dfd0"/><path d="M38,22 L46,10 L52,14 L48,26Z" fill="#e8dfd0"/><path d="M44,10 q0,-7 6,-8 M47,11 q2,-6 7,-5" stroke="#6b5a4a" stroke-width="2" fill="none"/><circle cx="49" cy="15" r="1.2" fill="#111"/><path d="M48,25 q1,6 -1,7" stroke="#e8dfd0" stroke-width="2" fill="none"/><path d="M9,23 q-4,-2 -5,-6" stroke="#e8dfd0" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg>`; }
+function dogSVG(){ return `<svg viewBox="0 0 46 36"><ellipse cx="23" cy="34" rx="16" ry="2.5" fill="rgba(0,0,0,.2)"/><g class="bob"><rect x="10" y="22" width="3" height="11" fill="#c47b1c"/><rect x="15" y="22" width="3" height="11" fill="#a86514"/><rect x="28" y="22" width="3" height="11" fill="#c47b1c"/><rect x="33" y="22" width="3" height="11" fill="#a86514"/><ellipse cx="22" cy="19" rx="13" ry="7.5" fill="#e8a41c"/><ellipse cx="34" cy="13" rx="6.5" ry="5.5" fill="#e8a41c"/><path d="M30,10 L28,5 L33,9" fill="#9e5c10"/><ellipse cx="38" cy="15" rx="3.5" ry="2.5" fill="#4a2c18"/><circle cx="35" cy="12" r="1" fill="#111"/><path d="M9,19 Q4,12 8,8" stroke="#e8a41c" stroke-width="2.5" fill="none" stroke-linecap="round"/></g></svg>`; }
+function ankoleCowSVG(){ return `<svg viewBox="0 0 96 74"><ellipse cx="48" cy="70" rx="36" ry="4.5" fill="rgba(0,0,0,.22)"/><g class="bob"><rect x="22" y="46" width="5.5" height="24" rx="2" fill="#5a3820"/><rect x="32" y="46" width="5.5" height="24" rx="2" fill="#442a18"/><rect x="62" y="46" width="5.5" height="24" rx="2" fill="#5a3820"/><rect x="72" y="46" width="5.5" height="24" rx="2" fill="#442a18"/><ellipse cx="48" cy="40" rx="30" ry="16" fill="#8c4a30"/><ellipse cx="44" cy="38" rx="20" ry="10" fill="#a65839"/><path d="M72,36 L84,18 L92,26 L80,44 Z" fill="#8c4a30"/><circle cx="86" cy="24" r="7" fill="#8c4a30"/><ellipse cx="92" cy="28" rx="5" ry="4" fill="#3b2011"/><!-- Giant Inyambo / Ankole Horns --><path d="M84,18 Q74,-8 58,-10 Q78,-4 86,16" fill="#f4ead0" stroke="#4a2c18" stroke-width="1.2"/><path d="M88,18 Q98,-8 114,-10 Q94,-4 86,16" fill="#f4ead0" stroke="#4a2c18" stroke-width="1.2"/><circle cx="86" cy="22" r="1.6" fill="#111"/><path d="M18,36 Q12,50 15,58" stroke="#5a3820" stroke-width="3" fill="none"/><circle cx="15" cy="58" r="3" fill="#1c1513"/></g></svg>`; }
+function duckSVG(){ return `<svg viewBox="0 0 32 26"><ellipse cx="16" cy="22" rx="11" ry="3" fill="rgba(0,0,0,.15)"/><g class="bob"><ellipse cx="15" cy="15" rx="10" ry="7" fill="#2d6e4f"/><circle cx="22" cy="9" r="5" fill="#1e5239"/><path d="M26,10 l5,1.5 l-5,1.5z" fill="#f59e0b"/><circle cx="23" cy="8" r="1" fill="#fff"/><circle cx="23.5" cy="8" r="0.6" fill="#111"/><ellipse cx="11" cy="15" rx="6" ry="3.5" fill="#8d5c36"/></g></svg>`; }
+
+const animals = [];
+function addAnimal(kind,x,y,w,h,color){
+  const d = document.createElement('div'); d.className = 'animal'; d.style.cssText = `width:${w}px;height:${h}px`;
+  if(kind==='goat') d.innerHTML = goatSVG();
+  else if(kind==='dog') d.innerHTML = dogSVG();
+  else if(kind==='cow') d.innerHTML = ankoleCowSVG();
+  else if(kind==='chick') d.innerHTML = chickSVG();
+  else if(kind==='duck') d.innerHTML = duckSVG();
+  else d.innerHTML = chickenSVG(color);
+  objects.appendChild(d);
+  animals.push({el:d,hx:x,hy:y,x,y,tx:x,ty:y,wait:rr(0,3),sp:kind==='cow'?15:kind==='dog'?65:kind==='goat'?40:kind==='duck'?25:48,r:kind==='cow'?40:kind==='dog'?120:kind==='duck'?30:70});
+}
+
+// Spawn animals around the village
+['#f4efe6','#b9702f','#e9e1d0','#7a4a2a'].forEach((c,i) => addAnimal('chicken', 520+i*40, 770+(i%2)*30, 28, 28, c));
+for(let i=0;i<4;i++) addAnimal('chick', 540+i*18, 790+(i%2)*10, 18, 18);
+addAnimal('dog', 1120, 360, 46, 36);
+addAnimal('dog', 1220, 1820, 46, 36);
+addAnimal('cow', 1940, 1160, 96, 74);
+addAnimal('cow', 2080, 1260, 96, 74);
+addAnimal('goat', 330, 1400, 54, 44);
+addAnimal('goat', 420, 1450, 54, 44);
+addAnimal('duck', POND.cx-50, POND.cy-10, 32, 26);
+addAnimal('duck', POND.cx+40, POND.cy+20, 32, 26);
+addAnimal('chicken', 1330, 640, 28, 28, '#f4efe6');
+addAnimal('chicken', 1370, 670, 28, 28, '#b9702f');
+
+/* =====================================================
+   7. MOUNT / DISMOUNT LOGIC
+===================================================== */
+const mountHudPill = $('#mountHudPill');
+const mountHudIcon = $('#mountHudIcon');
+const mountHudLabel = $('#mountHudLabel');
+
+function mountPlayer(m){
+  P.mount = m;
+  if(mountEls[m.id]) mountEls[m.id].style.display = 'none';
+
+  player.classList.add('mounted', m.type==='bike' ? 'mounted-bike' : 'mounted-donkey');
+  const bob = player.querySelector('.bob');
+  bob.innerHTML = m.type==='bike' ? spriteMountedBike() : spriteMountedDonkey();
+
+  mountHudIcon.textContent = m.icon;
+  mountHudLabel.textContent = `Riding ${m.name}`;
+  mountHudPill.classList.add('active');
+
+  if(m.type==='bike') chime(784);
+  else tone(220, .6, .08, 'sawtooth');
+
+  toast(`Mounted ${m.name}! Speed increased 🚀 (Press F to dismount)`);
+}
+
+function dismountPlayer(){
+  if(!P.mount) return;
+  const m = P.mount;
+  P.mount = null;
+
+  if(mountEls[m.id]){
+    mountEls[m.id].style.left = (P.x + 36) + 'px';
+    mountEls[m.id].style.top = (P.y + 4) + 'px';
+    mountEls[m.id].style.display = 'block';
+  }
+
+  player.classList.remove('mounted', 'mounted-bike', 'mounted-donkey');
+  const bob = player.querySelector('.bob');
+  bob.innerHTML = sprite({skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'});
+
+  mountHudPill.classList.remove('active');
+  chime(392);
+  toast(`Dismounted from ${m.name}. Walking on foot.`);
+}
+
+mountHudPill.addEventListener('click', dismountPlayer);
+
+/* =====================================================
+   8. REALISTIC KINEMATICS, MOMENTUM & MOVEMENT
+===================================================== */
+function blocked(x,y){
+  if(x<30 || x>W-30 || y<110 || y>H-12) return true;
+  const L=x-12, R=x+12, T=y-10, B=y;
+  for(const c of colliders){
+    if(c.e){ const nx=(x-c.cx)/(c.rx+12), ny=((y-4)-c.cy)/(c.ry+8); if(nx*nx+ny*ny<1) return true; }
+    else if(R>c.x && L<c.x+c.w && B>c.y && T<c.y+c.h) return true;
+  }
+  return false;
+}
+function tryMove(dx,dy){
+  let moved = false;
+  if(dx && !blocked(P.x+dx,P.y)){ P.x+=dx; moved=true; }
+  if(dy && !blocked(P.x,P.y+dy)){ P.y+=dy; moved=true; }
+  return moved;
+}
+
+const keys = new Set();
+let padV = [0,0];
+let route = [], pending = null, stuck = 0, modalOpen = true, introOpen = true;
+
+function inputVec(){
+  let vx=0, vy=0;
+  if(keys.has('arrowleft')||keys.has('q')||keys.has('a')) vx--;
+  if(keys.has('arrowright')||keys.has('d')) vx++;
+  if(keys.has('arrowup')||keys.has('z')||keys.has('w')) vy--;
+  if(keys.has('arrowdown')||keys.has('s')) vy++;
+  vx += padV[0]; vy += padV[1];
+  return [clamp(vx,-1,1), clamp(vy,-1,1)];
+}
+function setDir(el, vx, vy){ el.dataset.dir = Math.abs(vx) > Math.abs(vy) ? (vx<0?'left':'right') : (vy<0?'up':'down'); }
+
+let stepClock = 0, dustClock = 0;
+
+function updatePlayer(dt){
+  if(modalOpen){
+    P.walking = false;
+    P.vx = 0; P.vy = 0;
+    player.classList.remove('walking');
+    return;
+  }
+
+  let [ix, iy] = inputVec();
+  const isSprinting = keys.has('shift');
+  P.sprinting = isSprinting;
+
+  // Max Speed & Acceleration based on mount & sprint mode
+  let targetMaxSpeed = 185; // Base Walk speed
+  let accelRate = 950;
+  let friction = 12.0;
+
+  if(P.mount){
+    if(P.mount.type === 'bike'){
+      targetMaxSpeed = isSprinting ? 420 : 310;
+      accelRate = 750;
+      friction = 3.5; // Coasts smoothly like a real bicycle!
+    } else if(P.mount.type === 'donkey'){
+      targetMaxSpeed = isSprinting ? 330 : 230; // Trot vs Walk
+      accelRate = 800;
+      friction = 8.5;
+    }
+  } else {
+    // On Foot
+    if(isSprinting){
+      targetMaxSpeed = 295; // Athletic sprint speed
+      accelRate = 1200;
+      friction = 10.0;
+    }
+  }
+
+  let usingInput = ix !== 0 || iy !== 0;
+
+  // Pathfinding route handling
+  if(usingInput){ route = []; pending = null; }
+  else if(route.length){
+    const t = route[0], dx = t.x - P.x, dy = t.y - P.y, d = Math.hypot(dx,dy);
+    if(d < 16){
+      route.shift(); stuck = 0;
+      if(!route.length && pending){ const k = pending; pending = null; openHut(k); }
+    } else {
+      ix = dx / d; iy = dy / d;
+    }
+  }
+
+  // Smooth Inertial Velocity Update
+  if(ix !== 0 || iy !== 0){
+    const len = Math.hypot(ix, iy) || 1;
+    const targetVx = (ix / len) * targetMaxSpeed;
+    const targetVy = (iy / len) * targetMaxSpeed;
+
+    P.vx = lerp(P.vx, targetVx, clamp(accelRate * dt / targetMaxSpeed, 0, 1));
+    P.vy = lerp(P.vy, targetVy, clamp(accelRate * dt / targetMaxSpeed, 0, 1));
+    setDir(player, P.vx, P.vy);
+  } else {
+    // Natural deceleration / braking
+    P.vx = lerp(P.vx, 0, clamp(friction * dt, 0, 1));
+    P.vy = lerp(P.vy, 0, clamp(friction * dt, 0, 1));
+  }
+
+  const currentSpeed = Math.hypot(P.vx, P.vy);
+  let moved = false;
+
+  if(currentSpeed > 6){
+    const bx = P.x, by = P.y;
+    moved = tryMove(P.vx * dt, P.vy * dt);
+
+    // Realistic banking / leaning in turns
+    const targetLean = clamp(P.vx * 0.05, -12, 12);
+    P.leanAngle = lerp(P.leanAngle, targetLean, 0.2);
+
+    if(route.length && !usingInput){
+      if(Math.hypot(P.x-bx, P.y-by) < currentSpeed * dt * 0.3){
+        stuck += dt;
+        if(stuck > 0.5){ route.shift(); stuck = 0; if(!route.length && pending) pending = null; }
+      } else stuck = 0;
+    }
+  } else {
+    P.leanAngle = lerp(P.leanAngle, 0, 0.25);
+  }
+
+  P.walking = moved && currentSpeed > 8;
+  player.classList.toggle('walking', P.walking);
+
+  // Apply dynamic body lean & sprint posture
+  const bob = player.querySelector('.bob');
+  if(bob){
+    const pitchLean = isSprinting ? (P.dir === 'up' ? -6 : 6) : 0;
+    bob.style.transform = `rotate(${P.leanAngle}deg) skewX(${pitchLean}deg)`;
+  }
+
+  // Dust Particle Emitter & Footstep Frequency Modulation
+  if(moved){
+    dustClock += dt;
+    stepClock += dt;
+
+    const dustInterval = (isSprinting || P.mount) ? 0.12 : 0.22;
+    if(dustClock > dustInterval){
+      dustClock = 0;
+      dust(P.x + rr(-8,8), P.y - 2);
+      if(isSprinting && !P.mount) dust(P.x - (P.vx > 0 ? 8 : -8), P.y - 4); // Extra sprint kick-up
+    }
+
+    const stepInterval = clamp(0.35 / (currentSpeed / 160), 0.14, 0.4);
+    if(stepClock > stepInterval){
+      stepClock = 0;
+      footstep();
+    }
+  }
+
+  player.style.left = P.x + 'px';
+  player.style.top = P.y + 'px';
+  player.style.zIndex = Math.round(P.y);
+}
+
+function routeTo(x,y,enterKey){
+  const i = nearestSample(P.x,P.y), j = nearestSample(x,y), step = i<=j ? 1 : -1;
+  route = [];
+  for(let k=i; step>0 ? k<=j : k>=j; k+=step*6) route.push({x:S[k][0], y:S[k][1]});
+  route.push({x:S[j][0], y:S[j][1]}, {x,y});
+  pending = enterKey || null; stuck = 0;
+}
+function goToHut(key, enter){
+  const h = HUTS.find(h => h.key===key);
+  routeTo(h.front.x, h.front.y, enter ? key : null);
+}
+
+/* NPC villager */
+function updateMama(dt){
+  if(NPC.wait > 0){ NPC.wait -= dt; mama.classList.remove('walking'); }
+  else {
+    NPC.i += NPC.dir * 52 * dt / 12;
+    if(NPC.i >= S.length-2){ NPC.i = S.length-2; NPC.dir = -1; NPC.wait = 4; }
+    if(NPC.i <= 2){ NPC.i = 2; NPC.dir = 1; NPC.wait = 4; }
+    mama.classList.add('walking');
+    const a = S[Math.floor(NPC.i)], b = S[Math.floor(NPC.i)+1];
+    setDir(mama, (b[0]-a[0])*NPC.dir, (b[1]-a[1])*NPC.dir);
+  }
+  const a = S[Math.floor(NPC.i)], b = S[Math.min(S.length-1,Math.floor(NPC.i)+1)], f = NPC.i % 1;
+  const x = lerp(a[0],b[0],f) + 26, y = lerp(a[1],b[1],f) + 12;
+  mama.style.left = x+'px'; mama.style.top = y+'px'; mama.style.zIndex = Math.round(y);
+  mama._x = x; mama._y = y;
+  const near = Math.hypot(P.x-x, P.y-y) < 130 && !modalOpen;
+  if(near){
+    const n = visited.size;
+    sayMama.textContent = n===0 ? 'Muraho! Welcome. Try riding a bike or visiting the Workshop.' : n<5 ? `Muraho! ${5-n} hut${5-n>1?'s':''} left to visit.` : 'You saw it all. Go say hello at the fire!';
+  }
+  sayMama.classList.toggle('on', near);
+}
+function updateAnimals(dt){
+  for(const a of animals){
+    if(a.wait > 0){ a.wait -= dt; a.el.classList.remove('moving'); }
+    else {
+      const dx = a.tx-a.x, dy = a.ty-a.y, d = Math.hypot(dx,dy);
+      if(d < 4){ a.wait = rr(1.5,5); a.tx = a.hx + rr(-a.r,a.r); a.ty = a.hy + rr(-a.r*.6,a.r*.6); }
+      else { a.x += dx/d*a.sp*dt; a.y += dy/d*a.sp*dt; a.el.classList.add('moving'); a.el.classList.toggle('flip', dx<0); }
+    }
+    a.el.style.left = a.x+'px'; a.el.style.top = a.y+'px'; a.el.style.zIndex = Math.round(a.y);
+  }
+}
+
+/* =====================================================
+   9. CAMERA & PROXIMITY (HUTS & MOUNTS)
+===================================================== */
+const cam = { x:0, y:0 };
+let vw = 0, vh = 0;
+function updateCamera(snap){
+  const tx = vw >= W ? (W-vw)/2 : clamp(P.x - vw/2, 0, W-vw);
+  const ty = vh >= H ? (H-vh)/2 : clamp(P.y - vh*.55, 0, H-vh);
+  cam.x = snap ? tx : lerp(cam.x, tx, .14);
+  cam.y = snap ? ty : lerp(cam.y, ty, .14);
+  world.style.transform = `translate3d(${-cam.x}px,${-cam.y}px,0)`;
+}
+
+let nearKey = null;
+let nearMount = null;
+
+function updateProximity(){
+  // Check Huts
+  let bestHut = null, bd = 1e9;
+  for(const h of HUTS){ const d = Math.hypot(P.x-h.talk.x, P.y-h.talk.y); if(d < bd){ bd = d; bestHut = h; } }
+  const k = (bd < 130 && !modalOpen) ? bestHut.key : null;
+
+  // Check Mounts
+  let bestMount = null, md = 1e9;
+  for(const m of MOUNTS){
+    if(P.mount && P.mount.id === m.id) continue;
+    const d = Math.hypot(P.x - m.x, P.y - m.y);
+    if(d < md){ md = d; bestMount = m; }
+  }
+  const nm = (md < 95 && !modalOpen) ? bestMount : null;
+
+  // Highlight mounts
+  MOUNTS.forEach(m => {
+    if(mountEls[m.id]) mountEls[m.id].classList.toggle('near', nm && nm.id === m.id);
+  });
+
+  if(k !== nearKey || nm !== nearMount){
+    nearKey = k;
+    nearMount = nm;
+
+    for(const h of HUTS){
+      signEls[h.key].classList.toggle('near', h.key===k);
+      hutEls[h.key].classList.toggle('near', h.key===k);
+    }
+    document.querySelectorAll('#fast button').forEach(b => b.classList.toggle('here', b.dataset.key===k));
+
+    if(P.mount){
+      sayPlayer.innerHTML = `Dismount ${P.mount.name}<small>Press F or click here to walk</small>`;
+      sayPlayer.classList.add('on');
+    } else if(nm){
+      sayPlayer.innerHTML = `Ride ${nm.name} ${nm.icon}<small>Press F or click to mount</small>`;
+      sayPlayer.classList.add('on');
+    } else if(k){
+      const h = HUTS.find(h => h.key===k);
+      sayPlayer.innerHTML = `Enter ${h.name}<small>${coarse ? 'Tap here or press GO' : 'Press E or click'} · ${h.blurb}</small>`;
+      sayPlayer.classList.add('on');
+    } else {
+      sayPlayer.classList.remove('on');
+    }
+  }
+}
+
+/* =====================================================
+   10. DAY / NIGHT & LIGHTING CANVAS
+===================================================== */
+const stars = $('#stars');
+for(let i=0;i<95;i++){
+  const s = document.createElement('i'), sz = rr(1.4,3.2);
+  s.className='star'; s.style.cssText = `left:${rr(0,100)}%;top:${rr(0,80)}%;width:${sz}px;height:${sz}px;--t:${rr(.45,.95).toFixed(2)};--d:${rr(0,2.6).toFixed(2)}s`;
+  stars.appendChild(s);
+}
+let A = 0, targetA = 0;
+const DAY_LEN = 5.2;
+
+function applySky(){
+  const dusk = clamp(1 - Math.abs(A - .42)/.4, 0, 1);
+  root.style.setProperty('--a', A.toFixed(3));
+  root.style.setProperty('--dusk', (dusk*dusk*(3-2*dusk)).toFixed(3));
+  root.style.setProperty('--night', smooth(.35,.95,A).toFixed(3));
+  root.style.setProperty('--sunp', smooth(0,.72,A).toFixed(3));
+  root.style.setProperty('--moonp', smooth(.45,1,A).toFixed(3));
+  const th = A > .5 ? 'night' : 'day';
+  if(document.body.dataset.theme !== th) document.body.dataset.theme = th;
+}
+function updateDay(dt){
+  if(Math.abs(A-targetA) > .0004){
+    A += Math.sign(targetA-A) * dt / DAY_LEN; A = clamp(A,0,1);
+    if(Math.abs(A-targetA) < .001) A = targetA;
+    applySky();
+  }
+}
+$('#themeBtn').addEventListener('click', () => {
+  targetA = targetA ? 0 : 1; chime(targetA ? 330 : 523);
+  toast(targetA ? 'The sun sets over the village… the stars come out.' : 'A new day begins in the village.');
+});
+
+// night lighting canvas
+const cv = $('#night'), cx = cv.getContext('2d');
+let dpr = 1;
+function resize(){
+  vw = viewport.clientWidth; vh = viewport.clientHeight; dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = vw*dpr; cv.height = vh*dpr; cv.style.width = vw+'px'; cv.style.height = vh+'px';
+  cx.setTransform(dpr,0,0,dpr,0,0);
+}
+function drawNight(t){
+  cx.setTransform(dpr,0,0,dpr,0,0);
+  cx.clearRect(0,0,vw,vh);
+  if(A < .005) return;
+  const k = smooth(.35,.95,A);
+  const col = [lerp(122,8,k), lerp(54,12,k), lerp(78,40,k)].map(Math.round);
+  const alpha = .82 * smooth(0,.9,A);
+  cx.globalCompositeOperation = 'source-over';
+  cx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${alpha})`;
+  cx.fillRect(0,0,vw,vh);
+  const all = lights.concat([{x:P.x,y:P.y-40,r:150,warm:.35}]);
+  cx.globalCompositeOperation = 'destination-out';
+  for(const l of all){
+    const f = l.flick ? 1 + Math.sin(t*9 + l.x)*.04 + Math.sin(t*17)*.02 : 1, r = l.r*f;
+    const sx = l.x - cam.x, sy = l.y - cam.y;
+    if(sx < -r || sx > vw+r || sy < -r || sy > vh+r) continue;
+    const gr = cx.createRadialGradient(sx,sy,0,sx,sy,r);
+    gr.addColorStop(0,'rgba(0,0,0,.95)'); gr.addColorStop(.55,'rgba(0,0,0,.55)'); gr.addColorStop(1,'rgba(0,0,0,0)');
+    cx.fillStyle = gr; cx.beginPath(); cx.arc(sx,sy,r,0,6.2832); cx.fill();
+  }
+  cx.globalCompositeOperation = 'source-over';
+  for(const l of all){
+    const f = l.flick ? 1 + Math.sin(t*9 + l.x)*.04 : 1, r = l.r*f, sx = l.x - cam.x, sy = l.y - cam.y;
+    if(sx < -r || sx > vw+r || sy < -r || sy > vh+r) continue;
+    const gr = cx.createRadialGradient(sx,sy,0,sx,sy,r*.9);
+    gr.addColorStop(0,`rgba(255,168,70,${.26*l.warm*k})`); gr.addColorStop(1,'rgba(255,168,70,0)');
+    cx.fillStyle = gr; cx.beginPath(); cx.arc(sx,sy,r,0,6.2832); cx.fill();
+  }
+}
+
+/* =====================================================
+   11. SOUND (Kalimba, Footsteps, Bicycle Bell)
+===================================================== */
+let ac = null, soundOn = false, loopTimer = null;
+function ctx(){ if(!ac){ const C = window.AudioContext || window.webkitAudioContext; if(C) ac = new C(); } if(ac && ac.state==='suspended') ac.resume(); return ac; }
+function tone(f, dur=.7, vol=.05, type='sine', when=0){
+  if(!soundOn) return; const c = ctx(); if(!c) return;
+  const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur);
+}
+const chime = f => tone(f,.45,.06);
+function footstep(){
+  if(!soundOn) return;
+  if(P.mount && P.mount.type==='bike'){ tone(rr(160,220),.05,.02,'triangle'); }
+  else if(P.mount && P.mount.type==='donkey'){ tone(rr(110,160),.09,.04,'sawtooth'); }
+  else { tone(rr(90,130),.07,.03,'triangle'); }
+}
+const SCALE = [392,440,523.25,587.33,659.25,783.99,880];
+function melody(){
+  if(!soundOn) return;
+  const night = A > .5, n = night ? 2 : 3;
+  for(let i=0;i<n;i++) tone(SCALE[(rand()*SCALE.length)|0] * (night?.5:1), 1.4, .035, 'sine', i*(night?.7:.45));
+  if(night && rand()<.5) for(let i=0;i<4;i++) tone(4200 + rand()*200, .05, .012, 'square', i*.09);
+  loopTimer = setTimeout(melody, night ? 2600 : 1900);
+}
+const soundBtn = $('#soundBtn');
+soundBtn.addEventListener('click', () => {
+  soundOn = !soundOn; soundBtn.setAttribute('aria-pressed', soundOn);
+  clearTimeout(loopTimer);
+  if(soundOn){ ctx(); chime(523.25); melody(); toast('Village music on'); } else toast('Village music off');
+});
+
+/* =====================================================
+   12. HUT INTERIORS (CONTENT)
+===================================================== */
+const PROJECTS = [
+  { name:'Pharma Finder', tag:'Backend · PostgreSQL',
+    text:'Search for a medicine, find nearby pharmacies that stock it, then order for delivery or pickup and pay. Built to work across several countries.',
+    tech:['PostgreSQL','REST API','Multi-country'], url:'https://github.com/sage235/pharmaback' },
+  { name:'LockSave', tag:'Wallet · Backend',
+    text:'A digital wallet (porte-monnaie) application built over 600 commits, focused on keeping balances and transactions safe.',
+    tech:['Backend','Wallet','Security'], url:'https://github.com/sage235/locksave' },
+  { name:'Restaurant Backend', tag:'Backend · API',
+    text:'The server side of a restaurant platform: menus, orders and the data behind them.',
+    tech:['Backend','REST API'], url:'https://github.com/sage235/restaurant-backend' },
+  { name:'Rent House Management', tag:'Spring Boot · PostgreSQL',
+    text:'Rental platform with multi-role authentication, automated lease contracts and transactional integrity.',
+    tech:['Java 17','Spring Boot','PostgreSQL'] },
+  { name:'Hotel Management System', tag:'PHP · MySQL',
+    text:'Hotel booking with live availability, automated billing and an admin area.',
+    tech:['PHP','MySQL','JavaScript'] },
+  { name:'Football Data Analytics', tag:'Python · Data',
+    text:'Data cleaning, exploratory analysis and predictive models on football match trends.',
+    tech:['Python','Pandas','Colab'] },
+  { name:'VAPT Security Lab', tag:'Cybersecurity',
+    text:'Vulnerability assessment on virtual machines, controlled exploitation and hardening guides.',
+    tech:['Linux','Wireshark','Nmap'] }
+];
+const projCard = p => `<div class="card"><span class="when">${p.tag}</span><h4>${p.name}</h4><p>${p.text}</p>
+  <div class="tags">${p.tech.map(t => `<span>${t}</span>`).join('')}</div>
+  ${p.url ? `<a class="lnk" href="${p.url}" target="_blank" rel="noopener">View on GitHub ↗</a>` : ''}</div>`;
+
+const CONTENT = {
+  about: () => `<div class="kicker">Hut I · About me</div><h2 id="modalTitle">The mind behind the code</h2>
+    <p>I'm a <strong>software engineering student at AUCA</strong> (Adventist University of Central Africa) in Kigali, Rwanda, graduating in 2027.</p>
+    <p>I like building backends that are reliable, secure and fast: careful data models, clean architecture, and tests that catch problems before users do. Java and Spring Boot are my home ground, with PHP, JavaScript and several databases around them.</p>
+    <div class="quote">“Good architecture is invisible: it lets data move quickly and safely.”</div>`,
+  workshop: () => `<div class="kicker">Hut II · The Workshop</div><h2 id="modalTitle">Seven things I've built</h2>
+    <p>Each one solves a concrete problem. The first three are on GitHub.</p>
+    <div class="grid">${PROJECTS.map(projCard).join('')}</div>`,
+  skills: () => `<div class="kicker">Hut III · The Granary</div><h2 id="modalTitle">Tools and skills</h2>
+    <div class="grid">
+      <div class="card"><h4>Backend and data</h4><ul class="skill-list">
+        <li><b>Java 17 / 21:</b> OOP, streams, multithreading</li>
+        <li><b>Spring Boot:</b> JPA, Security, REST controllers</li>
+        <li><b>Databases:</b> PostgreSQL, MySQL, MongoDB</li>
+        <li><b>APIs:</b> OpenAPI, Postman</li></ul></div>
+      <div class="card"><h4>Quality, security and web</h4><ul class="skill-list">
+        <li><b>Testing:</b> unit tests, test plans, QA</li>
+        <li><b>Security:</b> VAPT, Linux hardening, networking</li>
+        <li><b>Web:</b> PHP, JavaScript, HTML5, modern CSS</li>
+        <li><b>Tools:</b> Git, GitHub, Maven, Python (Pandas)</li></ul></div>
+    </div>`,
+  school: () => `<div class="kicker">Hut IV · The School</div><h2 id="modalTitle">Where I learn</h2>
+    <div class="timeline">
+      <div class="card"><span class="when">2023 – 2027 · In progress</span><h4>Bachelor of Software Engineering</h4>
+        <div class="school-name">Adventist University of Central Africa (AUCA), Kigali, Rwanda</div>
+        <p>Data structures, algorithms, advanced databases, network security, software testing techniques and enterprise software development.</p></div>
+      <div class="card"><span class="when">Graduated 2023</span><h4>Secondary school diploma, science track</h4>
+        <div class="school-name">Complexe Scolaire Frère Polycarpe</div>
+        <p>A solid base in mathematics, logic and applied sciences.</p></div>
+    </div>`,
+  contact: () => `<div class="kicker">Fireside · Palaver Tree</div><h2 id="modalTitle">Let's talk</h2>
+    <p>Pull up a log. Tell me about an internship, a job, or a project you want built.</p>
+    <p class="open-to"><strong>Open to:</strong> internships and junior roles, freelance backend work, software testing and QA, and coding mentorship.</p>
+    <div class="actions">
+      <a class="btn" href="mailto:lesageasdodji@gmail.com">✉️ lesageasdodji@gmail.com</a>
+      <a class="btn in" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener">LinkedIn · le-sage-asdodji</a>
+      <a class="btn gh" href="https://github.com/sage235" target="_blank" rel="noopener">GitHub · sage235</a>
+      <a class="btn alt" href="tel:+250735562281">📞 +250 735 562 281</a>
+      <a class="btn alt" href="ASDODJI_Le_Sage_Resume.pdf" download="ASDODJI_Le_Sage_Resume.pdf">📄 Download my resume (PDF)</a>
+    </div>`
+};
+
+/* =====================================================
+   13. MODAL, PROGRESS & INPUT
+===================================================== */
+const visited = new Set();
+const modal = $('#modal'), body = $('#modalBody'), intro = $('#intro');
+function openHut(key){
+  if(!CONTENT[key]) return;
+  route = []; pending = null; keys.clear(); padV = [0,0];
+  body.innerHTML = CONTENT[key]();
+  modal.classList.add('open'); modalOpen = true; chime(659.25);
+  modal.querySelector('.sheet').scrollTop = 0;
+  setTimeout(() => $('#closeBtn').focus(), 50);
+  if(!visited.has(key)){
+    visited.add(key); updateProgress();
+    const b = document.querySelector(`#fast button[data-key="${key}"]`); b && b.classList.add('seen');
+    if(visited.size === HUTS.length) setTimeout(() => toast('You have seen the whole village. The fireside is the place to say hello.'), 700);
+  }
+}
+function closeModal(){
+  if(!modal.classList.contains('open')) return;
+  modal.classList.remove('open'); modalOpen = false; chime(330);
+  nearKey = null;
+}
+function updateProgress(){ $('#progress').textContent = `Explored ${visited.size}/${HUTS.length}`; }
+$('#closeBtn').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
+
+function startGame(){ intro.classList.remove('open'); introOpen = false; modalOpen = false; if(!soundOn) ctx(); }
+$('#startBtn').addEventListener('click', startGame);
+
+const fast = $('#fast');
+HUTS.forEach(h => {
+  const li = document.createElement('li');
+  li.innerHTML = `<button data-key="${h.key}">${h.label}<span class="tick">✓</span></button>`;
+  li.firstChild.addEventListener('click', () => { if(modalOpen) return; goToHut(h.key, false); });
+  fast.appendChild(li);
+});
+
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3400); }
+
+/* KEYBOARD & CONTROLS */
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if(introOpen){ if(k==='enter' || k===' '){ e.preventDefault(); startGame(); } return; }
+  if(modalOpen){ if(k==='escape') closeModal(); return; }
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+
+  if(['arrowleft','arrowright','arrowup','arrowdown','z','q','s','d','w','a'].includes(k)){ keys.add(k); e.preventDefault(); }
+  else if(k==='shift'){ keys.add('shift'); }
+  else if(k==='f'){
+    e.preventDefault();
+    if(P.mount) dismountPlayer();
+    else if(nearMount) mountPlayer(nearMount);
+  }
+  else if(k==='e' || k===' ' || k==='enter'){
+    if(nearKey){ e.preventDefault(); openHut(nearKey); }
+    else if(nearMount && !P.mount){ e.preventDefault(); mountPlayer(nearMount); }
+    else if(P.mount && (k==='f')){ e.preventDefault(); dismountPlayer(); }
+  }
+});
+window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+window.addEventListener('blur', () => keys.clear());
+
+// on-screen pad
+document.querySelectorAll('#dpad [data-v]').forEach(b => {
+  const [x,y] = b.dataset.v.split(',').map(Number);
+  b.addEventListener('pointerdown', e => { e.preventDefault(); b.setPointerCapture(e.pointerId); padV = [x,y]; });
+  const up = () => { padV = [0,0]; };
+  b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
+});
+
+$('#actBtn').addEventListener('click', () => {
+  if(P.mount) dismountPlayer();
+  else if(nearMount) mountPlayer(nearMount);
+  else if(nearKey) openHut(nearKey);
+});
+
+sayPlayer.addEventListener('click', e => {
+  e.stopPropagation();
+  if(P.mount) dismountPlayer();
+  else if(nearMount) mountPlayer(nearMount);
+  else if(nearKey) openHut(nearKey);
+});
+
+// click/tap the world
+viewport.addEventListener('click', e => {
+  if(modalOpen || e.target.closest('.say')) return;
+  const hs = e.target.closest('.hut, .sign');
+  if(hs){ goToHut(hs.dataset.key, true); return; }
+  const r = viewport.getBoundingClientRect();
+  routeTo(e.clientX - r.left + cam.x, e.clientY - r.top + cam.y);
+});
+
+/* =====================================================
+   14. MAIN LOOP
+===================================================== */
+window.addEventListener('resize', () => { resize(); updateCamera(true); });
+resize();
+if(matchMedia('(prefers-color-scheme: dark)').matches){ A = targetA = 1; }
+applySky();
+updateProgress();
+player.style.left = P.x+'px'; player.style.top = P.y+'px';
+updateCamera(true);
+
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(.05, (now-last)/1000); last = now;
+  updatePlayer(dt); updateMama(dt); updateAnimals(dt); updateDay(dt);
+  updateCamera(false); updateProximity(); drawNight(now/1000);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
 </body>
 </html>
