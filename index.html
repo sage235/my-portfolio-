@@ -268,18 +268,19 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 @keyframes hoof{from{transform:rotate(22deg)}to{transform:rotate(-22deg)}}
 @keyframes wag{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
 
-.stam{position:fixed;left:16px;bottom:64px;z-index:40;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(30,20,16,.82);color:#fbf3e6;font-size:.7rem;font-weight:700;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s;pointer-events:none}
-.stam.show{opacity:1;transform:none}
-.stam .bar{width:110px;height:7px;border-radius:5px;background:rgba(255,255,255,.2);overflow:hidden}
-.stam .bar i{display:block;height:100%;width:100%;transform-origin:0 50%;background:#7bd36b}
-.stam.tired .bar i{background:#e8774a}
-@media (pointer:coarse){.stam{bottom:auto;top:calc(var(--sky-h) + 14px);left:12px}}
 /* articulated riders */
 .rig{position:absolute;left:-50px;bottom:-6px;width:160px;height:120px;overflow:visible;pointer-events:none;display:none}
 .actor.rigged .rig{display:block}
 .actor.rigged .rider{visibility:hidden}
 .rig g[data-v]{transition:opacity .1s linear}
 .rig .dleg,.rig .dhead,.rig .dtail{animation:none!important}
+.rig.hopOn{animation:rigHopOn .26s ease-out forwards}
+.rig.hopOff{animation:rigHopOff .46s cubic-bezier(.3,.7,.4,1)}
+.rig.dropIn{animation:rigDrop .24s ease-out}
+.actor.rigged:not(.mounted) .say{margin-bottom:16px}
+@keyframes rigHopOn{0%{transform:translateY(0)}60%{transform:translateY(-30px)}100%{transform:translateY(-18px)}}
+@keyframes rigHopOff{0%{transform:translateY(-22px)}45%{transform:translateY(-44px)}100%{transform:translateY(0)}}
+@keyframes rigDrop{0%{transform:translateY(-14px)}100%{transform:none}}
 .animal .dhead{transition:transform .6s ease-in-out}
 .animal.drinking .dhead{animation:none!important;transform:rotate(27deg)}
 .big{font-family:var(--f-display);font-size:2rem;line-height:1.15;color:var(--ink)}
@@ -439,8 +440,6 @@ body[data-theme="night"] .when{color:#8fd19a}
   <button class="s" id="runBtn" aria-label="Hold to sprint">RUN</button>
 </div>
 
-<div class="stam" id="stam" aria-hidden="true"><span>Stamina</span><div class="bar"><i id="stamFill"></i></div></div>
-
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- Intro -->
@@ -449,7 +448,7 @@ body[data-theme="night"] .when{color:#8fd19a}
     <div class="kicker">Portfolio of ASDODJI Le Sage</div>
     <h2 id="introTitle">Welcome to my village.</h2>
     <p>Each hut holds a piece of my story: who I am, what I build, what I know, where I study and how to reach me. Follow the dirt paths, read the signs, and step inside.</p>
-    <p><strong>Walk</strong> with the arrow keys, WASD or ZQSD (hold Shift to sprint; it drains your stamina). Press <strong>E</strong> at a door to go in. On a phone, use the pad or tap the ground. See a <strong>bicycle</strong> or a <strong>donkey</strong>? Stand next to it and press <strong>F</strong> to hop on (the bike is the fastest). Tired? The <strong>marigot</strong> has cool water, a stone to rest on and a word for the day. The moon button lets the sun set.</p>
+    <p><strong>Walk</strong> with the arrow keys, WASD or ZQSD (hold Shift to sprint). Press <strong>E</strong> at a door to go in. On a phone, use the pad or tap the ground. See a <strong>bicycle</strong> or a <strong>donkey</strong>? Stand next to it and press <strong>F</strong> to hop on (the bike is the fastest). Tired? The <strong>marigot</strong> has cool water, a stone to rest on and a word for the day. The moon button lets the sun set.</p>
     <div class="actions"><button class="btn" id="startBtn">Start walking</button></div>
   </div>
 </div>
@@ -499,7 +498,7 @@ const SPAWN = { x:1200, y:270 };
 const MAIN_PATH = [[1200,170],[1200,340],[960,500],[700,660],[860,820],[1250,900],[1650,1000],[1500,1130],[1150,1230],[700,1380],[900,1500],[1300,1560],[1650,1720],[1500,1850],[1150,1980]];
 const POND = { cx:1960, cy:430, rx:175, ry:95 };
 const WELL = { x:390, y:940 };
-const BRANCHES = [ [[1200,340],[1450,395],[1730,470]], [[700,660],[540,790],[430,900]], [[900,1500],[840,1700],[720,1900],[650,1956]] ];
+const BRANCHES = [ [[1200,340],[1450,395],[1730,470]], [[700,660],[540,790],[430,900]], [[900,1500],[870,1700],[810,1850],[740,1950],[650,1956]] ];
 const MG = { cx:420, cy:1780, rx:190, ry:100 };   // the marigot (watering hole)
 
 function smoothPath(pts){
@@ -806,7 +805,7 @@ function makeFigure(o){
   const dark = '#2a1a10', f = {};
   ['farLeg','farArm','body','nearLeg','nearArm'].forEach(n => { f['g' + n[0].toUpperCase() + n.slice(1)] = E('g'); });
   const limb = (parent,leg,k) => ({
-    u:E('line',{stroke:shade(leg?o.bottom:o.top,k),'stroke-width':leg?9:7,'stroke-linecap':'round'},parent),
+    u:E('line',{stroke:shade(leg?(o.dress?o.top:o.bottom):o.top,k),'stroke-width':leg?(o.dress?12.5:9):7,'stroke-linecap':'round'},parent),
     l:E('line',{stroke:shade(o.skin,k),'stroke-width':leg?6.5:5.5,'stroke-linecap':'round'},parent),
     e:leg ? E('ellipse',{rx:5.5,ry:2.8,fill:dark},parent) : E('circle',{r:3.3,fill:shade(o.skin,k)},parent) });
   f.fl = limb(f.gFarLeg,true,.7); f.nl = limb(f.gNearLeg,true,1); f.fa = limb(f.gFarArm,false,.7); f.na = limb(f.gNearArm,false,1);
@@ -817,6 +816,7 @@ function makeFigure(o){
   f.bag2   = E('rect',{x:-7.5,y:-9,width:15,height:18,rx:4.5,fill:o.bag},f.gBody);
   f.head   = E('circle',{r:10.5,fill:o.skin},f.gBody);
   f.hair   = [0,1,2,3,4,5].map(() => E('circle',{fill:o.hair,r:0},f.gBody));
+  f.wrapC  = [0,1,2].map(() => E('circle',{fill:o.wrap||'none',r:0},f.gBody));
   f.eyes   = [E('circle',{r:1.5,fill:dark},f.gBody), E('circle',{r:1.5,fill:dark},f.gBody)];
   f.mouth  = E('path',{fill:'none',stroke:dark,'stroke-width':1.3,'stroke-linecap':'round'},f.gBody);
   const HV = {
@@ -834,6 +834,8 @@ function makeFigure(o){
     setLine(f.stripe,[hx-7,hy],[hx+7,hy]); f.stripe.setAttribute('opacity', ft ? 0 : 1);
     setPt(f.head,hd);
     const hv = HV[view]; f.hair.forEach((c,i) => { setPt(c,hd,hv[i][0],hv[i][1]); c.setAttribute('r',hv[i][2]); });
+    const WV = { side:[[-2,-8,7.8],[4,-9,6.2],[-8,-3,5.5]], down:[[-5,-8,6.8],[5,-8,6.8],[0,-11,6.8]], up:[[-5,-6,7.8],[5,-6,7.8],[0,-9,8.2]] }[view];
+    f.wrapC.forEach((c,i) => { setPt(c,hd,WV[i][0],WV[i][1]); c.setAttribute('r', o.wrap ? WV[i][2] : 0); });
     const eye = (e,dx,dy,on) => { setPt(e,hd,dx,dy); e.setAttribute('opacity',on?1:0); };
     if(ft){ eye(f.eyes[0],5.5,-1,1); eye(f.eyes[1],0,0,0); f.mouth.setAttribute('d',`M${hd[0]+4},${hd[1]+4.5} q2.5,1.6 5,0`); f.mouth.setAttribute('opacity',1); }
     else if(view === 'down'){ eye(f.eyes[0],-4,-.5,1); eye(f.eyes[1],4,-.5,1); f.mouth.setAttribute('d',`M${hd[0]-3.2},${hd[1]+4} q3.2,3 6.4,0`); f.mouth.setAttribute('opacity',1); }
@@ -845,6 +847,46 @@ function makeFigure(o){
     if(view==='down') setLine(f.strap,[S[0]-6,S[1]+2],[H[0]+7,H[1]-3]);
   };
   return f;
+}
+
+function makeWalkerRig(o){
+  const svg = E('svg',{viewBox:'0 0 160 120','class':'rig'}), root = E('g',{},svg);
+  const mk = (view,rx) => { const fig = makeFigure(o), g = E('g',{'data-v':view},root); E('ellipse',{cx:80,cy:111,rx,ry:3.2,fill:'rgba(0,0,0,.25)'},g); return {fig,g}; };
+  const S = mk('side',17), D = mk('down',15), U = mk('up',15);
+  S.g.append(S.fig.gFarLeg, S.fig.gFarArm, S.fig.gBody, S.fig.gNearLeg, S.fig.gNearArm);
+  D.g.append(D.fig.gFarLeg, D.fig.gNearLeg, D.fig.gBody, D.fig.gFarArm, D.fig.gNearArm);
+  U.g.append(U.fig.gFarLeg, U.fig.gNearLeg, U.fig.gFarArm, U.fig.gNearArm, U.fig.gBody);
+  const DEG = Math.PI/180;
+  return { svg,
+    update(st){
+      root.setAttribute('transform',`rotate(${st.rot.toFixed(2)} 80 112)`);
+      S.g.style.opacity = st.view==='side' ? 1 : 0; D.g.style.opacity = st.view==='down' ? 1 : 0; U.g.style.opacity = st.view==='up' ? 1 : 0;
+      const r = st.r, amp = st.amp, w = st.w, idle = Math.sin(st.t*2)*.35*(1-amp);
+      // a real gait cycle: stance (foot planted, body moves over it) then swing (foot lifts and reaches forward)
+      const beta = lerp(.62,.38,r), s = beta*st.stride/2*amp, lift = lerp(6,14,r)*amp;
+      const foot = p => { p = ((p%1)+1)%1; if(p < beta) return [s*(1-2*p/beta),0]; const u = (p-beta)/(1-beta), e = u*u*(3-2*u); return [-s+2*s*e, lift*Math.sin(Math.PI*u)]; };
+      const f1 = foot(w), f2 = foot(w+.5);
+      const hipY = 66 - (amp*(1+r*2.5)*Math.cos(4*Math.PI*(w-beta/2)) + amp*r*3) + idle;
+      const armA = (lerp(26,48,r)*amp + 2)*DEG, flex = (lerp(12,85,r)*amp + 8)*DEG;
+      if(st.view === 'side'){
+        S.g.setAttribute('transform',`translate(80,0) scale(${st.faceT.toFixed(3)},1) translate(-80,0)`);
+        const H = [80,hipY], a = (lerp(3,15,r)*amp + 1.5)*DEG;
+        const Sh = [H[0]+25*Math.sin(a), H[1]-25*Math.cos(a)], hd = [Sh[0]+12.5*Math.sin(a+.12), Sh[1]-12.5*Math.cos(a+.12)], fS = [Sh[0]-1.5,Sh[1]+.5];
+        const arm = (sp,ph) => { const u = armA*Math.sin(2*Math.PI*(w+ph)); const el = [sp[0]+15*Math.sin(u), sp[1]+15*Math.cos(u)]; return {j:el, e:[el[0]+14*Math.sin(u+flex), el[1]+14*Math.cos(u+flex)]}; };
+        S.fig.update('side',{H,S:Sh,hd,tilt:a/DEG, nl:ik(H,[80+f1[0],109-f1[1]],26,26,-1), fl:ik(H,[80+f2[0],109-f2[1]],26,26,-1), na:arm(Sh,.5), fa:arm(fS,0), fS});
+      } else {
+        const dn = st.view === 'down', sg = dn ? 1 : -1, fig = dn ? D.fig : U.fig;
+        const sway = Math.sin(2*Math.PI*w)*1.6*amp;
+        const H = [80+sway,hipY], Sh = [80+sway*1.2,hipY-25], hd = [80+sway*1.3,hipY-37.5];
+        const hR = [86+sway,hipY], hL = [74+sway,hipY], sR = [89+sway*1.2,Sh[1]+3], sL = [71+sway*1.2,Sh[1]+3];
+        const yR = 109 + sg*f1[0]*.3 - f1[1]*.9, yL = 109 + sg*f2[0]*.3 - f2[1]*.9;
+        const sh1 = Math.sin(2*Math.PI*(w+.5))*(4+6*r)*amp;
+        const handR = [sR[0]+4, sR[1]+24+sg*sh1], handL = [sL[0]-4, sL[1]+24-sg*sh1];
+        fig.update(st.view,{H,S:Sh,hd,tilt:0, nH:hR, fH:hL, nS:sR, fS:sL,
+          nl:ikPick(hR,[88,yR],26,26,j=>j[0]), fl:ikPick(hL,[72,yL],26,26,j=>-j[0]),
+          na:ikPick(sR,handR,15,14,j=>j[0]),   fa:ikPick(sL,handL,15,14,j=>-j[0]) });
+      }
+    } };
 }
 
 function makeBikeRig(o){
@@ -1009,8 +1051,8 @@ function makeDonkeyRig(o){
 
 // the rider controller turns velocity into pedalling, wheel spin, steering, banking and rein tension
 function makeRider(kind,o){
-  const rig = kind === 'bike' ? makeBikeRig(o) : makeDonkeyRig(o);
-  const st = { view:'side', face:1, faceT:1, theta:0, phi:0, gait:0, bank:0, lean:34, pull:0, tension:0, sway:0, amp:0, rot:0, t:0, prevH:null, spd:0 };
+  const rig = kind === 'bike' ? makeBikeRig(o) : kind === 'donkey' ? makeDonkeyRig(o) : makeWalkerRig(o);
+  const st = { view:'side', face:1, faceT:1, theta:0, phi:0, gait:0, bank:0, lean:34, pull:0, tension:0, sway:0, amp:0, rot:0, t:0, prevH:null, spd:0, w:0, r:0, stride:60 };
   return { svg:rig.svg,
     setColor(c){ if(rig.setColor) rig.setColor(c); },
     reset(face){ st.face = st.faceT = face; st.prevH = null; st.spd = 0; st.bank = 0; st.tension = 0; st.pull = 0; st.view = 'side'; },
@@ -1030,7 +1072,12 @@ function makeRider(kind,o){
       const dist = speed*dt;
       st.phi += dist/110*360; st.gait += dist/110*6.2832;
       if(active) st.theta += dist/110*6.2832*.55;
-      st.amp = clamp(speed/120,0,1);
+      st.amp = clamp(speed/(kind === 'walk' ? 60 : 120),0,1);
+      if(kind === 'walk'){          // walk -> run blends smoothly with speed, stride grows with speed
+        st.r += (clamp((speed-170)/90,0,1) - st.r)*Math.min(1,dt*8);
+        st.stride = clamp(speed*.6,36,90) + st.r*60;
+        if(speed > 8) st.w += dist/st.stride;
+      }
       st.lean += ((34 + (sprint?14:0) + clamp(acc/300,-1,1)*5) - st.lean)*Math.min(1,dt*6);
       st.sway = Math.sin(st.theta)*1.8;
       st.rot = st.view === 'side' ? st.bank*.3 : st.bank*(st.view === 'down' ? -1 : 1);
@@ -1039,21 +1086,24 @@ function makeRider(kind,o){
 }
 
 // player
-const P = { x:SPAWN.x, y:SPAWN.y, dir:'down', walking:false, mount:null, ride:null, face:'right', lock:0, approach:null };
+const P = { x:SPAWN.x, y:SPAWN.y, dir:'down', walking:false, mount:null, ride:null, face:'right', lock:0, approach:null, rigOn:false };
 const player = makeActor({skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'});
 const LOOK = {skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'};
-const riders = { bike:makeRider('bike',LOOK), donkey:makeRider('donkey',LOOK) };
-['bike','donkey'].forEach(k => { riders[k].svg.style.display = 'none'; player.appendChild(riders[k].svg); });
+const riders = { walk:makeRider('walk',LOOK), bike:makeRider('bike',LOOK), donkey:makeRider('donkey',LOOK) };
+['walk','bike','donkey'].forEach(k => { if(k !== 'walk') riders[k].svg.style.display = 'none'; player.appendChild(riders[k].svg); });
+player.classList.add('rigged');
 const sayPlayer = player.querySelector('.say');
 sayPlayer.classList.add('go'); sayPlayer.setAttribute('role','button');
 
 // villager walking the path
-const mama = makeActor({skin:'#8a5636',hair:'#1a1210',top:'#2f7a5a',stripe:'#f4ead0',wrap:'#e8a41c',bag:'#a85a2a',dress:true});
+const MAMA_LOOK = {skin:'#8a5636',hair:'#1a1210',top:'#2f7a5a',stripe:'#f4ead0',bottom:'#2f7a5a',wrap:'#e8a41c',bag:'#a85a2a',dress:true};
+const mama = makeActor(MAMA_LOOK);
+const mamaRider = makeRider('walk', MAMA_LOOK); mama.appendChild(mamaRider.svg); mama.classList.add('rigged');
 const sayMama = mama.querySelector('.say');
 const movers = [];
 function addMover(m){ const o = Object.assign({i:30,dir:1,wait:0,speed:50,off:[0,0],x:0,y:0}, m); movers.push(o); return o; }
 mama.style.setProperty('--gait','.4s');
-const MAMA = addMover({el:mama, actor:true, i:60, speed:52, off:[26,12]});
+const MAMA = addMover({el:mama, actor:true, rider:mamaRider, i:60, speed:52, off:[26,12]});
 
 // a boy cycling up and down the main road (same articulated bike as the player)
 const CYC = {skin:'#8a5636',hair:'#16100d',top:'#2a6fb0',stripe:'#f4ead0',bottom:'#6b4429',bag:'#e8a41c',bike:'#2e7d4f'};
@@ -1065,9 +1115,11 @@ addMover({el:cyclist, actor:true, rider:cycRider, i:300, dir:-1, speed:135, off:
 const packEl = document.createElement('div'); packEl.className = 'animal'; packEl.style.cssText = 'width:130px;height:90px';
 packEl.innerHTML = donkeySVG('pack'); objects.appendChild(packEl); packEl.style.setProperty('--hoof','.6s');
 const packM = addMover({el:packEl, actor:false, i:140, speed:40, off:[0,-20]});
-const farmer = makeActor({skin:'#6b4429',hair:'#111',top:'#8b5a2b',stripe:'#e8d9a8',bottom:'#3d4a63',bag:'#777'});
+const FARMER_LOOK = {skin:'#6b4429',hair:'#111',top:'#8b5a2b',stripe:'#e8d9a8',bottom:'#3d4a63',bag:'#777'};
+const farmer = makeActor(FARMER_LOOK);
+const farmerRider = makeRider('walk', FARMER_LOOK); farmer.appendChild(farmerRider.svg); farmer.classList.add('rigged');
 farmer.style.setProperty('--gait','.44s');
-addMover({el:farmer, actor:true, leader:packM, lead:9, off:[0,-20]});
+addMover({el:farmer, actor:true, rider:farmerRider, speed:40, leader:packM, lead:9, off:[0,-20]});
 
 // animals
 function chickenSVG(c){ return `<svg viewBox="0 0 30 30"><ellipse cx="15" cy="28" rx="10" ry="2.5" fill="rgba(0,0,0,.2)"/><g class="bob"><ellipse cx="14" cy="19" rx="9" ry="7" fill="${c}"/><circle cx="21" cy="12" r="5" fill="${c}"/><path d="M20,6 q2,-3 3,0 q1,-2 2,1" fill="#d6372a"/><path d="M25,12 l4,1.5 l-4,1.5z" fill="#f0a020"/><circle cx="22.5" cy="11" r="1" fill="#111"/><path d="M5,17 q-4,-3 -3,-7 q4,2 6,6" fill="${c}"/><path d="M12,26 v-5 M17,26 v-5" stroke="#d98b1c" stroke-width="1.5"/></g></svg>`; }
@@ -1187,9 +1239,8 @@ function inputVec(){
 }
 function setDir(el, vx, vy){ el.dataset.dir = Math.abs(vx) > Math.abs(vy) ? (vx<0?'left':'right') : (vy<0?'up':'down'); }
 
-let stepClock = 0, dustClock = 0, stamina = 1, tired = false, padRun = false;
+let stepClock = 0, dustClock = 0, padRun = false;
 const vel = {x:0, y:0};
-const stamEl = $('#stam'), stamFill = $('#stamFill');
 function updatePlayer(dt){
   const kind = P.mount || 'foot';
   if(P.lock > 0) P.lock -= dt;
@@ -1206,15 +1257,14 @@ function updatePlayer(dt){
     }
   }
   const moving = !!(tx || ty);
-  const canRun = wantRun && moving && !tired && stamina > 0;
-  if(canRun) stamina = Math.max(0, stamina - dt*(kind==='foot' ? .26 : .2));
-  else stamina = Math.min(1, stamina + dt*(moving ? .09 : .22));
-  if(stamina <= .001) tired = true; else if(tired && stamina > .3) tired = false;
+  const canRun = wantRun && moving;
 
   const sp = SPEEDS[kind], maxS = (canRun ? sp[1] : sp[0]) * arrive;
   const wx = tx*maxS, wy = ty*maxS, ex = wx-vel.x, ey = wy-vel.y, el = Math.hypot(ex,ey);
   const stepA = ACCEL[kind]*dt*(moving ? 1 : 1.4);
-  if(el <= stepA){ vel.x = wx; vel.y = wy; } else { vel.x += ex/el*stepA; vel.y += ey/el*stepA; }
+  if(el <= stepA || el < 1e-6){ vel.x = wx; vel.y = wy; } else { vel.x += ex/el*stepA; vel.y += ey/el*stepA; }
+  if(!isFinite(vel.x) || !isFinite(vel.y)){ vel.x = vel.y = 0; }
+  if(!isFinite(P.x) || !isFinite(P.y)){ P.x = SPAWN.x; P.y = SPAWN.y; }
 
   const bx = P.x, by = P.y;
   if(vel.x){ if(!blocked(P.x+vel.x*dt, P.y)) P.x += vel.x*dt; else vel.x = 0; }
@@ -1250,10 +1300,8 @@ function updatePlayer(dt){
     if(dustClock > (running ? .09 : .2)){ dustClock = 0; dust(P.x + rr(-6,6), P.y-2, running ? 1.7 : kind==='foot' ? 1 : 1.3); }
     if(stepClock > gait){ stepClock = 0; footstep(); }
   }
-  if(P.mount && player.classList.contains('rigged')) riders[P.mount].step(dt, vel.x, vel.y, moving, running);
-  stamEl.classList.toggle('show', stamina < .98 || canRun);
-  stamEl.classList.toggle('tired', tired);
-  stamFill.style.transform = `scaleX(${stamina.toFixed(3)})`;
+  if(P.rigOn) riders[P.mount].step(dt, vel.x, vel.y, moving, running);
+  else riders.walk.step(dt, vel.x, vel.y, moving, running);
 
   player.style.left = P.x + 'px'; player.style.top = P.y + 'px'; player.style.zIndex = Math.round(P.y);
 }
@@ -1365,14 +1413,16 @@ function mount(r){
   r.taken = true; r.el.classList.remove('near');
   P.mount = r.kind; P.ride = r; route = []; pending = null; P.lock = .55; P.approach = {x:r.x, y:r.y};
   if(Math.abs(r.x-P.x) > 6) P.face = r.x > P.x ? 'right' : 'left';
-  player.dataset.dir = P.face; player.classList.add('mounting-' + r.kind);
+  player.dataset.dir = P.face; player.classList.add('mounting-' + r.kind); riders.walk.svg.classList.add('hopOn');
   if(r.kind === 'bike'){ riders.bike.setColor(r.color); tone(1760,.28,.05); tone(2093,.3,.04,'sine',.12); toast('On the bicycle: fast, but slow to start and stop. Press F to get off.'); }
   else { tone(520,.18,.04,'sawtooth'); tone(260,.32,.04,'sawtooth',.2); toast('On the donkey: hold the rope, slow and steady. Press F to get off.'); }
   setTimeout(() => {                      // the boy has swung a leg over: swap to the riding pose
     if(P.ride !== r) return;
     r.el.style.display = 'none'; P.approach = null;
-    player.classList.remove('mounting-' + r.kind); player.classList.add('mounted','ride-' + r.kind,'rigged');
-    riders[r.kind].reset(P.face === 'left' ? -1 : 1); riders[r.kind].svg.style.display = 'block';
+    player.classList.remove('mounting-' + r.kind); player.classList.add('mounted','ride-' + r.kind);
+    riders.walk.svg.classList.remove('hopOn'); riders.walk.svg.style.display = 'none';
+    const rs = riders[r.kind]; rs.reset(P.face === 'left' ? -1 : 1); rs.svg.style.display = 'block'; rs.svg.classList.add('dropIn'); setTimeout(() => rs.svg.classList.remove('dropIn'), 260);
+    P.rigOn = true;
   }, 260);
   nearRide = null; promptState = '';
 }
@@ -1387,7 +1437,9 @@ function dismount(){
   r.el.style.display = '';
   const kind = r.kind;
   riders[kind].svg.style.display = 'none';
-  player.classList.remove('mounted','ride-bike','ride-donkey','rigged','walking','running','mounting-bike','mounting-donkey');
+  riders.walk.svg.style.display = ''; riders.walk.reset(P.face === 'left' ? -1 : 1); riders.walk.svg.classList.add('hopOff'); setTimeout(() => riders.walk.svg.classList.remove('hopOff'), 500);
+  P.rigOn = false;
+  player.classList.remove('mounted','ride-bike','ride-donkey','walking','running','mounting-bike','mounting-donkey');
   player.classList.add('dismounting-' + kind); setTimeout(() => player.classList.remove('dismounting-' + kind), 480);
   P.mount = null; P.ride = null; P.approach = null; P.lock = .45; promptState = '';
   setDir(player, P.face==='left' ? -1 : 1, 0);
@@ -1602,7 +1654,7 @@ let mLine = dayIdx % LINES.length;
 window.marigotNext = () => { mLine = (mLine + 1 + ((Math.random()*(LINES.length-1))|0)) % LINES.length; const e = document.getElementById('mLine'); if(e) e.textContent = LINES[mLine]; };
 CONTENT.marigot = () => { const w = WORDS[dayIdx % WORDS.length];
   return `<div class="kicker">The Marigot · Rest stop</div><h2 id="modalTitle">Drink, rest, read</h2>
-  <p>You kneel at the edge, drink the cool water and sit on the warm stone for a minute. <strong>Your stamina is back.</strong></p>
+  <p>You kneel at the edge, drink the cool water and sit on the warm stone for a minute. <strong>You feel fresh again.</strong></p>
   <div class="grid">
     <div class="card"><span class="when">Word of the day · Kinyarwanda</span><div class="big">${w[0]}</div><p><span class="mean">${w[1]}</span></p></div>
     <div class="card"><span class="when">Words to carry</span><p class="motto" id="mLine">${LINES[mLine]}</p>
@@ -1614,7 +1666,6 @@ const modal = $('#modal'), body = $('#modalBody'), intro = $('#intro');
 function openHut(key){
   if(!CONTENT[key]) return;
   route = []; pending = null; keys.clear(); padV = [0,0];
-  if(key === 'marigot'){ stamina = 1; tired = false; }
   body.innerHTML = CONTENT[key]();
   modal.classList.add('open'); modalOpen = true; chime(659.25);
   modal.querySelector('.sheet').scrollTop = 0;
@@ -1700,7 +1751,7 @@ updateCamera(true);
 
 let last = performance.now();
 function frame(now){
-  const dt = Math.min(.05, (now-last)/1000); last = now;
+  const dt = clamp((now-last)/1000, 0, .05); last = now;      // some browsers report a first frame slightly in the past
   updatePlayer(dt); updateMovers(dt); updateAnimals(dt); updateDay(dt);
   updateCamera(false); updateProximity(); drawNight(now/1000);
   requestAnimationFrame(frame);
