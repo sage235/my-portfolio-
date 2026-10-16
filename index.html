@@ -1,31 +1,25 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>ASDODJI Le Sage — The Village Walk | Interactive Portfolio</title>
-<meta name="description" content="Interactive RPG portfolio of ASDODJI Le Sage, software engineering student at AUCA (Rwanda). Walk through the village, enter each hut, and watch the sun set over the paths.">
+<title>ASDODJI Le Sage — Le Village | Portfolio interactif</title>
+<meta name="description" content="Portfolio RPG interactif d'ASDODJI Le Sage, étudiant en génie logiciel à l'AUCA (Rwanda). Parcourez le village, entrez dans chaque hutte et regardez le soleil se coucher.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-/* =====================================================
-   1. TOKENS
-===================================================== */
 :root{
-  --a:0;                 /* 0 = noon, 1 = deep night (driven by JS) */
-  --dusk:0; --night:0; --sunp:0; --moonp:0;
+  --a:0; --dusk:0; --night:0; --sunp:0; --moonp:0;
   --sky-h:clamp(150px,24vh,230px);
-
   --ink:#2a1c14; --ink-soft:#6a5446;
   --panel:rgba(252,246,236,.93); --panel-solid:#fcf6ec;
   --line:#e3d2bb;
   --accent:#b83a26; --accent-ink:#fff;
   --gold:#e8a41c; --leaf:#2f6b3a;
   --wood:#6b4429; --wood-dark:#3b2314;
-
   --f-display:'Fraunces',Georgia,serif;
   --f-ui:'Plus Jakarta Sans',system-ui,sans-serif;
   --f-sign:'Space Mono',ui-monospace,monospace;
@@ -36,69 +30,53 @@ body[data-theme="night"]{
   --line:#352f5a;
   --accent:#e0553d;
 }
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:#12101f;font-family:var(--f-ui);color:var(--ink);-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit;cursor:pointer}
 a{color:inherit}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 
-/* =====================================================
-   2. SKY (sun, sunset, moon, stars)
-===================================================== */
 #sky{position:fixed;left:0;right:0;top:0;height:var(--sky-h);overflow:hidden;z-index:1}
 .sky-layer{position:absolute;inset:0}
 .sky-day{background:linear-gradient(180deg,#5fb0e8 0%,#a6d7f2 60%,#f6ecc9 100%)}
 .sky-dusk{background:linear-gradient(180deg,#34296a 0%,#9a3f72 42%,#f0804a 78%,#ffc468 100%);opacity:var(--dusk)}
 .sky-night{background:linear-gradient(180deg,#05071a 0%,#0e1235 55%,#241c4a 100%);opacity:var(--night)}
-
 .sun{position:absolute;right:16%;width:88px;height:88px;border-radius:50%;
   top:calc(14px + var(--sunp) * (var(--sky-h) - 34px));
   background:radial-gradient(circle,#fff6c0 0%,#ffd34d 55%,#f7b32b 100%);
-  box-shadow:0 0 60px 22px rgba(255,205,80,.55);
-  opacity:calc(1 - var(--night))}
+  box-shadow:0 0 60px 22px rgba(255,205,80,.55);opacity:calc(1 - var(--night))}
 .sun::after{content:'';position:absolute;inset:0;border-radius:50%;
   background:radial-gradient(circle,#ffb347 0%,#ff6a3d 70%,#e03a2a 100%);
   box-shadow:0 0 90px 36px rgba(255,100,50,.55);opacity:var(--dusk)}
-
 .moon{position:absolute;right:30%;width:70px;height:70px;border-radius:50%;
   top:calc(var(--sky-h) - var(--moonp) * (var(--sky-h) - 26px));
   background:radial-gradient(circle at 32% 30%,#fff 0%,#e8ecf5 55%,#aab3c8 100%);
   box-shadow:0 0 40px 8px rgba(220,230,255,.45);opacity:var(--night)}
 .moon::before{content:'';position:absolute;top:16px;left:18px;width:14px;height:14px;border-radius:50%;background:rgba(120,130,160,.35);box-shadow:26px 20px 0 -3px rgba(120,130,160,.3)}
-
 #stars{position:absolute;inset:0;pointer-events:none}
-.star{position:absolute;border-radius:50%;
-  opacity:clamp(0, calc((var(--a) - var(--t)) * 7), 1)}
+.star{position:absolute;border-radius:50%;opacity:clamp(0, calc((var(--a) - var(--t)) * 7), 1)}
 .star::after{content:'';display:block;width:100%;height:100%;border-radius:50%;background:#fff;
   box-shadow:0 0 6px 1px rgba(255,244,200,.8);animation:tw 2.6s ease-in-out infinite alternate;animation-delay:var(--d)}
 @keyframes tw{from{opacity:.35;transform:scale(.8)}to{opacity:1;transform:scale(1.15)}}
-
 .shoot{position:absolute;top:14%;left:62%;width:90px;height:2px;border-radius:2px;
   background:linear-gradient(90deg,rgba(255,255,255,0),#fff);opacity:0;transform:rotate(28deg);
   animation:shoot 11s linear infinite}
 @keyframes shoot{0%,86%{opacity:0;transform:translate(0,0) rotate(28deg)}
   88%{opacity:calc(var(--night));transform:translate(0,0) rotate(28deg)}
   97%{opacity:0;transform:translate(-220px,120px) rotate(28deg)}100%{opacity:0}}
-
 .cloud{position:absolute;height:26px;border-radius:30px;background:rgba(255,255,255,.85);
   opacity:calc(.9 - var(--a)*.8);animation:drift linear infinite}
 .cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%}
 .cloud::before{width:34px;height:34px;left:14px;top:-16px}
 .cloud::after{width:26px;height:26px;right:16px;top:-10px}
 @keyframes drift{from{transform:translateX(-160px)}to{transform:translateX(calc(100vw + 160px))}}
-
 .bird{position:absolute;width:22px;height:10px;opacity:calc(1 - var(--a)*2.2);animation:fly linear infinite}
 .bird path{animation:flap .5s ease-in-out infinite alternate;transform-origin:11px 8px}
 @keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(-.5)}}
 @keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(calc(100vw + 40px))}}
-
 .hills{position:absolute;left:0;bottom:-1px;width:100%;height:58px;display:block;
   filter:brightness(calc(1 - var(--night)*.7)) saturate(calc(1 - var(--night)*.3))}
 
-/* =====================================================
-   3. HUD
-===================================================== */
 .hud{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:50;
   width:calc(100% - 24px);max-width:1180px;display:flex;align-items:center;gap:14px;justify-content:space-between;
   padding:8px 12px 8px 10px;background:var(--panel);border:1px solid var(--line);border-radius:999px;
@@ -108,13 +86,11 @@ a{color:inherit}
 .avatar.fallback{display:grid;place-items:center;background:var(--accent);color:#fff;font-weight:800;font-size:.8rem}
 .who b{display:block;font-family:var(--f-display);font-size:1.05rem;line-height:1.1;white-space:nowrap}
 .who small{display:block;font-size:.72rem;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
 .fast{display:flex;gap:4px;list-style:none}
 .fast button{background:none;border:0;padding:7px 12px;border-radius:999px;font-size:.82rem;font-weight:600;transition:background .2s,color .2s;white-space:nowrap}
 .fast button:hover,.fast button.here{background:var(--accent);color:var(--accent-ink)}
 .fast button .tick{display:none;margin-left:5px;font-size:.7rem}
 .fast button.seen .tick{display:inline}
-
 .tools{display:flex;align-items:center;gap:6px;flex:none}
 .chip{font-size:.74rem;font-weight:700;padding:6px 11px;border-radius:999px;background:rgba(0,0,0,.06);white-space:nowrap}
 body[data-theme="night"] .chip{background:rgba(255,255,255,.09)}
@@ -135,19 +111,13 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 }
 @media (max-width:520px){ .chip{display:none} }
 
-/* =====================================================
-   4. THE WORLD
-===================================================== */
 #viewport{position:fixed;left:0;right:0;bottom:0;top:var(--sky-h);overflow:hidden;z-index:2;background:#6f9c4c;touch-action:none;cursor:crosshair}
 #world{position:absolute;left:0;top:0;will-change:transform;user-select:none;-webkit-user-select:none}
 #ground{position:absolute;left:0;top:0;display:block}
 #objects{position:absolute;left:0;top:0;width:0;height:0}
 #night{position:absolute;inset:0;pointer-events:none;z-index:20}
-
 .obj{position:absolute;transform:translate(-50%,-100%);pointer-events:none}
 .obj svg{display:block;width:100%;height:100%;overflow:visible}
-
-/* huts */
 .hut{pointer-events:auto;cursor:pointer;transform:translate(-50%,-100%);transition:filter .25s}
 .hut:hover,.hut.near{filter:brightness(1.08) drop-shadow(0 0 14px rgba(255,200,90,.55))}
 .lit{fill-opacity:calc(.3 + var(--a)*.7)}
@@ -156,8 +126,6 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 @keyframes flick{from{transform:scale(1,.9) skewX(-3deg)}to{transform:scale(1.06,1.1) skewX(3deg)}}
 .smoke{position:absolute;width:16px;height:16px;border-radius:50%;background:rgba(235,235,235,.7);opacity:0;animation:puff 4s ease-out infinite}
 @keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.5)}15%{opacity:.7}100%{opacity:0;transform:translate(26px,-90px) scale(2.6)}}
-
-/* signs in front of the doors */
 .sign{transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 4px rgba(0,0,0,.3));transition:transform .25s}
 .sign.near{transform:translate(-50%,-100%) scale(1.07)}
 .board{position:relative;min-width:126px;padding:7px 14px 8px;text-align:center;color:#f7ead2;line-height:1.1;
@@ -171,16 +139,12 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 .lantern{position:absolute;right:-16px;top:-10px;width:14px;height:20px;border-radius:4px 4px 6px 6px;background:#3b2314;border-top:3px solid #3b2314}
 .lantern::before{content:'';position:absolute;left:2px;top:2px;width:10px;height:14px;border-radius:3px;background:#ffd36a;
   opacity:calc(.25 + var(--a)*.75);box-shadow:0 0 calc(var(--a)*16px) calc(var(--a)*6px) rgba(255,190,70,.8)}
-
-/* gate */
 .gate{width:300px;height:170px;pointer-events:none}
 .gate .post{position:absolute;bottom:0;width:24px;height:140px;background:linear-gradient(90deg,#4b2d19,#6b4429);border-radius:4px 4px 0 0}
 .gate .p1{left:20px}.gate .p2{right:20px}
 .gate .beam{position:absolute;left:8px;right:8px;top:6px;height:50px;background:linear-gradient(180deg,#8d5c36,#6a4127);border:2px solid #4a2c18;border-radius:8px;
   display:grid;place-items:center;color:#f7ead2;font-family:var(--f-display);font-weight:700;font-size:1.02rem;text-align:center;line-height:1.1}
 .gate .beam small{display:block;font-family:var(--f-sign);font-weight:400;font-size:.6rem;opacity:.75;margin-bottom:2px}
-
-/* actors */
 .actor{position:absolute;width:60px;height:90px;transform:translate(-50%,-100%);pointer-events:none}
 .actor .bob{width:100%;height:100%;transform-origin:50% 100%}
 .sp{width:100%;height:100%;overflow:visible;display:block}
@@ -200,13 +164,11 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 .walking .v-fb .legR{animation:step var(--gait,.32s) ease-in-out infinite alternate-reverse}
 .walking .v-fb .armL{animation:armFB var(--gait,.32s) ease-in-out infinite alternate}
 .walking .v-fb .armR{animation:armFB var(--gait,.32s) ease-in-out infinite alternate-reverse}
-/* sprint: longer stride, higher knees, arm drive, forward lean */
 .running .bob{animation-name:bobRun}
 .running .v-side .legL,.running .v-side .legR{animation-name:swingRun}
 .running .v-side .armR{animation-name:swingArmRun}
 .running .v-fb .legL,.running .v-fb .legR{animation-name:stepRun}
 .running .v-fb .armL,.running .v-fb .armR{animation-name:armFBRun}
-/* riders: smooth ride bounce */
 .actor.mounted.ride-donkey.walking .bob{animation-name:bobDonkey}
 .actor.mounted.ride-bike.walking .bob{animation-name:bobBike}
 @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
@@ -221,14 +183,11 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 @keyframes stepRun{from{transform:translateY(0)}to{transform:translateY(-11px)}}
 @keyframes armFB{from{transform:translateY(-2px)}to{transform:translateY(3px)}}
 @keyframes armFBRun{from{transform:translateY(-5px)}to{transform:translateY(7px)}}
-
 .animal{position:absolute;transform:translate(-50%,-100%);pointer-events:none}
 .animal svg{display:block;width:100%;height:100%;overflow:visible}
 .animal.flip svg{transform:scaleX(-1)}
 .animal.moving .bob{animation:hop .26s ease-in-out infinite alternate}
 @keyframes hop{from{transform:translateY(0)}to{transform:translateY(-4px)}}
-
-/* rides: bicycles and donkeys */
 .rider{width:100%;height:100%;transform-origin:50% 100%;transform:translateY(calc(var(--lift,0px) * -1)) rotate(var(--lean,0deg));transition:transform .2s ease-out}
 .actor.mounted.ride-bike{--lift:24px}.actor.mounted.ride-donkey{--lift:30px}
 .mount{position:absolute;bottom:0;pointer-events:none;display:none}
@@ -267,8 +226,6 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes hoof{from{transform:rotate(22deg)}to{transform:rotate(-22deg)}}
 @keyframes wag{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
-
-/* articulated riders */
 .rig{position:absolute;left:-50px;bottom:-6px;width:160px;height:120px;overflow:visible;pointer-events:none;display:none}
 .actor.rigged .rig{display:block}
 .actor.rigged .rider{visibility:hidden}
@@ -285,11 +242,9 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 .animal.drinking .dhead{animation:none!important;transform:rotate(27deg)}
 .big{font-family:var(--f-display);font-size:2rem;line-height:1.15;color:var(--ink)}
 .mean{color:var(--accent);font-weight:700}
-.motto{font-family:var(--f-display);font-style:italic;font-size:1.3rem;line-height:1.4;color:var(--ink)}
-
+.motto{font-family:var(--f-display);font-style:italic;font-size:1.15rem;line-height:1.5;color:var(--ink)}
 .dust{position:absolute;width:14px;height:8px;border-radius:50%;background:rgba(214,170,120,.7);transform:translate(-50%,-50%);pointer-events:none;animation:dust .55s ease-out forwards}
 @keyframes dust{to{opacity:0;transform:translate(-50%,-90%) scale(2.4)}}
-
 .say{position:absolute;left:50%;bottom:100%;margin-bottom:6px;transform:translateX(-50%) scale(0);transform-origin:50% 100%;
   background:#fff8e6;color:#2a1c14;border:2px solid #4a2c18;border-radius:14px;padding:6px 12px;font-size:.78rem;font-weight:700;line-height:1.3;white-space:nowrap;
   transition:transform .22s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:3;box-shadow:0 5px 14px rgba(0,0,0,.3);text-align:center}
@@ -297,29 +252,35 @@ body[data-theme="night"] #themeBtn .i-moon{display:block}
 .say::after{content:'';position:absolute;left:50%;top:100%;margin-left:-6px;border:6px solid transparent;border-top-color:#4a2c18}
 .say.go{background:var(--gold);cursor:pointer;pointer-events:auto;padding:8px 14px}
 .say.go small{display:block;font-weight:600;opacity:.8;font-size:.7rem}
-
 .firefly{position:absolute;width:5px;height:5px;border-radius:50%;background:#e9ff7a;box-shadow:0 0 10px 3px rgba(230,255,100,.8);
   opacity:clamp(0, calc((var(--a) - .6) * 3), 1);animation:wander var(--dur) ease-in-out infinite alternate;pointer-events:none}
 @keyframes wander{from{transform:translate(0,0)}50%{transform:translate(var(--dx),calc(var(--dy)*-.5))}to{transform:translate(calc(var(--dx)*-.6),var(--dy))}}
 
-/* =====================================================
-   5. CONTROLS
-===================================================== */
 .hint{position:fixed;left:16px;bottom:16px;z-index:40;display:flex;gap:10px;align-items:center;padding:9px 16px;border-radius:999px;
-  background:rgba(30,20,16,.85);color:#fbf3e6;font-size:.78rem;font-weight:600;backdrop-filter:blur(8px)}
+  background:rgba(30,20,16,.85);color:#fbf3e6;font-size:.78rem;font-weight:600;backdrop-filter:blur(8px);flex-wrap:wrap;max-width:calc(100vw - 32px)}
 .hint kbd{font-family:var(--f-sign);font-size:.72rem;background:rgba(255,255,255,.18);padding:2px 7px;border-radius:5px}
-.dpad{position:fixed;right:14px;bottom:18px;z-index:40;display:none;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:5px;padding:10px;border-radius:26px;background:rgba(30,20,16,.75);backdrop-filter:blur(8px);touch-action:none}
-.dpad button{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.12);color:#fff;border-radius:14px;font-size:1.1rem;touch-action:none}
-.dpad button:active{background:var(--accent)}
-.dpad .u{grid-column:2;grid-row:1}.dpad .l{grid-column:1;grid-row:2}.dpad .o{grid-column:2;grid-row:2;font-weight:800;font-size:.8rem}.dpad .r{grid-column:3;grid-row:2}.dpad .d{grid-column:2;grid-row:3}.dpad .f{grid-column:1;grid-row:3;font-size:.62rem;font-weight:800}.dpad .s{grid-column:3;grid-row:3;font-size:.62rem;font-weight:800}
-@media (pointer:coarse){ .dpad{display:grid} .hint{display:none} }
-
+.joystick{position:fixed;inset:0;z-index:40;pointer-events:none;display:none}
+@media (pointer:coarse){ .joystick{display:block} .hint{display:none} }
+.joy-base{position:fixed;width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(30,20,16,.5),rgba(30,20,16,.72));
+  border:2px solid rgba(255,255,255,.25);backdrop-filter:blur(8px);
+  left:24px;bottom:24px;pointer-events:auto;touch-action:none;
+  opacity:.55;transition:opacity .2s,transform .2s}
+.joy-base.active{opacity:.95;transform:scale(1.05)}
+.joy-knob{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;
+  border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--accent) 60%,#7a2418);
+  box-shadow:0 4px 14px rgba(0,0,0,.5);pointer-events:none;
+  transition:transform .08s ease-out}
+.joy-actions{position:fixed;right:20px;bottom:24px;display:flex;flex-direction:column;gap:10px;pointer-events:auto}
+.joy-btn{width:64px;height:64px;border-radius:50%;border:2px solid rgba(255,255,255,.35);
+  background:rgba(30,20,16,.75);color:#fbf3e6;font-weight:800;font-size:.78rem;
+  backdrop-filter:blur(8px);touch-action:none;transition:transform .15s,background .15s}
+.joy-btn:active,.joy-btn.on{background:var(--accent);transform:scale(.92)}
+.joy-btn.run{background:rgba(47,107,58,.85)}
+.joy-btn.ride{background:rgba(184,58,38,.85)}
 .toast{position:fixed;left:50%;top:calc(var(--sky-h) + 20px);transform:translate(-50%,-30px);z-index:60;background:#1c1411;color:#fbf3e6;padding:10px 20px;border-radius:999px;font-weight:700;font-size:.85rem;opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 10px 28px rgba(0,0,0,.4);max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
-/* =====================================================
-   6. INTRO + MODAL
-===================================================== */
 .overlay{position:fixed;inset:0;z-index:100;background:rgba(14,10,8,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .35s}
 .overlay.open{opacity:1;pointer-events:auto}
 .sheet{position:relative;background:var(--panel-solid);color:var(--ink);border:1px solid var(--line);border-radius:28px;width:100%;max-width:940px;max-height:88vh;overflow:auto;padding:40px 40px 36px;box-shadow:0 30px 80px rgba(0,0,0,.5);transform:translateY(22px) scale(.97);transition:transform .4s cubic-bezier(.2,.8,.2,1);user-select:text;-webkit-user-select:text}
@@ -334,7 +295,6 @@ body[data-theme="night"] .x{background:rgba(255,255,255,.1)}
 .sheet p+p{margin-top:12px}
 .sheet strong{color:var(--ink)}
 .quote{margin-top:22px;padding:14px 18px;border-left:4px solid var(--accent);background:rgba(184,58,38,.08);border-radius:0 14px 14px 0;font-family:var(--f-display);font-style:italic;max-width:62ch}
-
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:18px}
 @media (max-width:720px){.grid{grid-template-columns:1fr}.sheet{padding:30px 22px 26px}}
 .card{border:1px solid var(--line);border-radius:18px;padding:18px 20px;background:rgba(0,0,0,.025);display:flex;flex-direction:column;gap:6px;transition:transform .2s,border-color .2s}
@@ -346,14 +306,12 @@ body[data-theme="night"] .card{background:rgba(255,255,255,.035)}
 .tags span{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(47,107,58,.14);color:var(--leaf)}
 body[data-theme="night"] .tags span{color:#8fd19a;background:rgba(143,209,154,.12)}
 .card .lnk{align-self:flex-start;margin-top:6px;font-size:.82rem;font-weight:800;color:var(--accent);text-decoration:none;border-bottom:2px solid currentColor}
-.card .soon{font-size:.74rem;color:var(--ink-soft)}
 .skill-list{list-style:none;display:flex;flex-direction:column;gap:9px;margin-top:8px;font-size:.92rem;color:var(--ink-soft);line-height:1.5}
 .skill-list b{color:var(--ink)}
 .timeline{display:flex;flex-direction:column;gap:14px;margin-top:16px}
 .when{font-family:var(--f-sign);font-size:.76rem;color:var(--leaf);font-weight:700}
 body[data-theme="night"] .when{color:#8fd19a}
 .school-name{color:var(--accent);font-weight:700;font-size:.92rem}
-
 .actions{display:flex;flex-direction:column;gap:10px;margin-top:22px;max-width:520px}
 .btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 20px;border-radius:999px;border:0;background:var(--accent);color:#fff;font-weight:800;font-size:.92rem;text-decoration:none;box-shadow:0 6px 18px rgba(184,58,38,.3);transition:transform .2s,box-shadow .2s}
 .btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(184,58,38,.4)}
@@ -361,6 +319,13 @@ body[data-theme="night"] .when{color:#8fd19a}
 .btn.in{background:#0a66c2;box-shadow:0 6px 18px rgba(10,102,194,.3)}
 .btn.gh{background:#24292f}
 .open-to{margin-top:20px;font-size:.9rem}
+
+/* Empty state (certifications) */
+.empty-state{margin-top:22px;padding:40px 24px;border:2px dashed var(--line);border-radius:22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty-state .icon{font-size:2.6rem;line-height:1;filter:grayscale(.15)}
+.empty-state h4{font-family:var(--f-display);font-size:1.25rem}
+.empty-state p{color:var(--ink-soft);font-size:.92rem;max-width:44ch;line-height:1.7}
+.empty-state .btn{margin-top:6px;align-self:center}
 
 @media (prefers-reduced-motion:reduce){
   .cloud,.bird,.firefly,.shoot,.smoke{animation:none}
@@ -370,7 +335,6 @@ body[data-theme="night"] .when{color:#8fd19a}
 </head>
 <body data-theme="day">
 
-<!-- ============ SKY ============ -->
 <div id="sky" aria-hidden="true">
   <div class="sky-layer sky-day"></div>
   <div class="sky-layer sky-dusk"></div>
@@ -390,37 +354,36 @@ body[data-theme="night"] .when{color:#8fd19a}
   </svg>
 </div>
 
-<!-- ============ HUD ============ -->
 <header class="hud">
   <div class="who">
     <img class="avatar" src="photo.jpg" alt="ASDODJI Le Sage"
          onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'avatar fallback',textContent:'LS'}))">
     <div>
       <b>ASDODJI Le Sage</b>
-      <small>Software engineer · AUCA, Rwanda</small>
+      <small data-i18n="tagline">Software engineer · AUCA, Rwanda</small>
     </div>
   </div>
 
-  <ul class="fast" id="fast" aria-label="Walk to a hut"></ul>
+  <ul class="fast" id="fast" aria-label="Fast travel"></ul>
 
   <div class="tools">
-    <span class="chip" id="progress">Explored 0/5</span>
-    <a class="ibtn links" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener" aria-label="LinkedIn profile" title="LinkedIn">in</a>
-    <a class="ibtn links" href="https://github.com/sage235" target="_blank" rel="noopener" aria-label="GitHub profile" title="GitHub">
+    <span class="chip" id="progress">Explored 0/7</span>
+    <a class="ibtn links" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener" aria-label="LinkedIn" title="LinkedIn">in</a>
+    <a class="ibtn links" href="https://github.com/sage235" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.58.24 2.75.12 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
     </a>
-    <button class="ibtn" id="soundBtn" aria-pressed="false" aria-label="Toggle village music" title="Music">
+    <button class="ibtn" id="soundBtn" aria-pressed="false" aria-label="Music" title="Music">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path class="waves" d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
     </button>
-    <button class="ibtn" id="themeBtn" aria-label="Switch between day and night" title="Day / night">
+    <button class="ibtn" id="themeBtn" aria-label="Day / night" title="Day / night">
       <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M1.5 12H4M20 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
       <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
     </button>
+    <button class="ibtn" id="langBtn" aria-label="Change language" title="FR / EN">FR</button>
   </div>
 </header>
 
-<!-- ============ WORLD ============ -->
-<main id="viewport" aria-label="Interactive village. Use the buttons at the top to visit each hut.">
+<main id="viewport" aria-label="Interactive village">
   <div id="world">
     <svg id="ground"></svg>
     <div id="objects"></div>
@@ -428,35 +391,39 @@ body[data-theme="night"] .when{color:#8fd19a}
   <canvas id="night"></canvas>
 </main>
 
-<div class="hint"><span>Walk</span> <kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> <span>or</span> <kbd>WASD</kbd> <kbd>ZQSD</kbd> <span>· Enter a door</span> <kbd>E</kbd> <span>· Ride</span> <kbd>F</kbd> <span>· Sprint</span> <kbd>Shift</kbd> <span>· Or click the ground</span></div>
+<div class="hint" id="hint">
+  <span data-i18n="hint_walk">Walk</span> <kbd>🕹️</kbd> <kbd>←↑→↓</kbd> <kbd>WASD</kbd>
+  <span>·</span> <span data-i18n="hint_enter">Enter a door</span> <kbd>E</kbd>
+  <span>·</span> <span data-i18n="hint_ride">Ride</span> <kbd>F</kbd>
+  <span>·</span> <span data-i18n="hint_sprint">Sprint</span> <kbd>Shift</kbd>
+</div>
 
-<div class="dpad" id="dpad">
-  <button class="u" data-v="0,-1" aria-label="Up">▲</button>
-  <button class="l" data-v="-1,0" aria-label="Left">◀</button>
-  <button class="o" id="actBtn" aria-label="Enter">GO</button>
-  <button class="r" data-v="1,0" aria-label="Right">▶</button>
-  <button class="d" data-v="0,1" aria-label="Down">▼</button>
-  <button class="f" id="rideBtn" aria-label="Get on or off a ride">RIDE</button>
-  <button class="s" id="runBtn" aria-label="Hold to sprint">RUN</button>
+<div class="joystick" id="joystick">
+  <div class="joy-base" id="joyBase">
+    <div class="joy-knob" id="joyKnob"></div>
+  </div>
+  <div class="joy-actions">
+    <button id="actBtn" class="joy-btn go">GO</button>
+    <button id="rideBtn" class="joy-btn ride">RIDE</button>
+    <button id="runBtn" class="joy-btn run">RUN</button>
+  </div>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<!-- Intro -->
 <div class="overlay open" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
   <div class="sheet small">
-    <div class="kicker">Portfolio of ASDODJI Le Sage</div>
-    <h2 id="introTitle">Welcome to my village.</h2>
-    <p>Each hut holds a piece of my story: who I am, what I build, what I know, where I study and how to reach me. Follow the dirt paths, read the signs, and step inside.</p>
-    <p><strong>Walk</strong> with the arrow keys, WASD or ZQSD (hold Shift to sprint). Press <strong>E</strong> at a door to go in. On a phone, use the pad or tap the ground. See a <strong>bicycle</strong> or a <strong>donkey</strong>? Stand next to it and press <strong>F</strong> to hop on (the bike is the fastest). Tired? The <strong>marigot</strong> has cool water, a stone to rest on and a word for the day. The moon button lets the sun set.</p>
-    <div class="actions"><button class="btn" id="startBtn">Start walking</button></div>
+    <div class="kicker" data-i18n="intro_kicker">Portfolio of ASDODJI Le Sage</div>
+    <h2 id="introTitle" data-i18n="intro_title">Welcome to my village.</h2>
+    <p data-i18n="intro_p1">Each hut holds a piece of my story...</p>
+    <p data-i18n="intro_p2">Walk with the joystick or arrow keys...</p>
+    <div class="actions"><button class="btn" id="startBtn" data-i18n="start">Start walking</button></div>
   </div>
 </div>
 
-<!-- Hut interior -->
 <div class="overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="sheet">
-    <button class="x" id="closeBtn" aria-label="Close and go back outside">✕</button>
+    <button class="x" id="closeBtn" aria-label="Close">✕</button>
     <div id="modalBody"></div>
   </div>
 </div>
@@ -465,9 +432,6 @@ body[data-theme="night"] .when{color:#8fd19a}
 (() => {
 'use strict';
 
-/* =====================================================
-   0. HELPERS
-===================================================== */
 const $ = s => document.querySelector(s);
 const root = document.documentElement;
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
@@ -478,28 +442,97 @@ const rand = rng(235);
 const rr = (a,b) => a + rand()*(b-a);
 const coarse = matchMedia('(pointer:coarse)').matches;
 
+/* =====================================================
+   I18N — FR / EN
+===================================================== */
+const I18N = {
+  en: {
+    tagline:'Software engineering student · AUCA, Rwanda',
+    explored:'Explored',
+    intro_kicker:'Portfolio of ASDODJI Le Sage',
+    intro_title:'Welcome to my village.',
+    intro_p1:"Each hut holds a piece of my story: who I am, what I build, what I know, where I study, and how to reach me. Follow the dirt paths, read the signs, and step inside.",
+    intro_p2:"Move with the joystick (or the arrow keys / WASD). Hold Shift to sprint. Press E at a door to enter. See a bicycle or a donkey? Stand next to it and press F to hop on. The marigot has cool water and a stone to rest on. The moon button lets the sun set.",
+    start:'Start walking',
+    hint_walk:'Walk', hint_enter:'Enter a door', hint_ride:'Ride', hint_sprint:'Sprint',
+    enter_hut:'Enter', rest_at:'Rest at',
+    no_ride:'No ride close enough. Look for a bicycle or a donkey.',
+    music_on:'Village music on', music_off:'Village music off',
+    sunset:'The sun sets over the village… the stars come out.',
+    sunrise:'A new day begins in the village.',
+    all_seen:"You have seen the whole village. The fireside is the place to say hello.",
+    press_e:'Press E or click', tap_go:'Tap GO', press_f:'Press F', tap_ride:'Tap RIDE',
+    hop_bike:'Hop on the bicycle', hop_donkey:'Hop on the donkey',
+    on_bike:'On the bicycle: fast, but slow to start and stop. Press F to get off.',
+    on_donkey:'On the donkey: hold the rope, slow and steady. Press F to get off.',
+    resume:'Download my resume (PDF)',
+    hut_about:'About', hut_workshop:'Projects', hut_skills:'Skills',
+    hut_school:'Education', hut_certs:'Certifications', hut_contact:'Contact', hut_marigot:'Marigot',
+    name_about:'the Hut of Wisdom', name_workshop:'the Workshop', name_skills:'the Granary',
+    name_school:'the School', name_certs:'the Certification Hut', name_contact:'the Palaver Tree', name_marigot:'the Marigot',
+    sign_about:'About me', sign_workshop:'The Workshop', sign_skills:'The Granary',
+    sign_school:'The School', sign_certs:'Certifications', sign_contact:'Palaver Tree', sign_marigot:'Rest & letters',
+    lang_switched:'Language: English'
+  },
+  fr: {
+    tagline:'Étudiant en génie logiciel · AUCA, Rwanda',
+    explored:'Exploré',
+    intro_kicker:'Portfolio de ASDODJI Le Sage',
+    intro_title:'Bienvenue dans mon village.',
+    intro_p1:"Chaque hutte renferme une part de mon histoire : qui je suis, ce que je construis, ce que je sais, où j'étudie, et comment me joindre. Suis les chemins de terre, lis les panneaux, et entre.",
+    intro_p2:"Déplace-toi avec le joystick (ou les flèches / WASD). Maintiens Shift pour sprinter. Appuie sur E devant une porte pour entrer. Tu vois un vélo ou un âne ? Place-toi à côté et appuie sur F pour monter. Le marigot a de l'eau fraîche et une pierre pour se reposer. Le bouton lune fait tomber le soleil.",
+    start:'Commencer la promenade',
+    hint_walk:'Marcher', hint_enter:'Entrer', hint_ride:'Monter', hint_sprint:'Sprinter',
+    enter_hut:'Entrer dans', rest_at:'Se reposer à',
+    no_ride:'Aucun moyen de transport à proximité. Cherche un vélo ou un âne.',
+    music_on:'Musique du village activée', music_off:'Musique du village désactivée',
+    sunset:'Le soleil se couche sur le village… les étoiles apparaissent.',
+    sunrise:'Un nouveau jour se lève dans le village.',
+    all_seen:"Tu as vu tout le village. Le feu de camp est l'endroit pour dire bonjour.",
+    press_e:'Appuie sur E ou clique', tap_go:'Touche GO', press_f:'Appuie sur F', tap_ride:'Touche RIDE',
+    hop_bike:'Monte sur le vélo', hop_donkey:"Monte sur l'âne",
+    on_bike:"Sur le vélo : rapide, mais lent à démarrer et à s'arrêter. Appuie sur F pour descendre.",
+    on_donkey:"Sur l'âne : tiens la corde, lentement mais sûrement. Appuie sur F pour descendre.",
+    resume:'Télécharger mon CV (PDF)',
+    hut_about:'À propos', hut_workshop:'Projets', hut_skills:'Compétences',
+    hut_school:'Formation', hut_certs:'Certifications', hut_contact:'Contact', hut_marigot:'Marigot',
+    name_about:'la Hutte de la Sagesse', name_workshop:"l'Atelier", name_skills:'le Grenier',
+    name_school:"l'École", name_certs:'la Hutte des Certifications', name_contact:"l'Arbre à Palabres", name_marigot:'le Marigot',
+    sign_about:'À propos', sign_workshop:"L'Atelier", sign_skills:'Le Grenier',
+    sign_school:"L'École", sign_certs:'Certifications', sign_contact:'Arbre à palabres', sign_marigot:'Repos & lettres',
+    lang_switched:'Langue : Français'
+  }
+};
+let LANG = (() => {
+  const saved = localStorage.getItem('lang');
+  if(saved === 'fr' || saved === 'en') return saved;
+  return (navigator.language || 'en').toLowerCase().startsWith('fr') ? 'fr' : 'en';
+})();
+const t = k => (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k;
+
+/* =====================================================
+   1. WORLD DATA
+===================================================== */
 const W = 2400, H = 2150;
 const viewport = $('#viewport'), world = $('#world'), objects = $('#objects'), ground = $('#ground');
 ground.setAttribute('width', W); ground.setAttribute('height', H); ground.setAttribute('viewBox', `0 0 ${W} ${H}`);
 world.style.width = W + 'px'; world.style.height = H + 'px';
 
-/* =====================================================
-   1. WORLD DATA
-===================================================== */
 const HUTS = [
-  { key:'about',    x:700,  y:560,  type:'round',   sign:['Hut I','About me'],        label:'About',    name:'the Hut of Wisdom',  blurb:'Who I am and how I work', col:[-115,-70,230,70] },
-  { key:'workshop', x:1650, y:900,  type:'forge',   sign:['Hut II','The Workshop'],   label:'Projects', name:'the Workshop',       blurb:'7 projects built so far', col:[-120,-70,240,70] },
-  { key:'skills',   x:700,  y:1280, type:'granary', sign:['Hut III','The Granary'],   label:'Skills',   name:'the Granary',        blurb:'My tools and skills',      col:[-110,-60,220,60] },
-  { key:'school',   x:1650, y:1620, type:'school',  sign:['Hut IV','The School'],     label:'Education',name:'the School',         blurb:'Where I study',            col:[-115,-70,230,70] },
-  { key:'contact',  x:1150, y:1880, type:'tree',    sign:['Fireside','Palaver Tree'], label:'Contact',  name:'the Palaver Tree',   blurb:'Come and say hello',       col:[-48,-60,96,60] },
-  { key:'marigot',  x:640,  y:1850, type:'water',   sign:['Marigot','Rest & words'],  label:'Marigot',  name:'the Marigot',        blurb:'Drink, rest and read the word of the day', verb:'Rest at', col:[-70,-44,140,44] }
+  { key:'about',    x:700,  y:560,  type:'round',   label:'hut_about',    col:[-115,-70,230,70] },
+  { key:'workshop', x:1650, y:900,  type:'forge',   label:'hut_workshop', col:[-120,-70,240,70] },
+  { key:'skills',   x:700,  y:1280, type:'granary', label:'hut_skills',   col:[-110,-60,220,60] },
+  { key:'school',   x:1650, y:1620, type:'school',  label:'hut_school',   col:[-115,-70,230,70] },
+  { key:'certs',    x:1150, y:1230, type:'round',   label:'hut_certs',    col:[-115,-70,230,70] },
+  { key:'contact',  x:1150, y:1880, type:'tree',    label:'hut_contact',  col:[-48,-60,96,60] },
+  { key:'marigot',  x:640,  y:1850, type:'water',   label:'hut_marigot',  verb:true, col:[-70,-44,140,44] }
 ];
 const SPAWN = { x:1200, y:270 };
 const MAIN_PATH = [[1200,170],[1200,340],[960,500],[700,660],[860,820],[1250,900],[1650,1000],[1500,1130],[1150,1230],[700,1380],[900,1500],[1300,1560],[1650,1720],[1500,1850],[1150,1980]];
 const POND = { cx:1960, cy:430, rx:175, ry:95 };
 const WELL = { x:390, y:940 };
 const BRANCHES = [ [[1200,340],[1450,395],[1730,470]], [[700,660],[540,790],[430,900]], [[900,1500],[870,1700],[810,1850],[740,1950],[650,1956]] ];
-const MG = { cx:420, cy:1780, rx:190, ry:100 };   // the marigot (watering hole)
+const MG = { cx:420, cy:1780, rx:190, ry:100 };
 
 function smoothPath(pts){
   let d = `M${pts[0][0]},${pts[0][1]}`;
@@ -511,7 +544,7 @@ function smoothPath(pts){
 }
 
 /* =====================================================
-   2. GROUND (grass, field, pond, dirt paths)
+   2. GROUND
 ===================================================== */
 let g = `<defs>
   <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86b45a"/><stop offset=".5" stop-color="#78a84f"/><stop offset="1" stop-color="#6c9a47"/></linearGradient>
@@ -531,26 +564,22 @@ for(let i=0;i<190;i++){
   const x=rr(20,W-20), y=rr(20,H-20), c=FLOWER[(rand()*FLOWER.length)|0];
   g += `<circle cx="${x}" cy="${y}" r="3.2" fill="${c}"/><circle cx="${x}" cy="${y}" r="1.2" fill="#c47b1c"/>`;
 }
-// crop field
 g += `<rect x="1850" y="1130" width="420" height="270" rx="16" fill="url(#rows)" stroke="#6b4a28" stroke-width="4"/>`;
-// pond
 g += `<ellipse cx="${POND.cx}" cy="${POND.cy+8}" rx="${POND.rx+14}" ry="${POND.ry+12}" fill="#b9a36f"/>
 <ellipse cx="${POND.cx}" cy="${POND.cy}" rx="${POND.rx}" ry="${POND.ry}" fill="#4f9bc2"/>
 <ellipse cx="${POND.cx-20}" cy="${POND.cy-14}" rx="${POND.rx*.7}" ry="${POND.ry*.6}" fill="#6bb6d8" opacity=".7"/>
 <ellipse class="ripple" cx="${POND.cx+40}" cy="${POND.cy+10}" rx="50" ry="22" fill="none" stroke="#fff" stroke-width="2" opacity=".5"><animate attributeName="rx" values="20;70" dur="4s" repeatCount="indefinite"/><animate attributeName="ry" values="9;32" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".6;0" dur="4s" repeatCount="indefinite"/></ellipse>`;
 for(let i=0;i<7;i++) g += `<ellipse cx="${POND.cx+rr(-110,110)}" cy="${POND.cy+rr(-50,50)}" rx="13" ry="7" fill="#4f9a45"/>`;
-// marigot
 g += `<ellipse cx="${MG.cx}" cy="${MG.cy+10}" rx="${MG.rx+28}" ry="${MG.ry+18}" fill="#8a6a40"/>
 <ellipse cx="${MG.cx}" cy="${MG.cy+6}" rx="${MG.rx+13}" ry="${MG.ry+9}" fill="#a98a58"/>
 <ellipse cx="${MG.cx}" cy="${MG.cy}" rx="${MG.rx}" ry="${MG.ry}" fill="#3f8c8a"/>
 <ellipse cx="${MG.cx-24}" cy="${MG.cy-12}" rx="${MG.rx*.68}" ry="${MG.ry*.58}" fill="#58a7a3" opacity=".75"/>
 <ellipse cx="${MG.cx+30}" cy="${MG.cy+14}" rx="40" ry="16" fill="none" stroke="#fff" stroke-width="2" opacity=".5"><animate attributeName="rx" values="14;74" dur="5s" repeatCount="indefinite"/><animate attributeName="ry" values="6;30" dur="5s" repeatCount="indefinite"/><animate attributeName="opacity" values=".6;0" dur="5s" repeatCount="indefinite"/></ellipse>`;
 for(let i=0;i<8;i++) g += `<ellipse cx="${MG.cx+rr(-130,120)}" cy="${MG.cy+rr(-55,55)}" rx="${rr(10,16)}" ry="${rr(5,8)}" fill="#4f9a45"/>`;
-for(let i=0;i<22;i++){ const t = rr(-1.1,1.1), k = 1.05 + rr(.02,.14);
-  g += `<ellipse cx="${MG.cx+Math.cos(t)*MG.rx*k}" cy="${MG.cy+10+Math.sin(t)*MG.ry*k}" rx="${rr(2.5,4.5)}" ry="${rr(1.6,2.6)}" fill="#6e5230" opacity=".7"/>`; }
-for(let i=0;i<9;i++){ const t = rr(2.2,5.4); g += `<ellipse cx="${MG.cx+Math.cos(t)*(MG.rx+24)}" cy="${MG.cy+10+Math.sin(t)*(MG.ry+14)}" rx="${rr(8,15)}" ry="${rr(5,9)}" fill="#9b968b" stroke="#6b665c" stroke-width="1.5"/>`; }
+for(let i=0;i<22;i++){ const t0 = rr(-1.1,1.1), k = 1.05 + rr(.02,.14);
+  g += `<ellipse cx="${MG.cx+Math.cos(t0)*MG.rx*k}" cy="${MG.cy+10+Math.sin(t0)*MG.ry*k}" rx="${rr(2.5,4.5)}" ry="${rr(1.6,2.6)}" fill="#6e5230" opacity=".7"/>`; }
+for(let i=0;i<9;i++){ const t0 = rr(2.2,5.4); g += `<ellipse cx="${MG.cx+Math.cos(t0)*(MG.rx+24)}" cy="${MG.cy+10+Math.sin(t0)*(MG.ry+14)}" rx="${rr(8,15)}" ry="${rr(5,9)}" fill="#9b968b" stroke="#6b665c" stroke-width="1.5"/>`; }
 
-// paths
 const mainD = smoothPath(MAIN_PATH);
 g += `<g id="paths" fill="none" stroke-linecap="round" stroke-linejoin="round">`;
 BRANCHES.forEach((b,bi) => { const d = smoothPath(b);
@@ -561,7 +590,6 @@ g += `<path id="mainPath" d="${mainD}" stroke="#a9693f" stroke-width="82"/>
 <path d="${mainD}" stroke="#b9794c" stroke-width="3" stroke-dasharray="3 22" opacity=".6"/></g>`;
 ground.innerHTML = g;
 
-// sample path
 const mp = $('#mainPath'), total = mp.getTotalLength();
 const S = [];
 for(let l=0; l<=total; l += 12){ const p = mp.getPointAtLength(l); S.push([p.x,p.y]); }
@@ -572,7 +600,6 @@ const BR = BRANCHES.map((b,bi) => { const el = document.getElementById('br'+bi),
   return { pts, j:nearestSample(pts[0][0],pts[0][1]) }; });
 const NETP = S.concat(...BR.map(b => b.pts));
 
-// pebbles along path edge
 let peb = '';
 for(let i=0;i<S.length;i+=2){
   const a = rand()*6.28, r = rr(36,50);
@@ -581,10 +608,10 @@ for(let i=0;i<S.length;i+=2){
 ground.insertAdjacentHTML('beforeend', peb);
 
 /* =====================================================
-   3. OBJECTS (huts, signs, trees, gate…)
+   3. OBJECTS
 ===================================================== */
-const colliders = [];       // rects {x,y,w,h} or ellipses {e:1,cx,cy,rx,ry}
-const lights = [];          // night lights {x,y,r,warm,flick}
+const colliders = [];
+const lights = [];
 function addObj(html, x, y, w, h, cls = '', z = y){
   const d = document.createElement('div');
   d.className = 'obj ' + cls; d.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:${Math.round(z)}`;
@@ -652,7 +679,6 @@ function hutSVG(type){
       <path d="M118,238 q-11,-4 -10,-19 q2,-12 13,-12 q11,0 13,12 q1,15 -10,19Z" fill="#a24b2c"/><path d="M110,212 q11,-6 22,0" stroke="#7d3820" stroke-width="2" fill="none"/>
       <path d="M176,238 q-9,-8 -1,-18 q9,8 1,18Z" fill="#c9a24a" stroke="#8f6f26" stroke-width="1.5"/></svg>`;
   }
-  /* tree: palaver tree + campfire */
   return `<svg viewBox="0 0 320 290"><ellipse cx="160" cy="279" rx="150" ry="13" fill="rgba(0,0,0,.25)"/>
     <rect x="58" y="248" width="62" height="20" rx="9" fill="#6b4429"/><rect x="200" y="248" width="62" height="20" rx="9" fill="#6b4429"/>
     <path d="M138,272 Q146,200 128,150 Q148,170 160,160 Q172,170 192,150 Q174,200 182,272Z" fill="#5a3820"/>
@@ -663,48 +689,42 @@ function hutSVG(type){
     <g class="flames"><path d="M144,266 Q148,238 160,222 Q172,238 176,266Z" fill="#f59e0b"/><path d="M152,266 Q158,246 160,236 Q164,248 168,266Z" fill="#ef4444"/></g></svg>`;
 }
 
-// gate
 (() => {
   const x = 1200, y = 200;
-  const el = addObj(`<div class="post p1"></div><div class="post p2"></div><div class="beam"><div><small>Welcome, traveler</small>Le Sage's Village</div></div>`, x, y, 300, 170, 'gate');
+  addObj(`<div class="post p1"></div><div class="post p2"></div><div class="beam" id="gateBeam"><div><small data-i18n="gate_small">Welcome, traveler</small><span data-i18n="gate_title">Le Sage's Village</span></div></div>`, x, y, 300, 170, 'gate');
   colliders.push({x:x-130,y:y-28,w:28,h:28},{x:x+102,y:y-28,w:28,h:28});
   lights.push({x:x-118,y:y-120,r:120,warm:.7},{x:x+118,y:y-120,r:120,warm:.7});
 })();
 
-// huts + signs
 const hutEls = {}, signEls = {};
-HUTS.forEach((h,i) => {
+HUTS.forEach(h => {
   const el = addObj(hutSVG(h.type), h.x, h.y, 320, 290, 'hut');
-  el.dataset.key = h.key; el.setAttribute('role','button'); el.setAttribute('aria-label', 'Enter ' + h.name);
+  el.dataset.key = h.key; el.setAttribute('role','button');
   if(h.type==='forge') el.insertAdjacentHTML('beforeend', [0,1.3,2.6].map(d => `<span class="smoke" style="left:240px;top:56px;animation-delay:${d}s"></span>`).join(''));
   hutEls[h.key] = el;
   colliders.push({x:h.x+h.col[0], y:h.y+h.col[1], w:h.col[2], h:h.col[3]});
 
   const sy = h.y + 56;
-  const s = addObj(`<div class="board"><span class="lantern"></span><i>${h.sign[0]}</i><b>${h.sign[1]}</b></div><div class="pole"></div>`, h.x, sy, 140, 80, 'sign', sy);
+  const s = addObj(`<div class="board"><span class="lantern"></span><i data-hut-i="${h.key}"></i><b data-hut-b="${h.key}"></b></div><div class="pole"></div>`, h.x, sy, 140, 80, 'sign', sy);
   s.dataset.key = h.key; signEls[h.key] = s;
   colliders.push({x:h.x-8, y:sy-12, w:16, h:12});
 
   lights.push({x:h.x, y:h.y-70, r:h.type==='tree'?330:170, warm:h.type==='tree'?.9:.6, flick:h.type==='tree'||h.type==='forge'});
   lights.push({x:h.x+56, y:sy-62, r:120, warm:.75});
-  h.front = { x:h.x, y:h.y+104 };      // where visitors stand
-  h.talk  = { x:h.x, y:h.y+62 };       // proximity centre
+  h.front = { x:h.x, y:h.y+104 };
+  h.talk  = { x:h.x, y:h.y+62 };
 });
 
-// well
 addObj(`<svg viewBox="0 0 70 80"><ellipse cx="35" cy="76" rx="30" ry="6" fill="rgba(0,0,0,.25)"/><rect x="10" y="40" width="50" height="34" rx="6" fill="#8f8a7e" stroke="#6b665c" stroke-width="2"/><path d="M14,48 h42 M14,58 h42 M24,40 v34 M46,40 v34" stroke="#6b665c" stroke-opacity=".5"/><ellipse cx="35" cy="40" rx="25" ry="8" fill="#2c6d8f"/><rect x="8" y="10" width="6" height="40" fill="#4b2d19"/><rect x="56" y="10" width="6" height="40" fill="#4b2d19"/><path d="M4,14 L35,0 L66,14Z" fill="#b9923f" stroke="#8a6a2c" stroke-width="2"/><path d="M35,10 v22" stroke="#4b2d19" stroke-width="2"/><rect x="31" y="30" width="8" height="8" rx="2" fill="#7c5a2e"/></svg>`, WELL.x, WELL.y, 70, 80);
 colliders.push({x:WELL.x-28,y:WELL.y-22,w:56,h:22});
-
-colliders.push({x:728,y:1838,w:26,h:14});                                      // shade tree trunk at the marigot
-colliders.push({e:1, cx:MG.cx, cy:MG.cy, rx:MG.rx-22, ry:MG.ry-16});          // deep water of the marigot
-// pond collider (ellipse)
+colliders.push({x:728,y:1838,w:26,h:14});
+colliders.push({e:1, cx:MG.cx, cy:MG.cy, rx:MG.rx-22, ry:MG.ry-16});
 colliders.push({e:1, cx:POND.cx, cy:POND.cy, rx:POND.rx-6, ry:POND.ry-4});
 
-// trees
 const TREES = {
-  acacia: s => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="34" ry="6" fill="rgba(0,0,0,.22)"/><path d="M62,166 Q66,118 52,84 L60,80 Q72,108 76,118 Q82,100 94,76 L102,82 Q84,112 80,166Z" fill="#5a3b22"/><ellipse cx="70" cy="62" rx="64" ry="22" fill="#4f8f3d"/><ellipse cx="46" cy="52" rx="38" ry="15" fill="#5fa648"/><ellipse cx="98" cy="50" rx="34" ry="14" fill="#69b251"/></svg>`,
-  round:  s => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="34" ry="6" fill="rgba(0,0,0,.22)"/><rect x="63" y="100" width="14" height="66" fill="#5a3b22"/><circle cx="70" cy="70" r="46" fill="#3f8a45"/><circle cx="46" cy="84" r="30" fill="#4a9a4f"/><circle cx="96" cy="80" r="32" fill="#4a9a4f"/><circle cx="68" cy="48" r="26" fill="#5aab58"/></svg>`,
-  banana: s => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="28" ry="5" fill="rgba(0,0,0,.2)"/><rect x="65" y="80" width="10" height="86" rx="4" fill="#7c6a2a"/><path d="M70,84 Q20,60 8,104 Q40,82 70,94Z" fill="#5fb04a"/><path d="M70,84 Q120,60 132,104 Q100,82 70,94Z" fill="#4fa042"/><path d="M70,80 Q50,30 22,34 Q50,48 70,90Z" fill="#6cbd55"/><path d="M70,80 Q92,30 118,34 Q90,48 70,90Z" fill="#5aae48"/><path d="M70,78 Q66,20 70,12 Q84,40 72,88Z" fill="#74c75c"/><ellipse cx="78" cy="96" rx="7" ry="11" fill="#e8c43a"/></svg>`
+  acacia: () => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="34" ry="6" fill="rgba(0,0,0,.22)"/><path d="M62,166 Q66,118 52,84 L60,80 Q72,108 76,118 Q82,100 94,76 L102,82 Q84,112 80,166Z" fill="#5a3b22"/><ellipse cx="70" cy="62" rx="64" ry="22" fill="#4f8f3d"/><ellipse cx="46" cy="52" rx="38" ry="15" fill="#5fa648"/><ellipse cx="98" cy="50" rx="34" ry="14" fill="#69b251"/></svg>`,
+  round:  () => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="34" ry="6" fill="rgba(0,0,0,.22)"/><rect x="63" y="100" width="14" height="66" fill="#5a3b22"/><circle cx="70" cy="70" r="46" fill="#3f8a45"/><circle cx="46" cy="84" r="30" fill="#4a9a4f"/><circle cx="96" cy="80" r="32" fill="#4a9a4f"/><circle cx="68" cy="48" r="26" fill="#5aab58"/></svg>`,
+  banana: () => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="28" ry="5" fill="rgba(0,0,0,.2)"/><rect x="65" y="80" width="10" height="86" rx="4" fill="#7c6a2a"/><path d="M70,84 Q20,60 8,104 Q40,82 70,94Z" fill="#5fb04a"/><path d="M70,84 Q120,60 132,104 Q100,82 70,94Z" fill="#4fa042"/><path d="M70,80 Q50,30 22,34 Q50,48 70,90Z" fill="#6cbd55"/><path d="M70,80 Q92,30 118,34 Q90,48 70,90Z" fill="#5aae48"/><path d="M70,78 Q66,20 70,12 Q84,40 72,88Z" fill="#74c75c"/><ellipse cx="78" cy="96" rx="7" ry="11" fill="#e8c43a"/></svg>`
 };
 const treeKeys = Object.keys(TREES), placed = [];
 function freeSpot(x,y,pad=0){
@@ -727,14 +747,12 @@ while(placed.length < 95 && tries++ < 4000){
   addObj(TREES[k](), x, y, 140*sc, 170*sc);
   colliders.push({x:x-9*sc, y:y-11*sc, w:18*sc, h:11*sc});
 }
-// bushes & rocks (bushes are walkable, rocks are not)
 for(let i=0,t=0;i<60 && t<2000;t++){
   const x=rr(40,W-40), y=rr(150,H-20); if(!freeSpot(x,y,-30)) continue; i++;
   if(rand()<.7) addObj(`<svg viewBox="0 0 60 40"><ellipse cx="30" cy="36" rx="26" ry="4" fill="rgba(0,0,0,.18)"/><circle cx="18" cy="26" r="13" fill="#4a8f45"/><circle cx="34" cy="22" r="15" fill="#58a152"/><circle cx="44" cy="29" r="10" fill="#4a8f45"/></svg>`, x, y, 60, 40);
   else { addObj(`<svg viewBox="0 0 50 34"><ellipse cx="25" cy="31" rx="22" ry="3.5" fill="rgba(0,0,0,.2)"/><path d="M4,30 Q6,10 22,6 Q42,6 46,30Z" fill="#9b968b" stroke="#6b665c" stroke-width="2"/></svg>`, x, y, 50, 34); colliders.push({x:x-20,y:y-12,w:40,h:12}); }
 }
 
-// fireflies
 for(let i=0;i<34;i++){
   const f = document.createElement('div'); f.className='firefly';
   f.style.cssText = `left:${rr(60,W-60)}px;top:${rr(200,H-60)}px;z-index:9000;--dx:${rr(-60,60)}px;--dy:${rr(-50,50)}px;--dur:${rr(3,7)}s;animation-delay:${rr(-5,0)}s`;
@@ -783,16 +801,11 @@ function makeActor(opts, rides = []){
   objects.appendChild(d); return d;
 }
 
-/* =====================================================
-   ARTICULATED RIDERS: bicycle and donkey, drawn joint by joint
-   (hands on the bars, feet on pedals, reins in hand)
-===================================================== */
 const NS = 'http://www.w3.org/2000/svg';
 function E(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for(const k in (attrs||{})) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
 function shade(hex,k){ const n = parseInt(hex.slice(1),16); return `rgb(${((n>>16)&255)*k|0},${((n>>8)&255)*k|0},${(n&255)*k|0})`; }
 const setLine = (l,a,b) => { l.setAttribute('x1',a[0]); l.setAttribute('y1',a[1]); l.setAttribute('x2',b[0]); l.setAttribute('y2',b[1]); };
 const setPt = (e,p,dx=0,dy=0) => { e.setAttribute('cx',p[0]+dx); e.setAttribute('cy',p[1]+dy); };
-// two-bone inverse kinematics: returns the joint (knee/elbow) and the reachable end point
 function ik(h,p,l1,l2,s){
   let dx = p[0]-h[0], dy = p[1]-h[1], d = Math.hypot(dx,dy) || 1; const mx = l1+l2-.01;
   if(d > mx){ dx *= mx/d; dy *= mx/d; d = mx; }
@@ -860,33 +873,61 @@ function makeWalkerRig(o){
   return { svg,
     update(st){
       root.setAttribute('transform',`rotate(${st.rot.toFixed(2)} 80 112)`);
-      S.g.style.opacity = st.view==='side' ? 1 : 0; D.g.style.opacity = st.view==='down' ? 1 : 0; U.g.style.opacity = st.view==='up' ? 1 : 0;
-      const r = st.r, amp = st.amp, w = st.w, idle = Math.sin(st.t*2)*.35*(1-amp);
-      // a real gait cycle: stance (foot planted, body moves over it) then swing (foot lifts and reaches forward)
-      const beta = lerp(.62,.38,r), s = beta*st.stride/2*amp, lift = lerp(6,14,r)*amp;
-      const foot = p => { p = ((p%1)+1)%1; if(p < beta) return [s*(1-2*p/beta),0]; const u = (p-beta)/(1-beta), e = u*u*(3-2*u); return [-s+2*s*e, lift*Math.sin(Math.PI*u)]; };
+      S.g.style.opacity = st.view==='side' ? 1 : 0;
+      D.g.style.opacity = st.view==='down' ? 1 : 0;
+      U.g.style.opacity = st.view==='up' ? 1 : 0;
+      const r = st.r, amp = st.amp, w = st.w;
+      const idle = Math.sin(st.t*2)*.35*(1-amp);
+      const beta = lerp(.62,.38,r);
+      const s    = (lerp(28,58,r)) * amp;
+      const lift = lerp(8,18,r)*amp;
+      const foot = p => {
+        p = ((p%1)+1)%1;
+        if(p < beta){ const u = p/beta; return [s*(1-2*u), 0]; }
+        const u = (p-beta)/(1-beta);
+        const e = u*u*(3-2*u);
+        return [-s + 2*s*e, lift*Math.sin(Math.PI*u)];
+      };
       const f1 = foot(w), f2 = foot(w+.5);
       const hipY = 66 - (amp*(1+r*2.5)*Math.cos(4*Math.PI*(w-beta/2)) + amp*r*3) + idle;
-      const armA = (lerp(26,48,r)*amp + 2)*DEG, flex = (lerp(12,85,r)*amp + 8)*DEG;
+      const armA = (lerp(26,48,r)*amp + 2)*DEG;
+      const flex = (lerp(12,85,r)*amp + 8)*DEG;
       if(st.view === 'side'){
         S.g.setAttribute('transform',`translate(80,0) scale(${st.faceT.toFixed(3)},1) translate(-80,0)`);
-        const H = [80,hipY], a = (lerp(3,15,r)*amp + 1.5)*DEG;
-        const Sh = [H[0]+25*Math.sin(a), H[1]-25*Math.cos(a)], hd = [Sh[0]+12.5*Math.sin(a+.12), Sh[1]-12.5*Math.cos(a+.12)], fS = [Sh[0]-1.5,Sh[1]+.5];
-        const arm = (sp,ph) => { const u = armA*Math.sin(2*Math.PI*(w+ph)); const el = [sp[0]+15*Math.sin(u), sp[1]+15*Math.cos(u)]; return {j:el, e:[el[0]+14*Math.sin(u+flex), el[1]+14*Math.cos(u+flex)]}; };
-        S.fig.update('side',{H,S:Sh,hd,tilt:a/DEG, nl:ik(H,[80+f1[0],109-f1[1]],26,26,-1), fl:ik(H,[80+f2[0],109-f2[1]],26,26,-1), na:arm(Sh,.5), fa:arm(fS,0), fS});
+        const a = (lerp(3,18,r)*amp + 1.5)*DEG;
+        const H  = [80, hipY];
+        const Sh = [H[0]+25*Math.sin(a), H[1]-25*Math.cos(a)];
+        const hd = [Sh[0]+12.5*Math.sin(a+.12), Sh[1]-12.5*Math.cos(a+.12)];
+        const fS = [Sh[0]-1.5, Sh[1]+.5];
+        const arm = (sp,ph) => {
+          const u  = armA*Math.sin(2*Math.PI*(w+ph));
+          const el = [sp[0]+15*Math.sin(u), sp[1]+15*Math.cos(u)];
+          return { j:el, e:[el[0]+14*Math.sin(u+flex), el[1]+14*Math.cos(u+flex)] };
+        };
+        S.fig.update('side',{ H, S:Sh, hd, tilt:a/DEG,
+          nl:ik(H,[80+f1[0], 109-f1[1]], 26, 26, -1),
+          fl:ik(H,[80+f2[0], 109-f2[1]], 26, 26, -1),
+          na:arm(Sh,.5), fa:arm(fS,0), fS });
       } else {
         const dn = st.view === 'down', sg = dn ? 1 : -1, fig = dn ? D.fig : U.fig;
-        const sway = Math.sin(2*Math.PI*w)*1.6*amp;
-        const H = [80+sway,hipY], Sh = [80+sway*1.2,hipY-25], hd = [80+sway*1.3,hipY-37.5];
-        const hR = [86+sway,hipY], hL = [74+sway,hipY], sR = [89+sway*1.2,Sh[1]+3], sL = [71+sway*1.2,Sh[1]+3];
-        const yR = 109 + sg*f1[0]*.3 - f1[1]*.9, yL = 109 + sg*f2[0]*.3 - f2[1]*.9;
+        const sway = Math.sin(2*Math.PI*w)*1.8*amp;
+        const H  = [80+sway, hipY];
+        const Sh = [80+sway*1.2, hipY-25];
+        const hd = [80+sway*1.3, hipY-37.5];
+        const hR = [86+sway, hipY], hL = [74+sway, hipY];
+        const sR = [89+sway*1.2, Sh[1]+3], sL = [71+sway*1.2, Sh[1]+3];
+        const yR = 109 + sg*f1[0]*.3 - f1[1]*.9;
+        const yL = 109 + sg*f2[0]*.3 - f2[1]*.9;
         const sh1 = Math.sin(2*Math.PI*(w+.5))*(4+6*r)*amp;
-        const handR = [sR[0]+4, sR[1]+24+sg*sh1], handL = [sL[0]-4, sL[1]+24-sg*sh1];
-        fig.update(st.view,{H,S:Sh,hd,tilt:0, nH:hR, fH:hL, nS:sR, fS:sL,
+        const handR = [sR[0]+4, sR[1]+24+sg*sh1];
+        const handL = [sL[0]-4, sL[1]+24-sg*sh1];
+        fig.update(st.view,{ H, S:Sh, hd, tilt:0,
+          nH:hR, fH:hL, nS:sR, fS:sL,
           nl:ikPick(hR,[88,yR],26,26,j=>j[0]), fl:ikPick(hL,[72,yL],26,26,j=>-j[0]),
           na:ikPick(sR,handR,15,14,j=>j[0]),   fa:ikPick(sL,handL,15,14,j=>-j[0]) });
       }
-    } };
+    }
+  };
 }
 
 function makeBikeRig(o){
@@ -902,7 +943,6 @@ function makeBikeRig(o){
   const ln = (parent,a,b,w,c,isFrame) => { const l = E('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:c,'stroke-width':w,'stroke-linecap':'round'},parent); if(isFrame) frames.push(l); return l; };
   const grips = g => { ln(g,[63,58],[97,58],3.2,dk); E('circle',{cx:63,cy:58,r:3.3,fill:'#222'},g); E('circle',{cx:97,cy:58,r:3.3,fill:'#222'},g); };
 
-  // side view
   const figS = makeFigure(o), side = E('g',{'data-v':'side'},root);
   E('ellipse',{cx:76,cy:112,rx:46,ry:3.5,fill:'rgba(0,0,0,.22)'},side);
   side.append(figS.gFarLeg, figS.gFarArm);
@@ -915,7 +955,6 @@ function makeBikeRig(o){
   const crankN = ln(bk,BB,BB,2.6,'#333'), pedN = E('rect',{width:8,height:3,rx:1.2,fill:'#222'},bk);
   side.append(figS.gBody, figS.gNearLeg, figS.gNearArm);
 
-  // front view (riding toward the viewer)
   const figD = makeFigure(o), down = E('g',{'data-v':'down'},root);
   E('ellipse',{cx:80,cy:112,rx:18,ry:3.5,fill:'rgba(0,0,0,.22)'},down);
   down.append(figD.gFarLeg, figD.gNearLeg, figD.gBody);
@@ -924,7 +963,6 @@ function makeBikeRig(o){
   ln(down,[80,64],[80,94],3.5,col,true); fills.push(E('rect',{x:77.5,y:59,width:5,height:8,rx:2,fill:col},down));
   grips(down); down.append(figD.gFarArm, figD.gNearArm);
 
-  // back view (riding away)
   const figU = makeFigure(o), up = E('g',{'data-v':'up'},root);
   E('ellipse',{cx:80,cy:112,rx:18,ry:3.5,fill:'rgba(0,0,0,.22)'},up);
   grips(up);
@@ -968,14 +1006,12 @@ function makeDonkeyRig(o){
   const rope = parent => E('path',{fill:'none',stroke:'#7a4a22','stroke-width':1.9,'stroke-linecap':'round'},parent);
   const pivotize = (e,org) => { e.style.transformBox = 'fill-box'; e.style.transformOrigin = org; };
 
-  // side view: the real donkey drawing, driven joint by joint
   const side = E('g',{'data-v':'side'},root), dg = E('g',{transform:'translate(18,26)'});
   dg.innerHTML = donkeyInner('ride');
   side.append(figS.gFarLeg, dg, figS.gFarArm, figS.gBody, figS.gNearLeg);
   const ropeS = rope(side); side.append(figS.gNearArm);
   const legs = [...dg.querySelectorAll('.dleg')], head = dg.querySelector('.dhead'), tail = dg.querySelector('.dtail');
 
-  // front view
   const down = E('g',{'data-v':'down'},root), df = E('g');
   df.innerHTML = `<ellipse cx="80" cy="110" rx="26" ry="4" fill="rgba(0,0,0,.2)"/>
     <g class="fl"><rect x="66" y="86" width="9" height="24" rx="3.5" fill="#7a7671"/><rect x="65.5" y="106" width="10" height="5" rx="1.5" fill="#2a2420"/></g>
@@ -990,7 +1026,6 @@ function makeDonkeyRig(o){
   const fls = [...df.querySelectorAll('.fl')], fh = df.querySelector('.fh');
   fls.forEach(e => pivotize(e,'50% 100%')); pivotize(fh,'50% 20%');
 
-  // back view
   const up = E('g',{'data-v':'up'},root), dbk = E('g');
   dbk.innerHTML = `<ellipse cx="80" cy="110" rx="26" ry="4" fill="rgba(0,0,0,.2)"/>
     <g class="bl"><rect x="66" y="88" width="9" height="22" rx="3.5" fill="#7a7671"/><rect x="65.5" y="106" width="10" height="5" rx="1.5" fill="#2a2420"/></g>
@@ -1024,7 +1059,6 @@ function makeDonkeyRig(o){
         const A1 = [84+3*Math.sin(g)*A,79], A2 = [80-3*Math.sin(g)*A,80];
         const hand = [93-st.tension*3,49+by], fhand = [91-st.tension*3,48+by];
         figS.update('side',{H,S,hd,tilt:6, nl:ik(H,A1,19,19,-1), fl:ik(H,A2,19,19,-1), na:ik(S,hand,14,14,1), fa:ik(fS,fhand,14,14,1), fS});
-        // the rope runs from the hand to the donkey's mouth and goes taut when steering
         const ang = nod*Math.PI/180, px = 110, py = 75, mx0 = 144-px, my0 = 59-py;
         const mouth = [px + mx0*Math.cos(ang) - my0*Math.sin(ang), py + mx0*Math.sin(ang) + my0*Math.cos(ang)];
         const mid = [(hand[0]+mouth[0])/2, (hand[1]+mouth[1])/2], sag = (1-st.tension)*26 + 3;
@@ -1033,9 +1067,9 @@ function makeDonkeyRig(o){
         fls.forEach((l,i) => { const lift = Math.max(0, Math.sin(g + i*Math.PI))*5*A; l.style.transform = `translateY(${(-lift).toFixed(1)}px)`; });
         fh.style.transform = `translateY(${(Math.sin(g*2)*1.5*A).toFixed(1)}px) rotate(${(st.pull*8).toFixed(1)}deg)`;
         const H = [80+sw,54+by], S = [80+sw*1.1,31+by], hd = [80+sw*1.2,20+by], sh = st.pull*4;
-        const P = legsFB(figD,'down',H,S,hd,sw,by,g,A);
+        const P2 = legsFB(figD,'down',H,S,hd,sw,by,g,A);
         const hl = [78+sh,62+by], hr = [82+sh,62+by];
-        figD.update('down',Object.assign(P,{ na:ikPick(P.sR,hr,14,14,j=>j[0]), fa:ikPick(P.sL,hl,14,14,j=>-j[0]) }));
+        figD.update('down',Object.assign(P2,{ na:ikPick(P2.sR,hr,14,14,j=>j[0]), fa:ikPick(P2.sL,hl,14,14,j=>-j[0]) }));
         const mouth = [80+st.pull*5,94], spread = (1-st.tension)*8;
         ropeDL.setAttribute('d',`M${hl[0]},${hl[1]} Q${79-spread},80 ${mouth[0]},${mouth[1]}`);
         ropeDR.setAttribute('d',`M${hr[0]},${hr[1]} Q${81+spread},80 ${mouth[0]},${mouth[1]}`);
@@ -1043,13 +1077,12 @@ function makeDonkeyRig(o){
         bls.forEach((l,i) => { const lift = Math.max(0, Math.sin(g + i*Math.PI))*5*A; l.style.transform = `translateY(${(-lift).toFixed(1)}px)`; });
         bt.style.transform = `rotate(${tailSw.toFixed(1)}deg)`; rump.style.transform = `translateX(${sw.toFixed(1)}px)`;
         const H = [80+sw,54+by], S = [80+sw*1.1,31+by], hd = [80+sw*1.2,20+by];
-        const P = legsFB(figU,'up',H,S,hd,sw,by,g,A);
-        figU.update('up',Object.assign(P,{ na:ikPick(P.sR,[84+st.pull*3,58+by],14,14,j=>j[0]), fa:ikPick(P.sL,[76+st.pull*3,58+by],14,14,j=>-j[0]) }));
+        const P2 = legsFB(figU,'up',H,S,hd,sw,by,g,A);
+        figU.update('up',Object.assign(P2,{ na:ikPick(P2.sR,[84+st.pull*3,58+by],14,14,j=>j[0]), fa:ikPick(P2.sL,[76+st.pull*3,58+by],14,14,j=>-j[0]) }));
       }
     } };
 }
 
-// the rider controller turns velocity into pedalling, wheel spin, steering, banking and rein tension
 function makeRider(kind,o){
   const rig = kind === 'bike' ? makeBikeRig(o) : kind === 'donkey' ? makeDonkeyRig(o) : makeWalkerRig(o);
   const st = { view:'side', face:1, faceT:1, theta:0, phi:0, gait:0, bank:0, lean:34, pull:0, tension:0, sway:0, amp:0, rot:0, t:0, prevH:null, spd:0, w:0, r:0, stride:60 };
@@ -1073,7 +1106,7 @@ function makeRider(kind,o){
       st.phi += dist/110*360; st.gait += dist/110*6.2832;
       if(active) st.theta += dist/110*6.2832*.55;
       st.amp = clamp(speed/(kind === 'walk' ? 60 : 120),0,1);
-      if(kind === 'walk'){          // walk -> run blends smoothly with speed, stride grows with speed
+      if(kind === 'walk'){
         st.r += (clamp((speed-170)/90,0,1) - st.r)*Math.min(1,dt*8);
         st.stride = clamp(speed*.6,36,90) + st.r*60;
         if(speed > 8) st.w += dist/st.stride;
@@ -1085,7 +1118,6 @@ function makeRider(kind,o){
     } };
 }
 
-// player
 const P = { x:SPAWN.x, y:SPAWN.y, dir:'down', walking:false, mount:null, ride:null, face:'right', lock:0, approach:null, rigOn:false };
 const player = makeActor({skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'});
 const LOOK = {skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'};
@@ -1095,7 +1127,6 @@ player.classList.add('rigged');
 const sayPlayer = player.querySelector('.say');
 sayPlayer.classList.add('go'); sayPlayer.setAttribute('role','button');
 
-// villager walking the path
 const MAMA_LOOK = {skin:'#8a5636',hair:'#1a1210',top:'#2f7a5a',stripe:'#f4ead0',bottom:'#2f7a5a',wrap:'#e8a41c',bag:'#a85a2a',dress:true};
 const mama = makeActor(MAMA_LOOK);
 const mamaRider = makeRider('walk', MAMA_LOOK); mama.appendChild(mamaRider.svg); mama.classList.add('rigged');
@@ -1105,13 +1136,11 @@ function addMover(m){ const o = Object.assign({i:30,dir:1,wait:0,speed:50,off:[0
 mama.style.setProperty('--gait','.4s');
 const MAMA = addMover({el:mama, actor:true, rider:mamaRider, i:60, speed:52, off:[26,12]});
 
-// a boy cycling up and down the main road (same articulated bike as the player)
 const CYC = {skin:'#8a5636',hair:'#16100d',top:'#2a6fb0',stripe:'#f4ead0',bottom:'#6b4429',bag:'#e8a41c',bike:'#2e7d4f'};
 const cyclist = makeActor(CYC);
 const cycRider = makeRider('bike', CYC); cyclist.appendChild(cycRider.svg); cyclist.classList.add('rigged');
 addMover({el:cyclist, actor:true, rider:cycRider, i:300, dir:-1, speed:135, off:[-26,22]});
 
-// a farmer leading a donkey loaded with baskets
 const packEl = document.createElement('div'); packEl.className = 'animal'; packEl.style.cssText = 'width:130px;height:90px';
 packEl.innerHTML = donkeySVG('pack'); objects.appendChild(packEl); packEl.style.setProperty('--hoof','.6s');
 const packM = addMover({el:packEl, actor:false, i:140, speed:40, off:[0,-20]});
@@ -1121,7 +1150,6 @@ const farmerRider = makeRider('walk', FARMER_LOOK); farmer.appendChild(farmerRid
 farmer.style.setProperty('--gait','.44s');
 addMover({el:farmer, actor:true, rider:farmerRider, speed:40, leader:packM, lead:9, off:[0,-20]});
 
-// animals
 function chickenSVG(c){ return `<svg viewBox="0 0 30 30"><ellipse cx="15" cy="28" rx="10" ry="2.5" fill="rgba(0,0,0,.2)"/><g class="bob"><ellipse cx="14" cy="19" rx="9" ry="7" fill="${c}"/><circle cx="21" cy="12" r="5" fill="${c}"/><path d="M20,6 q2,-3 3,0 q1,-2 2,1" fill="#d6372a"/><path d="M25,12 l4,1.5 l-4,1.5z" fill="#f0a020"/><circle cx="22.5" cy="11" r="1" fill="#111"/><path d="M5,17 q-4,-3 -3,-7 q4,2 6,6" fill="${c}"/><path d="M12,26 v-5 M17,26 v-5" stroke="#d98b1c" stroke-width="1.5"/></g></svg>`; }
 function goatSVG(){ return `<svg viewBox="0 0 54 44"><ellipse cx="27" cy="42" rx="20" ry="3" fill="rgba(0,0,0,.2)"/><g class="bob"><rect x="12" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="18" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="32" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="38" y="28" width="3" height="13" fill="#6b5a4a"/><ellipse cx="26" cy="26" rx="17" ry="9" fill="#e8dfd0"/><path d="M38,22 L46,10 L52,14 L48,26Z" fill="#e8dfd0"/><path d="M44,10 q0,-7 6,-8 M47,11 q2,-6 7,-5" stroke="#6b5a4a" stroke-width="2" fill="none"/><circle cx="49" cy="15" r="1.2" fill="#111"/><path d="M48,25 q1,6 -1,7" stroke="#e8dfd0" stroke-width="2" fill="none"/><path d="M9,23 q-4,-2 -5,-6" stroke="#e8dfd0" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg>`; }
 function donkeyInner(mode){
@@ -1215,18 +1243,14 @@ function blocked(x,y){
   }
   return false;
 }
-function tryMove(dx,dy){
-  let moved = false;
-  if(dx && !blocked(P.x+dx,P.y)){ P.x+=dx; moved=true; }
-  if(dy && !blocked(P.x,P.y+dy)){ P.y+=dy; moved=true; }
-  return moved;
-}
 
 const keys = new Set();
-let padV = [0,0];
 let route = [], pending = null, stuck = 0, modalOpen = true, introOpen = true;
-const SPEEDS = {foot:[150,285], bike:[270,410], donkey:[140,230]};   // [walk/cruise, sprint] px per second
-const ACCEL  = {foot:1100, bike:420, donkey:560};                     // bikes and donkeys take time to get going and to stop
+const SPEEDS = {foot:[150,285], bike:[270,410], donkey:[140,230]};
+const ACCEL  = {foot:1100, bike:420, donkey:560};
+
+let joyVec = [0,0];
+let padRun = false;
 
 function inputVec(){
   let vx=0, vy=0;
@@ -1234,23 +1258,33 @@ function inputVec(){
   if(keys.has('arrowright')||keys.has('d')) vx++;
   if(keys.has('arrowup')||keys.has('z')||keys.has('w')) vy--;
   if(keys.has('arrowdown')||keys.has('s')) vy++;
-  vx += padV[0]; vy += padV[1];
-  return [clamp(vx,-1,1), clamp(vy,-1,1)];
+  if(Math.abs(joyVec[0]) > .01 || Math.abs(joyVec[1]) > .01){
+    vx += joyVec[0]; vy += joyVec[1];
+  }
+  const m = Math.hypot(vx,vy);
+  if(m > 1){ vx /= m; vy /= m; }
+  return [vx, vy];
 }
 function setDir(el, vx, vy){ el.dataset.dir = Math.abs(vx) > Math.abs(vy) ? (vx<0?'left':'right') : (vy<0?'up':'down'); }
 
-let stepClock = 0, dustClock = 0, padRun = false;
+let stepClock = 0, dustClock = 0;
 const vel = {x:0, y:0};
 function updatePlayer(dt){
   const kind = P.mount || 'foot';
   if(P.lock > 0) P.lock -= dt;
   if(P.approach && !blocked(P.approach.x,P.approach.y)){ const k = Math.min(1,dt*10); P.x += (P.approach.x-P.x)*k; P.y += (P.approach.y-P.y)*k; }
   let tx = 0, ty = 0, usingInput = false, wantRun = false, arrive = 1;
+  let analogMag = 1;
+
   if(!modalOpen && !(P.lock > 0)){
     const [ix,iy] = inputVec(); usingInput = !!(ix || iy);
     wantRun = keys.has('shift') || padRun;
-    if(usingInput){ route = []; pending = null; const l = Math.hypot(ix,iy); tx = ix/l; ty = iy/l; }
-    else if(route.length){
+    if(usingInput){
+      route = []; pending = null;
+      analogMag = Math.min(1, Math.hypot(ix,iy));
+      const l = Math.hypot(ix,iy);
+      tx = ix/l; ty = iy/l;
+    } else if(route.length){
       const t = route[0], dx = t.x-P.x, dy = t.y-P.y, d = Math.hypot(dx,dy), last = route.length === 1;
       if(d < (last ? 10 : 28)){ route.shift(); stuck = 0; if(!route.length && pending){ const k = pending; pending = null; openHut(k); } }
       else { tx = dx/d; ty = dy/d; if(last) arrive = clamp(d/70, .25, 1); wantRun = route.length > 8; }
@@ -1259,7 +1293,10 @@ function updatePlayer(dt){
   const moving = !!(tx || ty);
   const canRun = wantRun && moving;
 
-  const sp = SPEEDS[kind], maxS = (canRun ? sp[1] : sp[0]) * arrive;
+  const sp = SPEEDS[kind];
+  const baseSpeed = canRun ? sp[1] : sp[0];
+  const maxS = baseSpeed * analogMag * arrive;
+
   const wx = tx*maxS, wy = ty*maxS, ex = wx-vel.x, ey = wy-vel.y, el = Math.hypot(ex,ey);
   const stepA = ACCEL[kind]*dt*(moving ? 1 : 1.4);
   if(el <= stepA || el < 1e-6){ vel.x = wx; vel.y = wy; } else { vel.x += ex/el*stepA; vel.y += ey/el*stepA; }
@@ -1283,7 +1320,6 @@ function updatePlayer(dt){
     if(P.mount) player.dataset.dir = P.face; else setDir(player, vel.x, vel.y);
   }
 
-  // animation timing follows real speed: faster legs, wheels and hooves when going faster
   let gait = .32;
   if(walking){
     gait = kind==='foot' ? clamp(54/speed,.15,.5) : kind==='donkey' ? clamp(70/speed,.26,.55) : clamp(96/speed,.12,.6);
@@ -1332,7 +1368,6 @@ function goToHut(key, enter){
   routeTo(h.front.x, h.front.y, enter ? key : null);
 }
 
-/* path walkers: villager, cyclist, farmer + loaded donkey */
 function updateMovers(dt){
   for(const m of movers){
     let walking;
@@ -1359,7 +1394,11 @@ function updateMovers(dt){
   const near = Math.hypot(P.x-MAMA.x, P.y-MAMA.y) < 130 && !modalOpen;
   if(near){
     const n = visited.size;
-    sayMama.textContent = n===0 ? 'Muraho! Welcome. Try the Workshop first.' : n<HUTS.length ? `Muraho! ${HUTS.length-n} place${HUTS.length-n>1?'s':''} left to visit.` : 'You saw it all. Go say hello at the fire!';
+    if(LANG === 'fr'){
+      sayMama.textContent = n===0 ? "Muraho ! Bienvenue. Essaie l'Atelier d'abord." : n<HUTS.length ? `Muraho ! Encore ${HUTS.length-n} endroit${HUTS.length-n>1?'s':''} à visiter.` : 'Tu as tout vu. Va dire bonjour au feu !';
+    } else {
+      sayMama.textContent = n===0 ? 'Muraho! Welcome. Try the Workshop first.' : n<HUTS.length ? `Muraho! ${HUTS.length-n} place${HUTS.length-n>1?'s':''} left to visit.` : 'You saw it all. Go say hello at the fire!';
+    }
   }
   sayMama.classList.toggle('on', near);
 }
@@ -1414,9 +1453,9 @@ function mount(r){
   P.mount = r.kind; P.ride = r; route = []; pending = null; P.lock = .55; P.approach = {x:r.x, y:r.y};
   if(Math.abs(r.x-P.x) > 6) P.face = r.x > P.x ? 'right' : 'left';
   player.dataset.dir = P.face; player.classList.add('mounting-' + r.kind); riders.walk.svg.classList.add('hopOn');
-  if(r.kind === 'bike'){ riders.bike.setColor(r.color); tone(1760,.28,.05); tone(2093,.3,.04,'sine',.12); toast('On the bicycle: fast, but slow to start and stop. Press F to get off.'); }
-  else { tone(520,.18,.04,'sawtooth'); tone(260,.32,.04,'sawtooth',.2); toast('On the donkey: hold the rope, slow and steady. Press F to get off.'); }
-  setTimeout(() => {                      // the boy has swung a leg over: swap to the riding pose
+  if(r.kind === 'bike'){ riders.bike.setColor(r.color); tone(1760,.28,.05); tone(2093,.3,.04,'sine',.12); toast(t('on_bike')); }
+  else { tone(520,.18,.04,'sawtooth'); tone(260,.32,.04,'sawtooth',.2); toast(t('on_donkey')); }
+  setTimeout(() => {
     if(P.ride !== r) return;
     r.el.style.display = 'none'; P.approach = null;
     player.classList.remove('mounting-' + r.kind); player.classList.add('mounted','ride-' + r.kind);
@@ -1448,7 +1487,7 @@ function toggleRide(){
   if(modalOpen || P.lock > 0) return;
   if(P.mount) return dismount();
   const r = findRide();
-  if(r) mount(r); else toast('No ride close enough. Look for a bicycle or a donkey.');
+  if(r) mount(r); else toast(t('no_ride'));
 }
 
 function updateProximity(){
@@ -1465,15 +1504,20 @@ function updateProximity(){
   const st = k ? 'h'+k : (r ? 'r'+r.kind : '');
   if(st !== promptState){
     promptState = st;
-    if(k){ const h = HUTS.find(h => h.key===k);
-      sayPlayer.innerHTML = `${h.verb || 'Enter'} ${h.name}<small>${coarse ? 'Tap here or press GO' : 'Press E or click'} · ${h.blurb}</small>`; }
-    else if(r){ sayPlayer.innerHTML = `Hop on the ${r.kind==='bike' ? 'bicycle' : 'donkey'}<small>${coarse ? 'Tap here or press RIDE' : 'Press F'}</small>`; }
+    if(k){
+      const name = t('name_' + k);
+      const verb = k === 'marigot' ? t('rest_at') : t('enter_hut');
+      sayPlayer.innerHTML = `${verb} ${name}<small>${coarse ? t('tap_go') : t('press_e')}</small>`;
+    }
+    else if(r){
+      sayPlayer.innerHTML = `${r.kind==='bike' ? t('hop_bike') : t('hop_donkey')}<small>${coarse ? t('tap_ride') : t('press_f')}</small>`;
+    }
     sayPlayer.classList.toggle('on', !!(k || r));
   }
 }
 
 /* =====================================================
-   7. DAY / NIGHT (sunset, stars, moon, lights)
+   7. DAY / NIGHT
 ===================================================== */
 const stars = $('#stars');
 for(let i=0;i<95;i++){
@@ -1482,7 +1526,7 @@ for(let i=0;i<95;i++){
   stars.appendChild(s);
 }
 let A = 0, targetA = 0;
-const DAY_LEN = 5.2;     // seconds for a full sunset / sunrise
+const DAY_LEN = 5.2;
 function applySky(){
   const dusk = clamp(1 - Math.abs(A - .42)/.4, 0, 1);
   root.style.setProperty('--a', A.toFixed(3));
@@ -1502,10 +1546,9 @@ function updateDay(dt){
 }
 $('#themeBtn').addEventListener('click', () => {
   targetA = targetA ? 0 : 1; chime(targetA ? 330 : 523);
-  toast(targetA ? 'The sun sets over the village… the stars come out.' : 'A new day begins in the village.');
+  toast(targetA ? t('sunset') : t('sunrise'));
 });
 
-// night lighting canvas
 const cv = $('#night'), cx = cv.getContext('2d');
 let dpr = 1;
 function resize(){
@@ -1544,19 +1587,19 @@ function drawNight(t){
 }
 
 /* =====================================================
-   8. SOUND (small kalimba-like loop, footsteps, crickets)
+   8. SOUND
 ===================================================== */
 let ac = null, soundOn = false, loopTimer = null;
 function ctx(){ if(!ac){ const C = window.AudioContext || window.webkitAudioContext; if(C) ac = new C(); } if(ac && ac.state==='suspended') ac.resume(); return ac; }
 function tone(f, dur=.7, vol=.05, type='sine', when=0){
   if(!soundOn) return; const c = ctx(); if(!c) return;
-  const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + when;
-  o.type = type; o.frequency.setValueAtTime(f,t);
-  g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur);
+  const o = c.createOscillator(), g2 = c.createGain(), t0 = c.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(f,t0);
+  g2.gain.setValueAtTime(vol,t0); g2.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+  o.connect(g2); g2.connect(c.destination); o.start(t0); o.stop(t0+dur);
 }
 const chime = f => tone(f,.45,.06);
-function footstep(){ if(!soundOn || P.mount==='bike') return; if(P.mount==='donkey') tone(rr(150,190),.09,.05,'triangle'); else tone(P.walking && player.classList.contains('running') ? rr(110,150) : rr(90,130),.07,.03,'triangle'); }
+function footstep(){ if(!soundOn || P.mount==='bike') return; if(P.mount==='donkey') tone(rr(150,190),.09,.05,'triangle'); else tone(player.classList.contains('running') ? rr(110,150) : rr(90,130),.07,.03,'triangle'); }
 const SCALE = [392,440,523.25,587.33,659.25,783.99,880];
 function melody(){
   if(!soundOn) return;
@@ -1569,71 +1612,157 @@ const soundBtn = $('#soundBtn');
 soundBtn.addEventListener('click', () => {
   soundOn = !soundOn; soundBtn.setAttribute('aria-pressed', soundOn);
   clearTimeout(loopTimer);
-  if(soundOn){ ctx(); chime(523.25); melody(); toast('Village music on'); } else toast('Village music off');
+  if(soundOn){ ctx(); chime(523.25); melody(); toast(t('music_on')); } else toast(t('music_off'));
 });
 
 /* =====================================================
-   9. HUT INTERIORS (content)
+   9. CONTENT — 100% RÉEL
 ===================================================== */
+
+/* Projets : uniquement ceux qui existent réellement sur ton GitHub.
+   Les 3 premiers ont une URL vérifiable. Les 4 suivants sont présentés comme
+   "en cours / à venir" si tu veux les garder, ou supprime-les simplement. */
 const PROJECTS = [
-  { name:'Pharma Finder', tag:'Backend · PostgreSQL',
-    text:'Search for a medicine, find nearby pharmacies that stock it, then order for delivery or pickup and pay. Built to work across several countries.',
+  { name:'Pharma Finder', tag:{en:'Backend · PostgreSQL',fr:'Backend · PostgreSQL'},
+    text:{en:'Search for a medicine, find nearby pharmacies that stock it, then order for delivery or pickup. Built with a PostgreSQL backend to work across several countries.',
+          fr:"Cherche un médicament, trouve les pharmacies proches qui le vendent, puis commande pour la livraison ou le retrait. Construit avec un backend PostgreSQL pour fonctionner dans plusieurs pays."},
     tech:['PostgreSQL','REST API','Multi-country'], url:'https://github.com/sage235/pharmaback' },
-  { name:'LockSave', tag:'Wallet · Backend',
-    text:'A digital wallet (porte-monnaie) application built over 600 commits, focused on keeping balances and transactions safe.',
+  { name:'LockSave', tag:{en:'Digital wallet · Backend',fr:'Portefeuille numérique · Backend'},
+    text:{en:'A digital wallet (porte-monnaie) application built over 600 commits, focused on keeping balances and transactions safe.',
+          fr:"Une application de portefeuille numérique construite sur plus de 600 commits, axée sur la sécurité des soldes et des transactions."},
     tech:['Backend','Wallet','Security'], url:'https://github.com/sage235/locksave' },
-  { name:'Restaurant Backend', tag:'Backend · API',
-    text:'The server side of a restaurant platform: menus, orders and the data behind them.',
+  { name:'Restaurant Backend', tag:{en:'Backend · REST API',fr:'Backend · API REST'},
+    text:{en:'The server side of a restaurant platform: menus, orders, and the data behind them.',
+          fr:"Le côté serveur d'une plateforme de restaurant : menus, commandes et leurs données."},
     tech:['Backend','REST API'], url:'https://github.com/sage235/restaurant-backend' },
-  { name:'Rent House Management', tag:'Spring Boot · PostgreSQL',
-    text:'Rental platform with multi-role authentication, automated lease contracts and transactional integrity.',
+  { name:'Rent House Management', tag:{en:'Spring Boot · PostgreSQL',fr:'Spring Boot · PostgreSQL'},
+    text:{en:'Rental platform with multi-role authentication, automated lease contracts and transactional integrity. University project.',
+          fr:'Plateforme de location avec authentification multi-rôles, contrats de bail automatisés et intégrité transactionnelle. Projet universitaire.'},
     tech:['Java 17','Spring Boot','PostgreSQL'] },
-  { name:'Hotel Management System', tag:'PHP · MySQL',
-    text:'Hotel booking with live availability, automated billing and an admin area.',
+  { name:'Hotel Management System', tag:{en:'PHP · MySQL',fr:'PHP · MySQL'},
+    text:{en:'Hotel booking with live availability, automated billing and an admin area. Coursework project.',
+          fr:"Réservation d'hôtel avec disponibilité en direct, facturation automatisée et espace admin. Projet de cours."},
     tech:['PHP','MySQL','JavaScript'] },
-  { name:'Football Data Analytics', tag:'Python · Data',
-    text:'Data cleaning, exploratory analysis and predictive models on football match trends.',
+  { name:'Football Data Analytics', tag:{en:'Python · Data',fr:'Python · Data'},
+    text:{en:'Data cleaning, exploratory analysis and predictive models on football match trends. Academic project.',
+          fr:'Nettoyage de données, analyse exploratoire et modèles prédictifs sur les tendances des matchs de football. Projet académique.'},
     tech:['Python','Pandas','Colab'] },
-  { name:'VAPT Security Lab', tag:'Cybersecurity',
-    text:'Vulnerability assessment on virtual machines, controlled exploitation and hardening guides.',
+  { name:'VAPT Security Lab', tag:{en:'Cybersecurity · Lab',fr:'Cybersécurité · Labo'},
+    text:{en:'Vulnerability assessment on virtual machines, controlled exploitation and hardening guides. Coursework in network security.',
+          fr:'Évaluation de vulnérabilités sur machines virtuelles, exploitation contrôlée et guides de durcissement. Cours de sécurité réseau.'},
     tech:['Linux','Wireshark','Nmap'] }
 ];
-const projCard = p => `<div class="card"><span class="when">${p.tag}</span><h4>${p.name}</h4><p>${p.text}</p>
-  <div class="tags">${p.tech.map(t => `<span>${t}</span>`).join('')}</div>
-  ${p.url ? `<a class="lnk" href="${p.url}" target="_blank" rel="noopener">View on GitHub ↗</a>` : ''}</div>`;
+const L = k => (typeof k === 'object' ? k[LANG] : k);
+const projCard = p => `<div class="card"><span class="when">${L(p.tag)}</span><h4>${p.name}</h4><p>${L(p.text)}</p>
+  <div class="tags">${p.tech.map(x => `<span>${x}</span>`).join('')}</div>
+  ${p.url ? `<a class="lnk" href="${p.url}" target="_blank" rel="noopener">${LANG==='fr'?'Voir sur GitHub':'View on GitHub'} ↗</a>` : ''}</div>`;
 
 const CONTENT = {
-  about: () => `<div class="kicker">Hut I · About me</div><h2 id="modalTitle">The mind behind the code</h2>
-    <p>I'm a <strong>software engineering student at AUCA</strong> (Adventist University of Central Africa) in Kigali, Rwanda, graduating in 2027.</p>
-    <p>I like building backends that are reliable, secure and fast: careful data models, clean architecture, and tests that catch problems before users do. Java and Spring Boot are my home ground, with PHP, JavaScript and several databases around them.</p>
+  about: () => LANG === 'fr' ? `<div class="kicker">Hutte I · À propos</div><h2 id="modalTitle">L'esprit derrière le code</h2>
+    <p>Je suis <strong>étudiant en génie logiciel à l'AUCA</strong> — l'Université Adventiste d'Afrique Centrale, à Kigali, au Rwanda. J'y suis depuis 2023 et j'obtiendrai mon diplôme en 2027.</p>
+    <p>Ce que j'aime, c'est construire des backends fiables : des modèles de données soignés, une architecture claire, des API qui tiennent la charge, et des tests qui attrapent les problèmes avant que les utilisateurs ne les voient. Mon terrain principal, c'est <strong>Java et Spring Boot</strong>, entourés de <strong>PHP, JavaScript et plusieurs bases de données</strong>.</p>
+    <p>Ce portfolio est lui-même un de mes projets : une seule page HTML, aucun framework, tout écrit à la main — la carte, les personnages, l'animation, le cycle jour/nuit. Je crois qu'on apprend mieux en construisant des choses complètes, jusqu'au bout.</p>
+    <div class="quote">« Une bonne architecture est invisible : elle permet aux données de circuler rapidement et en sécurité. »</div>`
+  : `<div class="kicker">Hut I · About me</div><h2 id="modalTitle">The mind behind the code</h2>
+    <p>I'm a <strong>software engineering student at AUCA</strong> — the Adventist University of Central Africa, in Kigali, Rwanda. I've been there since 2023 and will graduate in 2027.</p>
+    <p>What I love is building reliable backends: careful data models, clear architecture, APIs that hold up under load, and tests that catch problems before users ever see them. My home ground is <strong>Java and Spring Boot</strong>, surrounded by <strong>PHP, JavaScript and several databases</strong>.</p>
+    <p>This portfolio is itself one of my projects: a single HTML file, no framework, everything written by hand — the map, the characters, the animation, the day/night cycle. I believe you learn best by building complete things, all the way through.</p>
     <div class="quote">“Good architecture is invisible: it lets data move quickly and safely.”</div>`,
-  workshop: () => `<div class="kicker">Hut II · The Workshop</div><h2 id="modalTitle">Seven things I've built</h2>
-    <p>Each one solves a concrete problem. The first three are on GitHub.</p>
+
+  workshop: () => LANG === 'fr' ? `<div class="kicker">Hutte II · L'Atelier</div><h2 id="modalTitle">Ce que j'ai construit</h2>
+    <p>Des projets réels, certains sur GitHub, d'autres issus de mes cours à l'AUCA. Chaque carte dit clairement de quoi il s'agit.</p>
+    <div class="grid">${PROJECTS.map(projCard).join('')}</div>`
+  : `<div class="kicker">Hut II · The Workshop</div><h2 id="modalTitle">What I've built</h2>
+    <p>Real projects — some on GitHub, others from my coursework at AUCA. Each card says clearly what it is.</p>
     <div class="grid">${PROJECTS.map(projCard).join('')}</div>`,
-  skills: () => `<div class="kicker">Hut III · The Granary</div><h2 id="modalTitle">Tools and skills</h2>
+
+  skills: () => LANG === 'fr' ? `<div class="kicker">Hutte III · Le Grenier</div><h2 id="modalTitle">Outils et compétences</h2>
+    <p>Ce que j'utilise au quotidien, à l'université et sur mes projets personnels.</p>
     <div class="grid">
-      <div class="card"><h4>Backend and data</h4><ul class="skill-list">
-        <li><b>Java 17 / 21:</b> OOP, streams, multithreading</li>
-        <li><b>Spring Boot:</b> JPA, Security, REST controllers</li>
+      <div class="card"><h4>Langages & backend</h4><ul class="skill-list">
+        <li><b>Java 17 / 21 :</b> POO, collections, streams, multithreading</li>
+        <li><b>Spring Boot :</b> Spring Core, Spring Data JPA, Spring Security, contrôleurs REST</li>
+        <li><b>PHP :</b> applications web côté serveur</li>
+        <li><b>JavaScript :</b> côté client, DOM, fetch</li>
+        <li><b>Python :</b> scripts, nettoyage de données (Pandas)</li></ul></div>
+      <div class="card"><h4>Données, outils & sécurité</h4><ul class="skill-list">
+        <li><b>Bases de données :</b> PostgreSQL, MySQL, MongoDB</li>
+        <li><b>API :</b> conception REST, tests avec Postman, documentation OpenAPI</li>
+        <li><b>Tests :</b> tests unitaires, plans de test, démarche QA</li>
+        <li><b>Sécurité :</b> notions de VAPT, Linux, réseaux, Wireshark, Nmap</li>
+        <li><b>Outils :</b> Git, GitHub, Maven, VS Code, IntelliJ</li></ul></div>
+    </div>`
+  : `<div class="kicker">Hut III · The Granary</div><h2 id="modalTitle">Tools and skills</h2>
+    <p>What I actually use — at university and on my personal projects.</p>
+    <div class="grid">
+      <div class="card"><h4>Languages & backend</h4><ul class="skill-list">
+        <li><b>Java 17 / 21:</b> OOP, collections, streams, multithreading</li>
+        <li><b>Spring Boot:</b> Spring Core, Spring Data JPA, Spring Security, REST controllers</li>
+        <li><b>PHP:</b> server-side web applications</li>
+        <li><b>JavaScript:</b> client-side, DOM, fetch</li>
+        <li><b>Python:</b> scripting, data cleaning (Pandas)</li></ul></div>
+      <div class="card"><h4>Data, tools & security</h4><ul class="skill-list">
         <li><b>Databases:</b> PostgreSQL, MySQL, MongoDB</li>
-        <li><b>APIs:</b> OpenAPI, Postman</li></ul></div>
-      <div class="card"><h4>Quality, security and web</h4><ul class="skill-list">
-        <li><b>Testing:</b> unit tests, test plans, QA</li>
-        <li><b>Security:</b> VAPT, Linux hardening, networking</li>
-        <li><b>Web:</b> PHP, JavaScript, HTML5, modern CSS</li>
-        <li><b>Tools:</b> Git, GitHub, Maven, Python (Pandas)</li></ul></div>
+        <li><b>APIs:</b> REST design, Postman, OpenAPI documentation</li>
+        <li><b>Testing:</b> unit tests, test plans, QA mindset</li>
+        <li><b>Security:</b> VAPT basics, Linux, networking, Wireshark, Nmap</li>
+        <li><b>Tools:</b> Git, GitHub, Maven, VS Code, IntelliJ</li></ul></div>
     </div>`,
-  school: () => `<div class="kicker">Hut IV · The School</div><h2 id="modalTitle">Where I learn</h2>
+
+  school: () => LANG === 'fr' ? `<div class="kicker">Hutte IV · L'École</div><h2 id="modalTitle">Où j'apprends</h2>
+    <div class="timeline">
+      <div class="card"><span class="when">2023 – 2027 · En cours</span><h4>Licence en génie logiciel</h4>
+        <div class="school-name">Université Adventiste d'Afrique Centrale (AUCA), Kigali, Rwanda</div>
+        <p>Structures de données, algorithmes, bases de données avancées, sécurité réseau, techniques de test logiciel, développement d'applications d'entreprise.</p></div>
+      <div class="card"><span class="when">Diplômé en 2023</span><h4>Diplôme d'études secondaires · section scientifique</h4>
+        <div class="school-name">Complexe Scolaire Frère Polycarpe</div>
+        <p>Une base solide en mathématiques, logique et sciences appliquées — c'est là que j'ai su que je voulais écrire du logiciel.</p></div>
+    </div>`
+  : `<div class="kicker">Hut IV · The School</div><h2 id="modalTitle">Where I learn</h2>
     <div class="timeline">
       <div class="card"><span class="when">2023 – 2027 · In progress</span><h4>Bachelor of Software Engineering</h4>
         <div class="school-name">Adventist University of Central Africa (AUCA), Kigali, Rwanda</div>
-        <p>Data structures, algorithms, advanced databases, network security, software testing techniques and enterprise software development.</p></div>
-      <div class="card"><span class="when">Graduated 2023</span><h4>Secondary school diploma, science track</h4>
+        <p>Data structures, algorithms, advanced databases, network security, software testing techniques, enterprise software development.</p></div>
+      <div class="card"><span class="when">Graduated 2023</span><h4>Secondary school diploma · science track</h4>
         <div class="school-name">Complexe Scolaire Frère Polycarpe</div>
-        <p>A solid base in mathematics, logic and applied sciences.</p></div>
+        <p>A solid base in mathematics, logic and applied sciences — that's where I knew I wanted to write software.</p></div>
     </div>`,
-  contact: () => `<div class="kicker">Fireside · Palaver Tree</div><h2 id="modalTitle">Let's talk</h2>
-    <p>Pull up a log. Tell me about an internship, a job, or a project you want built.</p>
+
+  /* ==== CERTIFICATIONS : état vide honnête, à remplir quand tu les auras ==== */
+  certs: () => LANG === 'fr' ? `<div class="kicker">Hutte V · Certifications</div>
+    <h2 id="modalTitle">Certifications</h2>
+    <p>Cette hutte est encore vide — et c'est volontaire. Je préfère ne rien afficher plutôt qu'inventer des titres que je n'ai pas encore obtenus.</p>
+    <div class="empty-state">
+      <div class="icon">🎓</div>
+      <h4>En préparation</h4>
+      <p>Je travaille actuellement sur mes premières certifications professionnelles. Cette section sera remplie dès qu'elles seront validées.</p>
+      <a class="btn in" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener">Suivre mon parcours sur LinkedIn</a>
+    </div>
+    <p style="margin-top:22px;font-size:.85rem;opacity:.7;text-align:center">Tu veux en savoir plus sur ma formation ? Ouvre la hutte <strong>Formation</strong> sur le chemin principal.</p>`
+  : `<div class="kicker">Hut V · Certifications</div>
+    <h2 id="modalTitle">Certifications</h2>
+    <p>This hut is still empty — on purpose. I'd rather show nothing than invent titles I haven't earned yet.</p>
+    <div class="empty-state">
+      <div class="icon">🎓</div>
+      <h4>In progress</h4>
+      <p>I'm currently working on my first professional certifications. This section will be filled as soon as they're validated.</p>
+      <a class="btn in" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener">Follow my path on LinkedIn</a>
+    </div>
+    <p style="margin-top:22px;font-size:.85rem;opacity:.7;text-align:center">Want to know more about my education? Open the <strong>Education</strong> hut on the main path.</p>`,
+
+  contact: () => LANG === 'fr' ? `<div class="kicker">Feu de camp · Arbre à palabres</div><h2 id="modalTitle">Parlons-en</h2>
+    <p>Prends un rondin. Parle-moi d'un stage, d'un emploi, d'un projet à construire, ou simplement d'une idée à discuter.</p>
+    <p class="open-to"><strong>Ouvert à :</strong> stages et postes junior, missions freelance backend, tests logiciels et QA, et mentorat en programmation.</p>
+    <div class="actions">
+      <a class="btn" href="mailto:lesageasdodji@gmail.com">✉️ lesageasdodji@gmail.com</a>
+      <a class="btn in" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener">LinkedIn · le-sage-asdodji</a>
+      <a class="btn gh" href="https://github.com/sage235" target="_blank" rel="noopener">GitHub · sage235</a>
+      <a class="btn alt" href="tel:+250735562281">📞 +250 735 562 281</a>
+      <a class="btn alt" href="ASDODJI_Le_Sage_Resume.pdf" download="ASDODJI_Le_Sage_Resume.pdf">📄 Télécharger mon CV (PDF)</a>
+    </div>
+    <p style="margin-top:22px;font-size:.85rem;opacity:.7">Si le fichier du CV n'est pas encore en place, remplace-le par ton PDF final dans le dossier à côté de ce fichier <code>index.html</code>.</p>`
+  : `<div class="kicker">Fireside · Palaver Tree</div><h2 id="modalTitle">Let's talk</h2>
+    <p>Pull up a log. Tell me about an internship, a job, a project you want built, or simply an idea worth discussing.</p>
     <p class="open-to"><strong>Open to:</strong> internships and junior roles, freelance backend work, software testing and QA, and coding mentorship.</p>
     <div class="actions">
       <a class="btn" href="mailto:lesageasdodji@gmail.com">✉️ lesageasdodji@gmail.com</a>
@@ -1641,39 +1770,95 @@ const CONTENT = {
       <a class="btn gh" href="https://github.com/sage235" target="_blank" rel="noopener">GitHub · sage235</a>
       <a class="btn alt" href="tel:+250735562281">📞 +250 735 562 281</a>
       <a class="btn alt" href="ASDODJI_Le_Sage_Resume.pdf" download="ASDODJI_Le_Sage_Resume.pdf">📄 Download my resume (PDF)</a>
-    </div>`
+    </div>
+    <p style="margin-top:22px;font-size:.85rem;opacity:.7">If the resume file isn't in place yet, drop your final PDF next to this <code>index.html</code> file.</p>`
 };
+
+/* Lettres de motivation ------------------------------------------------- */
+const LETTERS = [
+  { title:{en:'On starting small', fr:'Commencer petit'},
+    body:{en:"Every large system I admire began as a single file, written by someone who didn't yet know how it would end. Start anyway.",
+          fr:"Tout grand système que j'admire a commencé par un seul fichier, écrit par quelqu'un qui ne savait pas encore comment il finirait. Commence quand même."} },
+  { title:{en:'On asking for help', fr:"Demander de l'aide"},
+    body:{en:'A well is shared. Asking a question is not a weakness — it is the fastest way to grow.',
+          fr:"Un puits se partage. Poser une question n'est pas une faiblesse — c'est le chemin le plus rapide pour grandir."} },
+  { title:{en:'On consistency', fr:'La constance'},
+    body:{en:'Thirty minutes a day, every day, will take you further than one brilliant weekend. The donkey reaches the market; the hare often does not.',
+          fr:"Trente minutes par jour, chaque jour, t'emmèneront plus loin qu'un week-end brillant. L'âne atteint le marché ; le lièvre souvent non."} },
+  { title:{en:'On shipping', fr:'Livrer'},
+    body:{en:'An imperfect project that exists teaches more than a perfect one that stays in your head. Ship it small, then make it better.',
+          fr:"Un projet imparfait qui existe enseigne plus qu'un projet parfait qui reste dans ta tête. Livre petit, puis améliore."} },
+  { title:{en:'On mistakes', fr:'Les erreurs'},
+    body:{en:'The bug you fixed yesterday is the skill you own today. Read the error message — it is trying to help you.',
+          fr:"Le bug que tu as corrigé hier est la compétence que tu possèdes aujourd'hui. Lis le message d'erreur — il essaie de t'aider."} },
+  { title:{en:'On patience', fr:'La patience'},
+    body:{en:'A tree does not apologize for growing slowly. Neither should you. Progress is quiet until it becomes obvious.',
+          fr:"Un arbre ne s'excuse pas de pousser lentement. Toi non plus. Le progrès est silencieux jusqu'à ce qu'il devienne évident."} },
+  { title:{en:'On showing up', fr:'Être présent'},
+    body:{en:'Talent is common. Reliability is rare. Be the person whose code, and whose word, others can build on.',
+          fr:'Le talent est commun. La fiabilité est rare. Sois la personne sur qui les autres peuvent bâtir — son code comme sa parole.'} },
+  { title:{en:'On humility', fr:"L'humilité"},
+    body:{en:"You will always be a beginner at something. That's not a flaw; it's the doorway to everything you have not learned yet.",
+          fr:"Tu seras toujours débutant en quelque chose. Ce n'est pas un défaut ; c'est la porte vers tout ce que tu n'as pas encore appris."} },
+  { title:{en:'On finishing', fr:'Finir'},
+    body:{en:'Starting is exciting. Finishing is what pays. The last 10% — documentation, tests, cleanup — is where juniors become professionals.',
+          fr:"Commencer est excitant. Finir, c'est ce qui paie. Les derniers 10% — documentation, tests, nettoyage — c'est là que les juniors deviennent des professionnels."} },
+  { title:{en:'On generosity', fr:'La générosité'},
+    body:{en:'Explain what you learn. Write the README you wished existed. Teaching is the second time you truly learn.',
+          fr:"Explique ce que tu apprends. Écris le README que tu aurais aimé trouver. Enseigner, c'est apprendre une seconde fois."} },
+  { title:{en:'On courage', fr:'Le courage'},
+    body:{en:'Apply for the role you are not sure you deserve. The worst answer is silence, and silence leaves you exactly where you are.',
+          fr:"Postule au poste dont tu n'es pas sûr de mériter. La pire réponse est le silence, et le silence te laisse exactement où tu es."} },
+  { title:{en:'On rest', fr:'Le repos'},
+    body:{en:'Rest is part of the road, not a detour. A tired mind writes tired code. Close the laptop. The bug will still be there — and so will you.',
+          fr:"Le repos fait partie de la route, pas un détour. Un esprit fatigué écrit du code fatigué. Ferme l'ordinateur. Le bug sera encore là — et toi aussi."} }
+];
+const dayIdx = Math.floor(Date.now()/86400000);
+let letterIdx = dayIdx % LETTERS.length;
+window.letterNext = () => {
+  letterIdx = (letterIdx + 1 + ((Math.random()*(LETTERS.length-1))|0)) % LETTERS.length;
+  const e = document.getElementById('letterBody');
+  if(e) e.innerHTML = renderLetter();
+};
+function renderLetter(){
+  const L2 = LETTERS[letterIdx];
+  return `<div class="big" style="font-size:1.05rem;margin-bottom:8px">${L2.title[LANG]}</div><p class="motto">${L2.body[LANG]}</p>`;
+}
+CONTENT.marigot = () => LANG === 'fr' ? `<div class="kicker">Le Marigot · Halte</div>
+  <h2 id="modalTitle">Bois, repose-toi, lis</h2>
+  <p>Tu t'agenouilles au bord, tu bois l'eau fraîche et tu t'assois sur la pierre chaude une minute. <strong>Tu te sens frais à nouveau.</strong></p>
+  <div class="grid">
+    <div class="card"><span class="when">Lettre du jour</span>
+      <div id="letterBody">${renderLetter()}</div>
+      <button class="btn" style="align-self:flex-start;padding:8px 18px;font-size:.8rem;box-shadow:none" onclick="letterNext()">Une autre</button>
+    </div>
+  </div>`
+: `<div class="kicker">The Marigot · Rest stop</div>
+  <h2 id="modalTitle">Drink, rest, read</h2>
+  <p>You kneel at the edge, drink the cool water and sit on the warm stone for a minute. <strong>You feel fresh again.</strong></p>
+  <div class="grid">
+    <div class="card"><span class="when">Letter of the day</span>
+      <div id="letterBody">${renderLetter()}</div>
+      <button class="btn" style="align-self:flex-start;padding:8px 18px;font-size:.8rem;box-shadow:none" onclick="letterNext()">Another one</button>
+    </div>
+  </div>`;
 
 /* =====================================================
    10. MODAL, PROGRESS, FAST TRAVEL, TOAST
 ===================================================== */
-const WORDS = [['Amahoro','peace'],['Ubumwe','unity'],['Ubwenge','wisdom'],['Umurava','courage, valor'],['Kwihangana','patience, perseverance'],['Murakoze','thank you'],['Urugendo','journey'],['Gukora','to work'],['Ejo hazaza','the future'],['Ishuri','school'],['Murakaza neza','welcome'],['Inshuti','friend'],['Ibyishimo','joy'],['Urukundo','love'],['Icyizere','hope']];
-const LINES = ['Small steps still leave footprints.','Ship it small, then make it better.','A slow donkey still reaches the market.','Every expert once wrote a program that did not compile.','Rest is part of the road, not a detour.','Water finds its way by never stopping.','Read the error message. It is trying to help you.','Tests are letters from your future self.','Progress is quiet until it is obvious.','Be patient with the code and with yourself.','Ask for help early; a well is shared.','Consistency beats intensity.','A clear name is a small act of kindness.','Light the next step; the rest of the road will show itself.','Build for the person in front of you.','Today\'s bug is tomorrow\'s story.'];
-const dayIdx = Math.floor(Date.now()/86400000);
-let mLine = dayIdx % LINES.length;
-window.marigotNext = () => { mLine = (mLine + 1 + ((Math.random()*(LINES.length-1))|0)) % LINES.length; const e = document.getElementById('mLine'); if(e) e.textContent = LINES[mLine]; };
-CONTENT.marigot = () => { const w = WORDS[dayIdx % WORDS.length];
-  return `<div class="kicker">The Marigot · Rest stop</div><h2 id="modalTitle">Drink, rest, read</h2>
-  <p>You kneel at the edge, drink the cool water and sit on the warm stone for a minute. <strong>You feel fresh again.</strong></p>
-  <div class="grid">
-    <div class="card"><span class="when">Word of the day · Kinyarwanda</span><div class="big">${w[0]}</div><p><span class="mean">${w[1]}</span></p></div>
-    <div class="card"><span class="when">Words to carry</span><p class="motto" id="mLine">${LINES[mLine]}</p>
-      <button class="btn" style="align-self:flex-start;padding:8px 18px;font-size:.8rem;box-shadow:none" onclick="marigotNext()">Another one</button></div>
-  </div>`; };
-
 const visited = new Set();
-const modal = $('#modal'), body = $('#modalBody'), intro = $('#intro');
+const modal = $('#modal'), bodyEl = $('#modalBody'), intro = $('#intro');
 function openHut(key){
   if(!CONTENT[key]) return;
-  route = []; pending = null; keys.clear(); padV = [0,0];
-  body.innerHTML = CONTENT[key]();
+  route = []; pending = null; keys.clear(); joyVec = [0,0];
+  bodyEl.innerHTML = CONTENT[key]();
   modal.classList.add('open'); modalOpen = true; chime(659.25);
   modal.querySelector('.sheet').scrollTop = 0;
   setTimeout(() => $('#closeBtn').focus(), 50);
   if(!visited.has(key)){
     visited.add(key); updateProgress();
     const b = document.querySelector(`#fast button[data-key="${key}"]`); b && b.classList.add('seen');
-    if(visited.size === HUTS.length) setTimeout(() => toast('You have seen the whole village. The fireside is the place to say hello.'), 700);
+    if(visited.size === HUTS.length) setTimeout(() => toast(t('all_seen')), 700);
   }
 }
 function closeModal(){
@@ -1681,7 +1866,7 @@ function closeModal(){
   modal.classList.remove('open'); modalOpen = false; chime(330);
   nearKey = null; promptState = '';
 }
-function updateProgress(){ $('#progress').textContent = `Explored ${visited.size}/${HUTS.length}`; }
+function updateProgress(){ $('#progress').textContent = `${t('explored')} ${visited.size}/${HUTS.length}`; }
 $('#closeBtn').addEventListener('click', closeModal);
 modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
 
@@ -1691,16 +1876,57 @@ $('#startBtn').addEventListener('click', startGame);
 const fast = $('#fast');
 HUTS.forEach(h => {
   const li = document.createElement('li');
-  li.innerHTML = `<button data-key="${h.key}">${h.label}<span class="tick">✓</span></button>`;
+  li.innerHTML = `<button data-key="${h.key}"><span data-hut-label="${h.key}"></span><span class="tick">✓</span></button>`;
   li.firstChild.addEventListener('click', () => { if(modalOpen) return; goToHut(h.key, false); });
   fast.appendChild(li);
 });
 
 let toastT;
-function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3400); }
+function toast(msg){ const tt = $('#toast'); tt.textContent = msg; tt.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => tt.classList.remove('on'), 3400); }
 
 /* =====================================================
-   11. INPUT
+   11. I18N — application au DOM
+===================================================== */
+function refreshTexts(){
+  document.documentElement.lang = LANG;
+  const langBtn = $('#langBtn'); if(langBtn) langBtn.textContent = LANG === 'fr' ? 'EN' : 'FR';
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+
+  HUTS.forEach((h,idx) => {
+    const i = document.querySelector(`[data-hut-i="${h.key}"]`);
+    const b = document.querySelector(`[data-hut-b="${h.key}"]`);
+    const roman = ['I','II','III','IV','V','VI','VII','VIII'][idx] || (idx+1);
+    if(i) i.textContent = h.key === 'contact' ? (LANG==='fr'?'Feu de camp':'Fireside')
+                            : h.key === 'marigot' ? 'Marigot'
+                            : (LANG==='fr' ? `Hutte ${roman}` : `Hut ${roman}`);
+    if(b) b.textContent = t('sign_' + h.key);
+  });
+  document.querySelectorAll('[data-hut-label]').forEach(el => { el.textContent = t('hut_' + el.dataset.hutLabel); });
+
+  const small = document.querySelector('.who small'); if(small) small.textContent = t('tagline');
+  updateProgress();
+
+  const act = $('#actBtn'); if(act) act.textContent = LANG === 'fr' ? 'OK' : 'GO';
+  const ride = $('#rideBtn'); if(ride) ride.textContent = LANG === 'fr' ? 'MONTER' : 'RIDE';
+  const run = $('#runBtn'); if(run) run.textContent = LANG === 'fr' ? 'SPRINT' : 'RUN';
+
+  const h2 = $('#hint');
+  if(h2) h2.innerHTML = `<span>${t('hint_walk')}</span> <kbd>🕹️</kbd> <kbd>←↑→↓</kbd> <kbd>WASD</kbd>
+    <span>·</span> <span>${t('hint_enter')}</span> <kbd>E</kbd>
+    <span>·</span> <span>${t('hint_ride')}</span> <kbd>F</kbd>
+    <span>·</span> <span>${t('hint_sprint')}</span> <kbd>Shift</kbd>`;
+
+  promptState = '';
+}
+$('#langBtn').addEventListener('click', () => {
+  LANG = LANG === 'fr' ? 'en' : 'fr';
+  localStorage.setItem('lang', LANG);
+  refreshTexts();
+  toast(t('lang_switched'));
+});
+
+/* =====================================================
+   12. INPUT
 ===================================================== */
 window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
@@ -1715,21 +1941,47 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur', () => keys.clear());
 
-// on-screen pad
-document.querySelectorAll('#dpad [data-v]').forEach(b => {
-  const [x,y] = b.dataset.v.split(',').map(Number);
-  b.addEventListener('pointerdown', e => { e.preventDefault(); b.setPointerCapture(e.pointerId); padV = [x,y]; });
-  const up = () => { padV = [0,0]; };
-  b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
-});
+const joyBase = $('#joyBase'), joyKnob = $('#joyKnob');
+let joyActive = false, joyId = null, joyCenter = {x:0,y:0};
+const JOY_RADIUS = 56;
+function joyStart(e){
+  if(modalOpen || introOpen) return;
+  const rect = joyBase.getBoundingClientRect();
+  joyCenter = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+  joyActive = true; joyId = e.pointerId;
+  joyBase.classList.add('active');
+  try{ joyBase.setPointerCapture(e.pointerId); }catch(_){}
+  joyMove(e);
+}
+function joyMove(e){
+  if(!joyActive || e.pointerId !== joyId) return;
+  let dx = e.clientX - joyCenter.x, dy = e.clientY - joyCenter.y;
+  const d = Math.hypot(dx,dy);
+  if(d > JOY_RADIUS){ dx = dx/d*JOY_RADIUS; dy = dy/d*JOY_RADIUS; }
+  joyKnob.style.transform = `translate(${dx}px,${dy}px)`;
+  const mag = Math.min(1, d/JOY_RADIUS);
+  if(d < 6){ joyVec = [0,0]; }
+  else { const nx = dx/(d||1), ny = dy/(d||1); joyVec = [nx*mag, ny*mag]; }
+}
+function joyEnd(e){
+  if(e.pointerId !== joyId) return;
+  joyActive = false; joyId = null; joyVec = [0,0];
+  joyBase.classList.remove('active');
+  joyKnob.style.transform = 'translate(0,0)';
+}
+joyBase.addEventListener('pointerdown', joyStart);
+joyBase.addEventListener('pointermove', joyMove);
+joyBase.addEventListener('pointerup', joyEnd);
+joyBase.addEventListener('pointercancel', joyEnd);
+
 $('#actBtn').addEventListener('click', () => { if(nearKey) openHut(nearKey); });
 $('#rideBtn').addEventListener('click', toggleRide);
 const runBtn = $('#runBtn');
-runBtn.addEventListener('pointerdown', e => { e.preventDefault(); runBtn.setPointerCapture(e.pointerId); padRun = true; });
-['pointerup','pointercancel'].forEach(ev => runBtn.addEventListener(ev, () => { padRun = false; }));
+runBtn.addEventListener('pointerdown', e => { e.preventDefault(); try{ runBtn.setPointerCapture(e.pointerId);}catch(_){} padRun = true; runBtn.classList.add('on'); });
+['pointerup','pointercancel'].forEach(ev => runBtn.addEventListener(ev, () => { padRun = false; runBtn.classList.remove('on'); }));
+
 sayPlayer.addEventListener('click', e => { e.stopPropagation(); if(nearKey) openHut(nearKey); else if(nearRide) mount(nearRide); });
 
-// click/tap the world: walk there, or walk to a hut/sign and go in
 viewport.addEventListener('click', e => {
   if(modalOpen || e.target.closest('.say')) return;
   const hs = e.target.closest('.hut, .sign');
@@ -1739,19 +1991,19 @@ viewport.addEventListener('click', e => {
 });
 
 /* =====================================================
-   12. MAIN LOOP
+   13. MAIN LOOP
 ===================================================== */
 window.addEventListener('resize', () => { resize(); updateCamera(true); });
 resize();
 if(matchMedia('(prefers-color-scheme: dark)').matches){ A = targetA = 1; }
 applySky();
-updateProgress();
+refreshTexts();
 player.style.left = P.x+'px'; player.style.top = P.y+'px';
 updateCamera(true);
 
 let last = performance.now();
 function frame(now){
-  const dt = clamp((now-last)/1000, 0, .05); last = now;      // some browsers report a first frame slightly in the past
+  const dt = clamp((now-last)/1000, 0, .05); last = now;
   updatePlayer(dt); updateMovers(dt); updateAnimals(dt); updateDay(dt);
   updateCamera(false); updateProximity(); drawNight(now/1000);
   requestAnimationFrame(frame);
