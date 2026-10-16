@@ -10,8 +10,328 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-<!-- Liaison vers le fichier CSS séparé -->
-<link rel="stylesheet" href="style.css">
+<style>
+:root{
+  --a:0; --dusk:0; --night:0; --sunp:0; --moonp:0;
+  --sky-h:clamp(150px,24vh,230px);
+  --ink:#2a1c14; --ink-soft:#6a5446;
+  --panel:rgba(252,246,236,.93); --panel-solid:#fcf6ec;
+  --line:#e3d2bb;
+  --accent:#b83a26; --accent-ink:#fff;
+  --gold:#e8a41c; --leaf:#2f6b3a;
+  --wood:#6b4429; --wood-dark:#3b2314;
+  --f-display:'Fraunces',Georgia,serif;
+  --f-ui:'Plus Jakarta Sans',system-ui,sans-serif;
+  --f-sign:'Space Mono',ui-monospace,monospace;
+}
+body[data-theme="night"]{
+  --ink:#f3ece4; --ink-soft:#bfb2c8;
+  --panel:rgba(22,20,44,.93); --panel-solid:#16142c;
+  --line:#352f5a;
+  --accent:#e0553d;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#12101f;font-family:var(--f-ui);color:var(--ink);-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+#sky{position:fixed;left:0;right:0;top:0;height:var(--sky-h);overflow:hidden;z-index:1}
+.sky-layer{position:absolute;inset:0}
+.sky-day{background:linear-gradient(180deg,#5fb0e8 0%,#a6d7f2 60%,#f6ecc9 100%)}
+.sky-dusk{background:linear-gradient(180deg,#34296a 0%,#9a3f72 42%,#f0804a 78%,#ffc468 100%);opacity:var(--dusk)}
+.sky-night{background:linear-gradient(180deg,#05071a 0%,#0e1235 55%,#241c4a 100%);opacity:var(--night)}
+.sun{position:absolute;right:16%;width:88px;height:88px;border-radius:50%;
+  top:calc(14px + var(--sunp) * (var(--sky-h) - 34px));
+  background:radial-gradient(circle,#fff6c0 0%,#ffd34d 55%,#f7b32b 100%);
+  box-shadow:0 0 60px 22px rgba(255,205,80,.55);opacity:calc(1 - var(--night))}
+.sun::after{content:'';position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle,#ffb347 0%,#ff6a3d 70%,#e03a2a 100%);
+  box-shadow:0 0 90px 36px rgba(255,100,50,.55);opacity:var(--dusk)}
+.moon{position:absolute;right:30%;width:70px;height:70px;border-radius:50%;
+  top:calc(var(--sky-h) - var(--moonp) * (var(--sky-h) - 26px));
+  background:radial-gradient(circle at 32% 30%,#fff 0%,#e8ecf5 55%,#aab3c8 100%);
+  box-shadow:0 0 40px 8px rgba(220,230,255,.45);opacity:var(--night)}
+.moon::before{content:'';position:absolute;top:16px;left:18px;width:14px;height:14px;border-radius:50%;background:rgba(120,130,160,.35);box-shadow:26px 20px 0 -3px rgba(120,130,160,.3)}
+#stars{position:absolute;inset:0;pointer-events:none}
+.star{position:absolute;border-radius:50%;opacity:clamp(0, calc((var(--a) - var(--t)) * 7), 1)}
+.star::after{content:'';display:block;width:100%;height:100%;border-radius:50%;background:#fff;
+  box-shadow:0 0 6px 1px rgba(255,244,200,.8);animation:tw 2.6s ease-in-out infinite alternate;animation-delay:var(--d)}
+@keyframes tw{from{opacity:.35;transform:scale(.8)}to{opacity:1;transform:scale(1.15)}}
+.shoot{position:absolute;top:14%;left:62%;width:90px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),#fff);opacity:0;transform:rotate(28deg);
+  animation:shoot 11s linear infinite}
+@keyframes shoot{0%,86%{opacity:0;transform:translate(0,0) rotate(28deg)}
+  88%{opacity:calc(var(--night));transform:translate(0,0) rotate(28deg)}
+  97%{opacity:0;transform:translate(-220px,120px) rotate(28deg)}100%{opacity:0}}
+.cloud{position:absolute;height:26px;border-radius:30px;background:rgba(255,255,255,.85);
+  opacity:calc(.9 - var(--a)*.8);animation:drift linear infinite}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%}
+.cloud::before{width:34px;height:34px;left:14px;top:-16px}
+.cloud::after{width:26px;height:26px;right:16px;top:-10px}
+@keyframes drift{from{transform:translateX(-160px)}to{transform:translateX(calc(100vw + 160px))}}
+.bird{position:absolute;width:22px;height:10px;opacity:calc(1 - var(--a)*2.2);animation:fly linear infinite}
+.bird path{animation:flap .5s ease-in-out infinite alternate;transform-origin:11px 8px}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(-.5)}}
+@keyframes fly{from{transform:translateX(-40px)}to{transform:translateX(calc(100vw + 40px))}}
+.hills{position:absolute;left:0;bottom:-1px;width:100%;height:58px;display:block;
+  filter:brightness(calc(1 - var(--night)*.7)) saturate(calc(1 - var(--night)*.3))}
+
+.hud{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:50;
+  width:calc(100% - 24px);max-width:1180px;display:flex;align-items:center;gap:14px;justify-content:space-between;
+  padding:8px 12px 8px 10px;background:var(--panel);border:1px solid var(--line);border-radius:999px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 28px rgba(0,0,0,.2);transition:background 1.2s,border-color 1.2s}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex:none}
+.avatar.fallback{display:grid;place-items:center;background:var(--accent);color:#fff;font-weight:800;font-size:.8rem}
+.who b{display:block;font-family:var(--f-display);font-size:1.05rem;line-height:1.1;white-space:nowrap}
+.who small{display:block;font-size:.72rem;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fast{display:flex;gap:4px;list-style:none}
+.fast button{background:none;border:0;padding:7px 12px;border-radius:999px;font-size:.82rem;font-weight:600;transition:background .2s,color .2s;white-space:nowrap}
+.fast button:hover,.fast button.here{background:var(--accent);color:var(--accent-ink)}
+.fast button .tick{display:none;margin-left:5px;font-size:.7rem}
+.fast button.seen .tick{display:inline}
+.tools{display:flex;align-items:center;gap:6px;flex:none}
+.chip{font-size:.74rem;font-weight:700;padding:6px 11px;border-radius:999px;background:rgba(0,0,0,.06);white-space:nowrap}
+body[data-theme="night"] .chip{background:rgba(255,255,255,.09)}
+.ibtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--panel-solid);display:grid;place-items:center;
+  font-size:.74rem;font-weight:800;text-decoration:none;transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .2s}
+.ibtn:hover{transform:scale(1.1);border-color:var(--accent)}
+.ibtn svg{width:18px;height:18px}
+#themeBtn .i-moon{display:none}
+body[data-theme="night"] #themeBtn .i-sun{display:none}
+body[data-theme="night"] #themeBtn .i-moon{display:block}
+#soundBtn[aria-pressed="false"] .waves{display:none}
+
+@media (max-width:900px){
+  .fast{position:fixed;top:68px;left:12px;right:12px;overflow-x:auto;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:999px;backdrop-filter:blur(12px);scrollbar-width:none}
+  .fast::-webkit-scrollbar{display:none}
+  .links{display:none}
+  .who small{display:none}
+}
+@media (max-width:520px){ .chip{display:none} }
+
+#viewport{position:fixed;left:0;right:0;bottom:0;top:var(--sky-h);overflow:hidden;z-index:2;background:#6f9c4c;touch-action:none;cursor:crosshair}
+#world{position:absolute;left:0;top:0;will-change:transform;user-select:none;-webkit-user-select:none}
+#ground{position:absolute;left:0;top:0;display:block}
+#objects{position:absolute;left:0;top:0;width:0;height:0}
+#night{position:absolute;inset:0;pointer-events:none;z-index:20}
+.obj{position:absolute;transform:translate(-50%,-100%);pointer-events:none}
+.obj svg{display:block;width:100%;height:100%;overflow:visible}
+.hut{pointer-events:auto;cursor:pointer;transform:translate(-50%,-100%);transition:filter .25s}
+.hut:hover,.hut.near{filter:brightness(1.08) drop-shadow(0 0 14px rgba(255,200,90,.55))}
+.lit{fill-opacity:calc(.3 + var(--a)*.7)}
+.hut svg .lit{filter:drop-shadow(0 0 calc(var(--a)*7px) #ffc24d)}
+.flames{transform-box:fill-box;transform-origin:50% 100%;animation:flick .5s ease-in-out infinite alternate}
+@keyframes flick{from{transform:scale(1,.9) skewX(-3deg)}to{transform:scale(1.06,1.1) skewX(3deg)}}
+.smoke{position:absolute;width:16px;height:16px;border-radius:50%;background:rgba(235,235,235,.7);opacity:0;animation:puff 4s ease-out infinite}
+@keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.5)}15%{opacity:.7}100%{opacity:0;transform:translate(26px,-90px) scale(2.6)}}
+.sign{transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 4px rgba(0,0,0,.3));transition:transform .25s}
+.sign.near{transform:translate(-50%,-100%) scale(1.07)}
+.board{position:relative;min-width:126px;padding:7px 14px 8px;text-align:center;color:#f7ead2;line-height:1.1;
+  background:linear-gradient(180deg,#8d5c36,#6a4127);border:2px solid #4a2c18;border-radius:7px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.board i{display:block;font-style:normal;font-family:var(--f-sign);font-size:.62rem;opacity:.75;letter-spacing:.04em}
+.board b{display:block;font-family:var(--f-display);font-weight:700;font-size:1.02rem;margin-top:2px;white-space:nowrap}
+.board::before,.board::after{content:'';position:absolute;top:6px;width:5px;height:5px;border-radius:50%;background:#d9b04a;box-shadow:0 1px 1px rgba(0,0,0,.5)}
+.board::before{left:5px}.board::after{right:5px}
+.pole{width:9px;height:30px;background:linear-gradient(90deg,#4b2d19,#6b4429);border-radius:0 0 2px 2px}
+.lantern{position:absolute;right:-16px;top:-10px;width:14px;height:20px;border-radius:4px 4px 6px 6px;background:#3b2314;border-top:3px solid #3b2314}
+.lantern::before{content:'';position:absolute;left:2px;top:2px;width:10px;height:14px;border-radius:3px;background:#ffd36a;
+  opacity:calc(.25 + var(--a)*.75);box-shadow:0 0 calc(var(--a)*16px) calc(var(--a)*6px) rgba(255,190,70,.8)}
+.gate{width:300px;height:170px;pointer-events:none}
+.gate .post{position:absolute;bottom:0;width:24px;height:140px;background:linear-gradient(90deg,#4b2d19,#6b4429);border-radius:4px 4px 0 0}
+.gate .p1{left:20px}.gate .p2{right:20px}
+.gate .beam{position:absolute;left:8px;right:8px;top:6px;height:50px;background:linear-gradient(180deg,#8d5c36,#6a4127);border:2px solid #4a2c18;border-radius:8px;
+  display:grid;place-items:center;color:#f7ead2;font-family:var(--f-display);font-weight:700;font-size:1.02rem;text-align:center;line-height:1.1}
+.gate .beam small{display:block;font-family:var(--f-sign);font-weight:400;font-size:.6rem;opacity:.75;margin-bottom:2px}
+.actor{position:absolute;width:60px;height:90px;transform:translate(-50%,-100%);pointer-events:none}
+.actor .bob{width:100%;height:100%;transform-origin:50% 100%}
+.sp{width:100%;height:100%;overflow:visible;display:block}
+.v{display:none}
+[data-dir=down] .v-fb,[data-dir=up] .v-fb,[data-dir=left] .v-side,[data-dir=right] .v-side{display:inline}
+[data-dir=up] .front{display:none}
+[data-dir=down] .back{display:none}
+[data-dir=left] .sp{transform:scaleX(-1)}
+.sp g[class^=leg],.sp g[class^=arm]{transform-box:fill-box;transform-origin:50% 0}
+.actor:not(.walking) .bob{animation:breathe 2.6s ease-in-out infinite alternate}
+@keyframes breathe{from{transform:scaleY(1)}to{transform:scaleY(1.018)}}
+.walking .bob{animation:bob var(--gait,.32s) ease-in-out infinite alternate}
+.walking .v-side .legL{animation:swing var(--gait,.32s) ease-in-out infinite alternate}
+.walking .v-side .legR{animation:swing var(--gait,.32s) ease-in-out infinite alternate-reverse}
+.walking .v-side .armR{animation:swingArm var(--gait,.32s) ease-in-out infinite alternate}
+.walking .v-fb .legL{animation:step var(--gait,.32s) ease-in-out infinite alternate}
+.walking .v-fb .legR{animation:step var(--gait,.32s) ease-in-out infinite alternate-reverse}
+.walking .v-fb .armL{animation:armFB var(--gait,.32s) ease-in-out infinite alternate}
+.walking .v-fb .armR{animation:armFB var(--gait,.32s) ease-in-out infinite alternate-reverse}
+.running .bob{animation-name:bobRun}
+.running .v-side .legL,.running .v-side .legR{animation-name:swingRun}
+.running .v-side .armR{animation-name:swingArmRun}
+.running .v-fb .legL,.running .v-fb .legR{animation-name:stepRun}
+.running .v-fb .armL,.running .v-fb .armR{animation-name:armFBRun}
+.actor.mounted.ride-donkey.walking .bob{animation-name:bobDonkey}
+.actor.mounted.ride-bike.walking .bob{animation-name:bobBike}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes bobRun{from{transform:translateY(0)}to{transform:translateY(-7px)}}
+@keyframes bobDonkey{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+@keyframes bobBike{from{transform:translateY(0)}to{transform:translateY(-1.5px)}}
+@keyframes swing{from{transform:rotate(30deg)}to{transform:rotate(-30deg)}}
+@keyframes swingRun{from{transform:rotate(52deg)}to{transform:rotate(-52deg)}}
+@keyframes swingArm{from{transform:rotate(-34deg)}to{transform:rotate(34deg)}}
+@keyframes swingArmRun{from{transform:rotate(-66deg)}to{transform:rotate(66deg)}}
+@keyframes step{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+@keyframes stepRun{from{transform:translateY(0)}to{transform:translateY(-11px)}}
+@keyframes armFB{from{transform:translateY(-2px)}to{transform:translateY(3px)}}
+@keyframes armFBRun{from{transform:translateY(-5px)}to{transform:translateY(7px)}}
+.animal{position:absolute;transform:translate(-50%,-100%);pointer-events:none}
+.animal svg{display:block;width:100%;height:100%;overflow:visible}
+.animal.flip svg{transform:scaleX(-1)}
+.animal.moving .bob{animation:hop .26s ease-in-out infinite alternate}
+@keyframes hop{from{transform:translateY(0)}to{transform:translateY(-4px)}}
+.rider{width:100%;height:100%;transform-origin:50% 100%;transform:translateY(calc(var(--lift,0px) * -1)) rotate(var(--lean,0deg));transition:transform .2s ease-out}
+.actor.mounted.ride-bike{--lift:24px}.actor.mounted.ride-donkey{--lift:30px}
+.mount{position:absolute;bottom:0;pointer-events:none;display:none}
+.mount svg{width:100%;height:100%;display:block;overflow:visible}
+.mount.bike{left:-18px;width:120px;height:80px;transform-origin:48px 50%}
+.mount.donkey{left:-30px;width:130px;height:90px;transform-origin:60px 50%}
+.actor.ride-bike>.mount.bike,.actor.ride-donkey>.mount.donkey{display:block}
+.actor.mounted[data-dir=left]>.mount{transform:scaleX(-1)}
+.actor.mounting-bike .rider{animation:hopOnBike .5s cubic-bezier(.3,.7,.4,1)}
+.actor.mounting-donkey .rider{animation:hopOnDonkey .5s cubic-bezier(.3,.7,.4,1)}
+.actor.dismounting-bike .rider{animation:hopOffBike .46s cubic-bezier(.3,.7,.4,1)}
+.actor.dismounting-donkey .rider{animation:hopOffDonkey .46s cubic-bezier(.3,.7,.4,1)}
+.actor.mounting-bike>.mount.bike,.actor.mounting-donkey>.mount.donkey{animation:fadeIn .3s ease-out}
+@keyframes hopOnBike{0%{transform:translateY(0)}40%{transform:translateY(-58px)}100%{transform:translateY(-24px)}}
+@keyframes hopOnDonkey{0%{transform:translateY(0)}40%{transform:translateY(-72px)}100%{transform:translateY(-30px)}}
+@keyframes hopOffBike{0%{transform:translateY(-24px)}45%{transform:translateY(-54px)}100%{transform:translateY(0)}}
+@keyframes hopOffDonkey{0%{transform:translateY(-30px)}45%{transform:translateY(-64px)}100%{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}}
+.actor.mounted .say{margin-bottom:58px}
+.actor.mounted.ride-donkey .sp g[class^=leg],.actor.mounted.ride-donkey .sp g[class^=arm]{animation:none!important}
+.wheel,.dleg{transform-box:fill-box}
+.wheel{transform-origin:50% 50%}
+.dleg{transform-origin:50% 0}
+.walking .wheel{animation:spin var(--spin,.34s) linear infinite}
+.walking .dleg.a,.moving .dleg.a{animation:hoof var(--hoof,.45s) ease-in-out infinite alternate}
+.walking .dleg.b,.moving .dleg.b{animation:hoof var(--hoof,.45s) ease-in-out infinite alternate-reverse}
+.dhead{transform-box:fill-box;transform-origin:15% 90%}
+.dtail{transform-box:fill-box;transform-origin:100% 0;animation:swish 1.8s ease-in-out infinite alternate}
+.walking .dhead,.moving .dhead{animation:nod var(--hoof,.45s) ease-in-out infinite alternate}
+@keyframes nod{from{transform:rotate(-3deg)}to{transform:rotate(4deg)}}
+@keyframes swish{from{transform:rotate(-8deg)}to{transform:rotate(10deg)}}
+.ride-world{position:absolute;transform:translate(-50%,-100%);pointer-events:none}
+.ride-world svg{display:block;width:100%;height:100%;overflow:visible}
+.ride-world.near,.animal.near{filter:drop-shadow(0 0 9px #ffd34d)}
+.animal .tail{transform-box:fill-box;transform-origin:0 50%;animation:wag .3s ease-in-out infinite alternate}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes hoof{from{transform:rotate(22deg)}to{transform:rotate(-22deg)}}
+@keyframes wag{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
+.rig{position:absolute;left:-50px;bottom:-6px;width:160px;height:120px;overflow:visible;pointer-events:none;display:none}
+.actor.rigged .rig{display:block}
+.actor.rigged .rider{visibility:hidden}
+.rig g[data-v]{transition:opacity .1s linear}
+.rig .dleg,.rig .dhead,.rig .dtail{animation:none!important}
+.rig.hopOn{animation:rigHopOn .26s ease-out forwards}
+.rig.hopOff{animation:rigHopOff .46s cubic-bezier(.3,.7,.4,1)}
+.rig.dropIn{animation:rigDrop .24s ease-out}
+.actor.rigged:not(.mounted) .say{margin-bottom:16px}
+@keyframes rigHopOn{0%{transform:translateY(0)}60%{transform:translateY(-30px)}100%{transform:translateY(-18px)}}
+@keyframes rigHopOff{0%{transform:translateY(-22px)}45%{transform:translateY(-44px)}100%{transform:translateY(0)}}
+@keyframes rigDrop{0%{transform:translateY(-14px)}100%{transform:none}}
+.animal .dhead{transition:transform .6s ease-in-out}
+.animal.drinking .dhead{animation:none!important;transform:rotate(27deg)}
+.big{font-family:var(--f-display);font-size:2rem;line-height:1.15;color:var(--ink)}
+.mean{color:var(--accent);font-weight:700}
+.motto{font-family:var(--f-display);font-style:italic;font-size:1.15rem;line-height:1.5;color:var(--ink)}
+.dust{position:absolute;width:14px;height:8px;border-radius:50%;background:rgba(214,170,120,.7);transform:translate(-50%,-50%);pointer-events:none;animation:dust .55s ease-out forwards}
+@keyframes dust{to{opacity:0;transform:translate(-50%,-90%) scale(2.4)}}
+.say{position:absolute;left:50%;bottom:100%;margin-bottom:6px;transform:translateX(-50%) scale(0);transform-origin:50% 100%;
+  background:#fff8e6;color:#2a1c14;border:2px solid #4a2c18;border-radius:14px;padding:6px 12px;font-size:.78rem;font-weight:700;line-height:1.3;white-space:nowrap;
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:3;box-shadow:0 5px 14px rgba(0,0,0,.3);text-align:center}
+.say.on{transform:translateX(-50%) scale(1)}
+.say::after{content:'';position:absolute;left:50%;top:100%;margin-left:-6px;border:6px solid transparent;border-top-color:#4a2c18}
+.say.go{background:var(--gold);cursor:pointer;pointer-events:auto;padding:8px 14px}
+.say.go small{display:block;font-weight:600;opacity:.8;font-size:.7rem}
+.firefly{position:absolute;width:5px;height:5px;border-radius:50%;background:#e9ff7a;box-shadow:0 0 10px 3px rgba(230,255,100,.8);
+  opacity:clamp(0, calc((var(--a) - .6) * 3), 1);animation:wander var(--dur) ease-in-out infinite alternate;pointer-events:none}
+@keyframes wander{from{transform:translate(0,0)}50%{transform:translate(var(--dx),calc(var(--dy)*-.5))}to{transform:translate(calc(var(--dx)*-.6),var(--dy))}}
+
+.hint{position:fixed;left:16px;bottom:16px;z-index:40;display:flex;gap:10px;align-items:center;padding:9px 16px;border-radius:999px;
+  background:rgba(30,20,16,.85);color:#fbf3e6;font-size:.78rem;font-weight:600;backdrop-filter:blur(8px);flex-wrap:wrap;max-width:calc(100vw - 32px)}
+.hint kbd{font-family:var(--f-sign);font-size:.72rem;background:rgba(255,255,255,.18);padding:2px 7px;border-radius:5px}
+.joystick{position:fixed;inset:0;z-index:40;pointer-events:none;display:none}
+@media (pointer:coarse){ .joystick{display:block} .hint{display:none} }
+.joy-base{position:fixed;width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(30,20,16,.5),rgba(30,20,16,.72));
+  border:2px solid rgba(255,255,255,.25);backdrop-filter:blur(8px);
+  left:24px;bottom:24px;pointer-events:auto;touch-action:none;
+  opacity:.55;transition:opacity .2s,transform .2s}
+.joy-base.active{opacity:.95;transform:scale(1.05)}
+.joy-knob{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;
+  border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--accent) 60%,#7a2418);
+  box-shadow:0 4px 14px rgba(0,0,0,.5);pointer-events:none;
+  transition:transform .08s ease-out}
+.joy-actions{position:fixed;right:20px;bottom:24px;display:flex;flex-direction:column;gap:10px;pointer-events:auto}
+.joy-btn{width:64px;height:64px;border-radius:50%;border:2px solid rgba(255,255,255,.35);
+  background:rgba(30,20,16,.75);color:#fbf3e6;font-weight:800;font-size:.78rem;
+  backdrop-filter:blur(8px);touch-action:none;transition:transform .15s,background .15s}
+.joy-btn:active,.joy-btn.on{background:var(--accent);transform:scale(.92)}
+.joy-btn.run{background:rgba(47,107,58,.85)}
+.joy-btn.ride{background:rgba(184,58,38,.85)}
+.toast{position:fixed;left:50%;top:calc(var(--sky-h) + 20px);transform:translate(-50%,-30px);z-index:60;background:#1c1411;color:#fbf3e6;padding:10px 20px;border-radius:999px;font-weight:700;font-size:.85rem;opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 10px 28px rgba(0,0,0,.4);max-width:calc(100% - 32px);text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+.overlay{position:fixed;inset:0;z-index:100;background:rgba(14,10,8,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .35s}
+.overlay.open{opacity:1;pointer-events:auto}
+.sheet{position:relative;background:var(--panel-solid);color:var(--ink);border:1px solid var(--line);border-radius:28px;width:100%;max-width:940px;max-height:88vh;overflow:auto;padding:40px 40px 36px;box-shadow:0 30px 80px rgba(0,0,0,.5);transform:translateY(22px) scale(.97);transition:transform .4s cubic-bezier(.2,.8,.2,1);user-select:text;-webkit-user-select:text}
+.overlay.open .sheet{transform:none}
+.sheet.small{max-width:520px;text-align:left}
+.x{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.07);font-size:1.15rem;transition:background .2s,transform .25s}
+body[data-theme="night"] .x{background:rgba(255,255,255,.1)}
+.x:hover{background:var(--accent);color:#fff;transform:rotate(90deg)}
+.sheet .kicker{font-family:var(--f-sign);font-size:.78rem;color:var(--accent);margin-bottom:6px}
+.sheet h2{font-family:var(--f-display);font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.15;margin-bottom:14px;padding-right:44px}
+.sheet p{line-height:1.75;color:var(--ink-soft);max-width:68ch}
+.sheet p+p{margin-top:12px}
+.sheet strong{color:var(--ink)}
+.quote{margin-top:22px;padding:14px 18px;border-left:4px solid var(--accent);background:rgba(184,58,38,.08);border-radius:0 14px 14px 0;font-family:var(--f-display);font-style:italic;max-width:62ch}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:18px}
+@media (max-width:720px){.grid{grid-template-columns:1fr}.sheet{padding:30px 22px 26px}}
+.card{border:1px solid var(--line);border-radius:18px;padding:18px 20px;background:rgba(0,0,0,.025);display:flex;flex-direction:column;gap:6px;transition:transform .2s,border-color .2s}
+body[data-theme="night"] .card{background:rgba(255,255,255,.035)}
+.card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.card h4{font-family:var(--f-display);font-size:1.2rem}
+.card p{font-size:.9rem;line-height:1.6}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:6px}
+.tags span{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(47,107,58,.14);color:var(--leaf)}
+body[data-theme="night"] .tags span{color:#8fd19a;background:rgba(143,209,154,.12)}
+.card .lnk{align-self:flex-start;margin-top:6px;font-size:.82rem;font-weight:800;color:var(--accent);text-decoration:none;border-bottom:2px solid currentColor}
+.skill-list{list-style:none;display:flex;flex-direction:column;gap:9px;margin-top:8px;font-size:.92rem;color:var(--ink-soft);line-height:1.5}
+.skill-list b{color:var(--ink)}
+.timeline{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.when{font-family:var(--f-sign);font-size:.76rem;color:var(--leaf);font-weight:700}
+body[data-theme="night"] .when{color:#8fd19a}
+.school-name{color:var(--accent);font-weight:700;font-size:.92rem}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:22px;max-width:520px}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 20px;border-radius:999px;border:0;background:var(--accent);color:#fff;font-weight:800;font-size:.92rem;text-decoration:none;box-shadow:0 6px 18px rgba(184,58,38,.3);transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(184,58,38,.4)}
+.btn.alt{background:var(--wood)}
+.btn.in{background:#0a66c2;box-shadow:0 6px 18px rgba(10,102,194,.3)}
+.btn.gh{background:#24292f}
+.open-to{margin-top:20px;font-size:.9rem}
+
+/* Empty state (certifications) */
+.empty-state{margin-top:22px;padding:40px 24px;border:2px dashed var(--line);border-radius:22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty-state .icon{font-size:2.6rem;line-height:1;filter:grayscale(.15)}
+.empty-state h4{font-family:var(--f-display);font-size:1.25rem}
+.empty-state p{color:var(--ink-soft);font-size:.92rem;max-width:44ch;line-height:1.7}
+.empty-state .btn{margin-top:6px;align-self:center}
+
+@media (prefers-reduced-motion:reduce){
+  .cloud,.bird,.firefly,.shoot,.smoke{animation:none}
+  .star::after{animation:none}
+}
+</style>
 </head>
 <body data-theme="day">
 
@@ -48,8 +368,6 @@
 
   <div class="tools">
     <span class="chip" id="progress">Explored 0/7</span>
-    <!-- Bouton direct pour le mode CV classique -->
-    <button class="ibtn" id="cvModeBtn" aria-label="Mode CV Classique" title="Mode CV Classique" style="font-size:.65rem;font-weight:700;">CV</button>
     <a class="ibtn links" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener" aria-label="LinkedIn" title="LinkedIn">in</a>
     <a class="ibtn links" href="https://github.com/sage235" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.58.24 2.75.12 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
@@ -99,11 +417,7 @@
     <h2 id="introTitle" data-i18n="intro_title">Welcome to my village.</h2>
     <p data-i18n="intro_p1">Each hut holds a piece of my story...</p>
     <p data-i18n="intro_p2">Walk with the joystick or arrow keys...</p>
-    <div class="actions">
-      <button class="btn" id="startBtn" data-i18n="start">Start walking</button>
-      <!-- Option directe pour ouvrir le CV classique dès l'accueil -->
-      <button class="btn alt" id="introCvBtn">📄 Voir le CV classique</button>
-    </div>
+    <div class="actions"><button class="btn" id="startBtn" data-i18n="start">Start walking</button></div>
   </div>
 </div>
 
@@ -114,7 +428,1588 @@
   </div>
 </div>
 
-<!-- Liaison vers le fichier JavaScript séparé -->
-<script src="script.js"></script>
+<script>
+(() => {
+'use strict';
+
+const $ = s => document.querySelector(s);
+const root = document.documentElement;
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const lerp = (a,b,t) => a + (b-a)*t;
+const smooth = (a,b,x) => { const t = clamp((x-a)/(b-a),0,1); return t*t*(3-2*t); };
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const rand = rng(235);
+const rr = (a,b) => a + rand()*(b-a);
+const coarse = matchMedia('(pointer:coarse)').matches;
+
+/* =====================================================
+   I18N — FR / EN
+===================================================== */
+const I18N = {
+  en: {
+    tagline:'Software engineering student · AUCA, Rwanda',
+    explored:'Explored',
+    intro_kicker:'Portfolio of ASDODJI Le Sage',
+    intro_title:'Welcome to my village.',
+    intro_p1:"Each hut holds a piece of my story: who I am, what I build, what I know, where I study, and how to reach me. Follow the dirt paths, read the signs, and step inside.",
+    intro_p2:"Move with the joystick (or the arrow keys / WASD). Hold Shift to sprint. Press E at a door to enter. See a bicycle or a donkey? Stand next to it and press F to hop on. The marigot has cool water and a stone to rest on. The moon button lets the sun set.",
+    start:'Start walking',
+    hint_walk:'Walk', hint_enter:'Enter a door', hint_ride:'Ride', hint_sprint:'Sprint',
+    enter_hut:'Enter', rest_at:'Rest at',
+    no_ride:'No ride close enough. Look for a bicycle or a donkey.',
+    music_on:'Village music on', music_off:'Village music off',
+    sunset:'The sun sets over the village… the stars come out.',
+    sunrise:'A new day begins in the village.',
+    all_seen:"You have seen the whole village. The fireside is the place to say hello.",
+    press_e:'Press E or click', tap_go:'Tap GO', press_f:'Press F', tap_ride:'Tap RIDE',
+    hop_bike:'Hop on the bicycle', hop_donkey:'Hop on the donkey',
+    on_bike:'On the bicycle: fast, but slow to start and stop. Press F to get off.',
+    on_donkey:'On the donkey: hold the rope, slow and steady. Press F to get off.',
+    resume:'Download my resume (PDF)',
+    hut_about:'About', hut_workshop:'Projects', hut_skills:'Skills',
+    hut_school:'Education', hut_certs:'Certifications', hut_contact:'Contact', hut_marigot:'Marigot',
+    name_about:'the Hut of Wisdom', name_workshop:'the Workshop', name_skills:'the Granary',
+    name_school:'the School', name_certs:'the Certification Hut', name_contact:'the Palaver Tree', name_marigot:'the Marigot',
+    sign_about:'About me', sign_workshop:'The Workshop', sign_skills:'The Granary',
+    sign_school:'The School', sign_certs:'Certifications', sign_contact:'Palaver Tree', sign_marigot:'Rest & letters',
+    lang_switched:'Language: English'
+  },
+  fr: {
+    tagline:'Étudiant en génie logiciel · AUCA, Rwanda',
+    explored:'Exploré',
+    intro_kicker:'Portfolio de ASDODJI Le Sage',
+    intro_title:'Bienvenue dans mon village.',
+    intro_p1:"Chaque hutte renferme une part de mon histoire : qui je suis, ce que je construis, ce que je sais, où j'étudie, et comment me joindre. Suis les chemins de terre, lis les panneaux, et entre.",
+    intro_p2:"Déplace-toi avec le joystick (ou les flèches / WASD). Maintiens Shift pour sprinter. Appuie sur E devant une porte pour entrer. Tu vois un vélo ou un âne ? Place-toi à côté et appuie sur F pour monter. Le marigot a de l'eau fraîche et une pierre pour se reposer. Le bouton lune fait tomber le soleil.",
+    start:'Commencer la promenade',
+    hint_walk:'Marcher', hint_enter:'Entrer', hint_ride:'Monter', hint_sprint:'Sprinter',
+    enter_hut:'Entrer dans', rest_at:'Se reposer à',
+    no_ride:'Aucun moyen de transport à proximité. Cherche un vélo ou un âne.',
+    music_on:'Musique du village activée', music_off:'Musique du village désactivée',
+    sunset:'Le soleil se couche sur le village… les étoiles apparaissent.',
+    sunrise:'Un nouveau jour se lève dans le village.',
+    all_seen:"Tu as vu tout le village. Le feu de camp est l'endroit pour dire bonjour.",
+    press_e:'Appuie sur E ou clique', tap_go:'Touche GO', press_f:'Appuie sur F', tap_ride:'Touche RIDE',
+    hop_bike:'Monte sur le vélo', hop_donkey:"Monte sur l'âne",
+    on_bike:"Sur le vélo : rapide, mais lent à démarrer et à s'arrêter. Appuie sur F pour descendre.",
+    on_donkey:"Sur l'âne : tiens la corde, lentement mais sûrement. Appuie sur F pour descendre.",
+    resume:'Télécharger mon CV (PDF)',
+    hut_about:'À propos', hut_workshop:'Projets', hut_skills:'Compétences',
+    hut_school:'Formation', hut_certs:'Certifications', hut_contact:'Contact', hut_marigot:'Marigot',
+    name_about:'la Hutte de la Sagesse', name_workshop:"l'Atelier", name_skills:'le Grenier',
+    name_school:"l'École", name_certs:'la Hutte des Certifications', name_contact:"l'Arbre à Palabres", name_marigot:'le Marigot',
+    sign_about:'À propos', sign_workshop:"L'Atelier", sign_skills:'Le Grenier',
+    sign_school:"L'École", sign_certs:'Certifications', sign_contact:'Arbre à palabres', sign_marigot:'Repos & lettres',
+    lang_switched:'Langue : Français'
+  }
+};
+let LANG = (() => {
+  const saved = localStorage.getItem('lang');
+  if(saved === 'fr' || saved === 'en') return saved;
+  return (navigator.language || 'en').toLowerCase().startsWith('fr') ? 'fr' : 'en';
+})();
+const t = k => (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k;
+
+/* =====================================================
+   1. WORLD DATA
+===================================================== */
+const W = 2400, H = 2150;
+const viewport = $('#viewport'), world = $('#world'), objects = $('#objects'), ground = $('#ground');
+ground.setAttribute('width', W); ground.setAttribute('height', H); ground.setAttribute('viewBox', `0 0 ${W} ${H}`);
+world.style.width = W + 'px'; world.style.height = H + 'px';
+
+const HUTS = [
+  { key:'about',    x:700,  y:560,  type:'round',   label:'hut_about',    col:[-115,-70,230,70] },
+  { key:'workshop', x:1650, y:900,  type:'forge',   label:'hut_workshop', col:[-120,-70,240,70] },
+  { key:'skills',   x:700,  y:1280, type:'granary', label:'hut_skills',   col:[-110,-60,220,60] },
+  { key:'school',   x:1650, y:1620, type:'school',  label:'hut_school',   col:[-115,-70,230,70] },
+  { key:'certs',    x:1150, y:1230, type:'round',   label:'hut_certs',    col:[-115,-70,230,70] },
+  { key:'contact',  x:1150, y:1880, type:'tree',    label:'hut_contact',  col:[-48,-60,96,60] },
+  { key:'marigot',  x:640,  y:1850, type:'water',   label:'hut_marigot',  verb:true, col:[-70,-44,140,44] }
+];
+const SPAWN = { x:1200, y:270 };
+const MAIN_PATH = [[1200,170],[1200,340],[960,500],[700,660],[860,820],[1250,900],[1650,1000],[1500,1130],[1150,1230],[700,1380],[900,1500],[1300,1560],[1650,1720],[1500,1850],[1150,1980]];
+const POND = { cx:1960, cy:430, rx:175, ry:95 };
+const WELL = { x:390, y:940 };
+const BRANCHES = [ [[1200,340],[1450,395],[1730,470]], [[700,660],[540,790],[430,900]], [[900,1500],[870,1700],[810,1850],[740,1950],[650,1956]] ];
+const MG = { cx:420, cy:1780, rx:190, ry:100 };
+
+function smoothPath(pts){
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||p2;
+    d += ` C${p1[0]+(p2[0]-p0[0])/6},${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6},${p2[1]-(p3[1]-p1[1])/6} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+
+/* =====================================================
+   2. GROUND
+===================================================== */
+let g = `<defs>
+  <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86b45a"/><stop offset=".5" stop-color="#78a84f"/><stop offset="1" stop-color="#6c9a47"/></linearGradient>
+  <pattern id="rows" width="26" height="26" patternUnits="userSpaceOnUse"><rect width="26" height="26" fill="#8a6a3a"/><rect y="0" width="26" height="12" fill="#5f9b3c"/><path d="M4,6 q3,-5 6,0 M14,6 q3,-5 6,0" stroke="#8cd05a" stroke-width="2" fill="none"/></pattern>
+</defs>
+<rect width="${W}" height="${H}" fill="url(#gr)"/>`;
+for(let i=0;i<110;i++){
+  const c = rand()<.5 ? '#9cc767' : '#5d8f3f';
+  g += `<ellipse cx="${rr(0,W)}" cy="${rr(0,H)}" rx="${rr(60,200)}" ry="${rr(30,100)}" fill="${c}" opacity="${rr(.1,.22)}"/>`;
+}
+for(let i=0;i<650;i++){
+  const x=rr(0,W), y=rr(0,H);
+  g += `<path d="M${x},${y} l-3,-9 M${x},${y} l0,-11 M${x},${y} l3,-9" stroke="${rand()<.5?'#5a8c3b':'#9fcf6e'}" stroke-width="1.8" stroke-linecap="round" opacity=".75"/>`;
+}
+const FLOWER = ['#f4d03f','#ffffff','#e8618c','#f0883e','#b58cf0'];
+for(let i=0;i<190;i++){
+  const x=rr(20,W-20), y=rr(20,H-20), c=FLOWER[(rand()*FLOWER.length)|0];
+  g += `<circle cx="${x}" cy="${y}" r="3.2" fill="${c}"/><circle cx="${x}" cy="${y}" r="1.2" fill="#c47b1c"/>`;
+}
+g += `<rect x="1850" y="1130" width="420" height="270" rx="16" fill="url(#rows)" stroke="#6b4a28" stroke-width="4"/>`;
+g += `<ellipse cx="${POND.cx}" cy="${POND.cy+8}" rx="${POND.rx+14}" ry="${POND.ry+12}" fill="#b9a36f"/>
+<ellipse cx="${POND.cx}" cy="${POND.cy}" rx="${POND.rx}" ry="${POND.ry}" fill="#4f9bc2"/>
+<ellipse cx="${POND.cx-20}" cy="${POND.cy-14}" rx="${POND.rx*.7}" ry="${POND.ry*.6}" fill="#6bb6d8" opacity=".7"/>
+<ellipse class="ripple" cx="${POND.cx+40}" cy="${POND.cy+10}" rx="50" ry="22" fill="none" stroke="#fff" stroke-width="2" opacity=".5"><animate attributeName="rx" values="20;70" dur="4s" repeatCount="indefinite"/><animate attributeName="ry" values="9;32" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".6;0" dur="4s" repeatCount="indefinite"/></ellipse>`;
+for(let i=0;i<7;i++) g += `<ellipse cx="${POND.cx+rr(-110,110)}" cy="${POND.cy+rr(-50,50)}" rx="13" ry="7" fill="#4f9a45"/>`;
+g += `<ellipse cx="${MG.cx}" cy="${MG.cy+10}" rx="${MG.rx+28}" ry="${MG.ry+18}" fill="#8a6a40"/>
+<ellipse cx="${MG.cx}" cy="${MG.cy+6}" rx="${MG.rx+13}" ry="${MG.ry+9}" fill="#a98a58"/>
+<ellipse cx="${MG.cx}" cy="${MG.cy}" rx="${MG.rx}" ry="${MG.ry}" fill="#3f8c8a"/>
+<ellipse cx="${MG.cx-24}" cy="${MG.cy-12}" rx="${MG.rx*.68}" ry="${MG.ry*.58}" fill="#58a7a3" opacity=".75"/>
+<ellipse cx="${MG.cx+30}" cy="${MG.cy+14}" rx="40" ry="16" fill="none" stroke="#fff" stroke-width="2" opacity=".5"><animate attributeName="rx" values="14;74" dur="5s" repeatCount="indefinite"/><animate attributeName="ry" values="6;30" dur="5s" repeatCount="indefinite"/><animate attributeName="opacity" values=".6;0" dur="5s" repeatCount="indefinite"/></ellipse>`;
+for(let i=0;i<8;i++) g += `<ellipse cx="${MG.cx+rr(-130,120)}" cy="${MG.cy+rr(-55,55)}" rx="${rr(10,16)}" ry="${rr(5,8)}" fill="#4f9a45"/>`;
+for(let i=0;i<22;i++){ const t0 = rr(-1.1,1.1), k = 1.05 + rr(.02,.14);
+  g += `<ellipse cx="${MG.cx+Math.cos(t0)*MG.rx*k}" cy="${MG.cy+10+Math.sin(t0)*MG.ry*k}" rx="${rr(2.5,4.5)}" ry="${rr(1.6,2.6)}" fill="#6e5230" opacity=".7"/>`; }
+for(let i=0;i<9;i++){ const t0 = rr(2.2,5.4); g += `<ellipse cx="${MG.cx+Math.cos(t0)*(MG.rx+24)}" cy="${MG.cy+10+Math.sin(t0)*(MG.ry+14)}" rx="${rr(8,15)}" ry="${rr(5,9)}" fill="#9b968b" stroke="#6b665c" stroke-width="1.5"/>`; }
+
+const mainD = smoothPath(MAIN_PATH);
+g += `<g id="paths" fill="none" stroke-linecap="round" stroke-linejoin="round">`;
+BRANCHES.forEach((b,bi) => { const d = smoothPath(b);
+  g += `<path id="br${bi}" d="${d}" stroke="#a9693f" stroke-width="52"/><path d="${d}" stroke="#cd9566" stroke-width="40"/>`; });
+g += `<path id="mainPath" d="${mainD}" stroke="#a9693f" stroke-width="82"/>
+<path d="${mainD}" stroke="#cd9566" stroke-width="68"/>
+<path d="${mainD}" stroke="#dcaa7b" stroke-width="34" opacity=".55"/>
+<path d="${mainD}" stroke="#b9794c" stroke-width="3" stroke-dasharray="3 22" opacity=".6"/></g>`;
+ground.innerHTML = g;
+
+const mp = $('#mainPath'), total = mp.getTotalLength();
+const S = [];
+for(let l=0; l<=total; l += 12){ const p = mp.getPointAtLength(l); S.push([p.x,p.y]); }
+function distToPath(x,y){ let m = 1e9; for(const s of NETP){ const d = (s[0]-x)**2 + (s[1]-y)**2; if(d<m) m=d; } return Math.sqrt(m); }
+function nearestSample(x,y){ let m=1e18,k=0; S.forEach((s,i)=>{ const d=(s[0]-x)**2+(s[1]-y)**2; if(d<m){m=d;k=i;} }); return k; }
+const BR = BRANCHES.map((b,bi) => { const el = document.getElementById('br'+bi), L = el.getTotalLength(), pts = [];
+  for(let l=0;l<=L;l+=12){ const q = el.getPointAtLength(l); pts.push([q.x,q.y]); }
+  return { pts, j:nearestSample(pts[0][0],pts[0][1]) }; });
+const NETP = S.concat(...BR.map(b => b.pts));
+
+let peb = '';
+for(let i=0;i<S.length;i+=2){
+  const a = rand()*6.28, r = rr(36,50);
+  peb += `<ellipse cx="${S[i][0]+Math.cos(a)*r}" cy="${S[i][1]+Math.sin(a)*r}" rx="${rr(2,5)}" ry="${rr(1.5,3.5)}" fill="${rand()<.5?'#9a8f80':'#c4b8a6'}"/>`;
+}
+ground.insertAdjacentHTML('beforeend', peb);
+
+/* =====================================================
+   3. OBJECTS
+===================================================== */
+const colliders = [];
+const lights = [];
+function addObj(html, x, y, w, h, cls = '', z = y){
+  const d = document.createElement('div');
+  d.className = 'obj ' + cls; d.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:${Math.round(z)}`;
+  d.innerHTML = html; objects.appendChild(d); return d;
+}
+
+const C = { thatch:'#b9923f', thatchD:'#8a6a2c', clay:'#cf8157', clayD:'#9c5a35', wood:'#4b2d19', stone:'#8f8a7e' };
+const SH = '<ellipse cx="160" cy="279" rx="135" ry="13" fill="rgba(0,0,0,.25)"/>';
+const rays = (cx,top,y,xs) => xs.map(x => `M${cx},${top} L${x},${y}`).join(' ');
+
+function hutSVG(type){
+  if(type==='round') return `<svg viewBox="0 0 320 290">${SH}
+    <path d="M62,150 L258,150 L250,276 Q160,290 70,276Z" fill="${C.clay}" stroke="${C.clayD}" stroke-width="3"/>
+    <path d="M80,192 Q160,203 240,192 M78,230 Q160,242 242,230" stroke="${C.clayD}" stroke-opacity=".35" stroke-width="2" fill="none"/>
+    <path d="M126,278 L126,212 Q160,182 194,212 L194,278Z" fill="${C.wood}"/><circle cx="184" cy="246" r="3" fill="#e8a41c"/>
+    <rect x="214" y="184" width="28" height="28" rx="7" fill="#2b1a10"/><rect class="lit" x="217" y="187" width="22" height="22" rx="5" fill="#ffd36a"/>
+    <path d="M84,262 q-12,-4 -10,-20 q2,-14 14,-14 q12,0 14,14 q2,16 -10,20Z" fill="#a24b2c"/>
+    <path d="M160,24 L26,162 Q160,182 294,162Z" fill="${C.thatch}" stroke="${C.thatchD}" stroke-width="4" stroke-linejoin="round"/>
+    <path d="${rays(160,24,168,[70,115,160,205,250])}" stroke="${C.thatchD}" stroke-opacity=".55" stroke-width="2.5" fill="none"/>
+    <path d="M60,160 Q160,176 260,160" stroke="${C.thatchD}" stroke-opacity=".5" stroke-width="3" fill="none"/>
+    <circle cx="160" cy="20" r="6" fill="${C.thatchD}"/></svg>`;
+  if(type==='forge') return `<svg viewBox="0 0 320 290">${SH}
+    <rect x="40" y="130" width="240" height="146" rx="10" fill="#c27a52" stroke="${C.clayD}" stroke-width="3"/>
+    <path d="M52,190 H268 M52,232 H268" stroke="${C.clayD}" stroke-opacity=".3" stroke-width="2"/>
+    <rect x="228" y="58" width="40" height="110" fill="${C.stone}" stroke="#6b665c" stroke-width="3"/>
+    <path d="M118,278 L118,196 Q160,170 202,196 L202,278Z" fill="#241408"/>
+    <path class="lit" d="M128,278 L128,204 Q160,182 192,204 L192,278Z" fill="#ff8a2a"/>
+    <path d="M68,270 h44 l-7,-15 h-30 z" fill="#3b3b3f"/>
+    <path d="M62,170 L62,216" stroke="${C.wood}" stroke-width="4"/><rect x="53" y="166" width="18" height="10" rx="2" fill="#585b60"/>
+    <path d="M232,176 L232,214" stroke="${C.wood}" stroke-width="4"/><path d="M224,214 h16" stroke="#585b60" stroke-width="5"/>
+    <path d="M20,142 L160,50 L300,142Z" fill="#8c4a30" stroke="#5e2f1e" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M100,98 L82,142 M140,74 L126,142 M180,74 L194,142 M220,98 L238,142" stroke="#5e2f1e" stroke-opacity=".5" stroke-width="3"/></svg>`;
+  if(type==='granary') return `<svg viewBox="0 0 320 290">${SH}
+    <rect x="84" y="208" width="10" height="70" fill="${C.wood}"/><rect x="226" y="208" width="10" height="70" fill="${C.wood}"/>
+    <rect x="118" y="208" width="9" height="70" fill="#3b2314"/><rect x="193" y="208" width="9" height="70" fill="#3b2314"/>
+    <path d="M66,116 Q54,196 84,210 L236,210 Q266,196 254,116Z" fill="#c9a24a" stroke="#8f6f26" stroke-width="3"/>
+    <path d="M62,140 Q160,150 258,140 M60,166 Q160,176 260,166 M64,192 Q160,202 256,192 M100,120 L96,206 M130,124 L128,208 M190,124 L192,208 M220,120 L224,206" stroke="#8f6f26" stroke-opacity=".5" stroke-width="2.5" fill="none"/>
+    <rect x="140" y="148" width="40" height="54" rx="6" fill="#2d1b10"/>
+    <rect x="124" y="204" width="72" height="9" rx="2" fill="${C.wood}"/>
+    <path d="M140,213 L140,278 M180,213 L180,278 M140,228 H180 M140,244 H180 M140,260 H180" stroke="#6b4429" stroke-width="5" stroke-linecap="round"/>
+    <path d="M160,18 L36,122 Q160,142 284,122Z" fill="#c9b050" stroke="#8a7a30" stroke-width="4" stroke-linejoin="round"/>
+    <path d="${rays(160,18,130,[70,115,160,205,250])}" stroke="#8a7a30" stroke-opacity=".55" stroke-width="2.5" fill="none"/></svg>`;
+  if(type==='school') return `<svg viewBox="0 0 320 290">${SH}
+    <rect x="50" y="150" width="220" height="126" fill="#d9a06f" stroke="${C.clayD}" stroke-width="3"/>
+    <path d="M50,200 H270" stroke="${C.clayD}" stroke-opacity=".25" stroke-width="2"/>
+    <path d="M138,278 L138,214 Q160,196 182,214 L182,278Z" fill="${C.wood}"/>
+    <rect x="70" y="186" width="42" height="36" rx="4" fill="#2b1a10"/><rect class="lit" x="74" y="190" width="34" height="28" fill="#ffd36a"/>
+    <rect x="208" y="186" width="42" height="36" rx="4" fill="#2b1a10"/><rect class="lit" x="212" y="190" width="34" height="28" fill="#ffd36a"/>
+    <path d="M91,190 V218 M74,204 H108 M229,190 V218 M212,204 H246" stroke="#2b1a10" stroke-width="2"/>
+    <rect x="146" y="164" width="28" height="18" rx="2" fill="#b83a26"/><path d="M160,164 v18" stroke="#f4ead0" stroke-width="2"/>
+    <rect x="126" y="270" width="68" height="8" fill="#b88a5e"/>
+    <path d="M150,72 L150,42 L170,42 L170,72" stroke="${C.wood}" stroke-width="4" fill="none"/><path d="M154,60 q0,-15 6,-15 q6,0 6,15z" fill="#e8a41c"/>
+    <path d="M24,160 L160,70 L296,160Z" fill="#a1583a" stroke="#6e3822" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M100,112 L84,158 M140,86 L128,158 M180,86 L192,158 M220,112 L236,158" stroke="#6e3822" stroke-opacity=".5" stroke-width="3"/></svg>`;
+  if(type==='water'){
+    let reeds = '';
+    for(let i=0;i<9;i++){ const x = 28 + i*9 + (i%2)*3, h = 36 + (i*7)%22;
+      reeds += `<path d="M${x},276 Q${x-4},${276-h*.5} ${x+2},${276-h}" stroke="#6f8f3a" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+      if(i%3===0) reeds += `<ellipse cx="${x+2}" cy="${276-h-4}" rx="3" ry="8" fill="#6b4429"/>`; }
+    return `<svg viewBox="0 0 320 290"><ellipse cx="160" cy="279" rx="150" ry="12" fill="rgba(0,0,0,.22)"/>${reeds}
+      <path d="M250,276 Q252,200 236,150 L246,146 Q258,176 262,196 Q270,170 282,142 L292,148 Q272,180 268,276Z" fill="#5a3b22"/>
+      <ellipse cx="262" cy="122" rx="64" ry="25" fill="#4f8f3d"/><ellipse cx="234" cy="108" rx="40" ry="16" fill="#5fa648"/><ellipse cx="290" cy="106" rx="34" ry="14" fill="#69b251"/>
+      <path d="M86,264 Q88,240 118,238 L192,238 Q220,240 222,264 L224,274 Q154,284 84,274Z" fill="#9b968b" stroke="#6b665c" stroke-width="3"/>
+      <ellipse cx="154" cy="241" rx="60" ry="8" fill="#b9b4a8"/>
+      <path d="M118,238 q-11,-4 -10,-19 q2,-12 13,-12 q11,0 13,12 q1,15 -10,19Z" fill="#a24b2c"/><path d="M110,212 q11,-6 22,0" stroke="#7d3820" stroke-width="2" fill="none"/>
+      <path d="M176,238 q-9,-8 -1,-18 q9,8 1,18Z" fill="#c9a24a" stroke="#8f6f26" stroke-width="1.5"/></svg>`;
+  }
+  return `<svg viewBox="0 0 320 290"><ellipse cx="160" cy="279" rx="150" ry="13" fill="rgba(0,0,0,.25)"/>
+    <rect x="58" y="248" width="62" height="20" rx="9" fill="#6b4429"/><rect x="200" y="248" width="62" height="20" rx="9" fill="#6b4429"/>
+    <path d="M138,272 Q146,200 128,150 Q148,170 160,160 Q172,170 192,150 Q174,200 182,272Z" fill="#5a3820"/>
+    <circle cx="160" cy="84" r="70" fill="#3f7f3f"/><circle cx="98" cy="112" r="54" fill="#3a7a3c"/><circle cx="224" cy="110" r="56" fill="#3a7a3c"/>
+    <circle cx="130" cy="62" r="50" fill="#4f9a49"/><circle cx="196" cy="58" r="48" fill="#58a652"/><circle cx="160" cy="34" r="30" fill="#62b25a"/>
+    <ellipse cx="160" cy="268" rx="36" ry="10" fill="#7d776c"/><ellipse cx="160" cy="266" rx="28" ry="7" fill="#3b2c22"/>
+    <circle class="lit" cx="160" cy="250" r="26" fill="#ff9a2e" opacity=".25"/>
+    <g class="flames"><path d="M144,266 Q148,238 160,222 Q172,238 176,266Z" fill="#f59e0b"/><path d="M152,266 Q158,246 160,236 Q164,248 168,266Z" fill="#ef4444"/></g></svg>`;
+}
+
+(() => {
+  const x = 1200, y = 200;
+  addObj(`<div class="post p1"></div><div class="post p2"></div><div class="beam" id="gateBeam"><div><small data-i18n="gate_small">Welcome, traveler</small><span data-i18n="gate_title">Le Sage's Village</span></div></div>`, x, y, 300, 170, 'gate');
+  colliders.push({x:x-130,y:y-28,w:28,h:28},{x:x+102,y:y-28,w:28,h:28});
+  lights.push({x:x-118,y:y-120,r:120,warm:.7},{x:x+118,y:y-120,r:120,warm:.7});
+})();
+
+const hutEls = {}, signEls = {};
+HUTS.forEach(h => {
+  const el = addObj(hutSVG(h.type), h.x, h.y, 320, 290, 'hut');
+  el.dataset.key = h.key; el.setAttribute('role','button');
+  if(h.type==='forge') el.insertAdjacentHTML('beforeend', [0,1.3,2.6].map(d => `<span class="smoke" style="left:240px;top:56px;animation-delay:${d}s"></span>`).join(''));
+  hutEls[h.key] = el;
+  colliders.push({x:h.x+h.col[0], y:h.y+h.col[1], w:h.col[2], h:h.col[3]});
+
+  const sy = h.y + 56;
+  const s = addObj(`<div class="board"><span class="lantern"></span><i data-hut-i="${h.key}"></i><b data-hut-b="${h.key}"></b></div><div class="pole"></div>`, h.x, sy, 140, 80, 'sign', sy);
+  s.dataset.key = h.key; signEls[h.key] = s;
+  colliders.push({x:h.x-8, y:sy-12, w:16, h:12});
+
+  lights.push({x:h.x, y:h.y-70, r:h.type==='tree'?330:170, warm:h.type==='tree'?.9:.6, flick:h.type==='tree'||h.type==='forge'});
+  lights.push({x:h.x+56, y:sy-62, r:120, warm:.75});
+  h.front = { x:h.x, y:h.y+104 };
+  h.talk  = { x:h.x, y:h.y+62 };
+});
+
+addObj(`<svg viewBox="0 0 70 80"><ellipse cx="35" cy="76" rx="30" ry="6" fill="rgba(0,0,0,.25)"/><rect x="10" y="40" width="50" height="34" rx="6" fill="#8f8a7e" stroke="#6b665c" stroke-width="2"/><path d="M14,48 h42 M14,58 h42 M24,40 v34 M46,40 v34" stroke="#6b665c" stroke-opacity=".5"/><ellipse cx="35" cy="40" rx="25" ry="8" fill="#2c6d8f"/><rect x="8" y="10" width="6" height="40" fill="#4b2d19"/><rect x="56" y="10" width="6" height="40" fill="#4b2d19"/><path d="M4,14 L35,0 L66,14Z" fill="#b9923f" stroke="#8a6a2c" stroke-width="2"/><path d="M35,10 v22" stroke="#4b2d19" stroke-width="2"/><rect x="31" y="30" width="8" height="8" rx="2" fill="#7c5a2e"/></svg>`, WELL.x, WELL.y, 70, 80);
+colliders.push({x:WELL.x-28,y:WELL.y-22,w:56,h:22});
+colliders.push({x:728,y:1838,w:26,h:14});
+colliders.push({e:1, cx:MG.cx, cy:MG.cy, rx:MG.rx-22, ry:MG.ry-16});
+colliders.push({e:1, cx:POND.cx, cy:POND.cy, rx:POND.rx-6, ry:POND.ry-4});
+
+const TREES = {
+  acacia: () => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="34" ry="6" fill="rgba(0,0,0,.22)"/><path d="M62,166 Q66,118 52,84 L60,80 Q72,108 76,118 Q82,100 94,76 L102,82 Q84,112 80,166Z" fill="#5a3b22"/><ellipse cx="70" cy="62" rx="64" ry="22" fill="#4f8f3d"/><ellipse cx="46" cy="52" rx="38" ry="15" fill="#5fa648"/><ellipse cx="98" cy="50" rx="34" ry="14" fill="#69b251"/></svg>`,
+  round:  () => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="34" ry="6" fill="rgba(0,0,0,.22)"/><rect x="63" y="100" width="14" height="66" fill="#5a3b22"/><circle cx="70" cy="70" r="46" fill="#3f8a45"/><circle cx="46" cy="84" r="30" fill="#4a9a4f"/><circle cx="96" cy="80" r="32" fill="#4a9a4f"/><circle cx="68" cy="48" r="26" fill="#5aab58"/></svg>`,
+  banana: () => `<svg viewBox="0 0 140 170"><ellipse cx="70" cy="166" rx="28" ry="5" fill="rgba(0,0,0,.2)"/><rect x="65" y="80" width="10" height="86" rx="4" fill="#7c6a2a"/><path d="M70,84 Q20,60 8,104 Q40,82 70,94Z" fill="#5fb04a"/><path d="M70,84 Q120,60 132,104 Q100,82 70,94Z" fill="#4fa042"/><path d="M70,80 Q50,30 22,34 Q50,48 70,90Z" fill="#6cbd55"/><path d="M70,80 Q92,30 118,34 Q90,48 70,90Z" fill="#5aae48"/><path d="M70,78 Q66,20 70,12 Q84,40 72,88Z" fill="#74c75c"/><ellipse cx="78" cy="96" rx="7" ry="11" fill="#e8c43a"/></svg>`
+};
+const treeKeys = Object.keys(TREES), placed = [];
+function freeSpot(x,y,pad=0){
+  if(distToPath(x,y) < 110+pad) return false;
+  if(((x-POND.cx)/(POND.rx+60))**2 + ((y-POND.cy)/(POND.ry+60))**2 < 1) return false;
+  if(x>1820 && x<2300 && y>1100 && y<1430) return false;
+  if(Math.hypot(x-WELL.x,y-WELL.y) < 110) return false;
+  if(((x-MG.cx)/(MG.rx+90))**2 + ((y-MG.cy)/(MG.ry+90))**2 < 1) return false;
+  if(Math.hypot(x-SPAWN.x,y-SPAWN.y) < 200) return false;
+  for(const h of HUTS) if(Math.abs(x-h.x) < 210 && y > h.y-300 && y < h.y+150) return false;
+  return true;
+}
+let tries = 0;
+while(placed.length < 95 && tries++ < 4000){
+  const x = rr(50,W-50), y = rr(150,H-20);
+  if(!freeSpot(x,y)) continue;
+  if(placed.some(p => Math.hypot(p[0]-x,p[1]-y) < 85)) continue;
+  placed.push([x,y]);
+  const k = treeKeys[(rand()*treeKeys.length)|0], sc = rr(.8,1.3);
+  addObj(TREES[k](), x, y, 140*sc, 170*sc);
+  colliders.push({x:x-9*sc, y:y-11*sc, w:18*sc, h:11*sc});
+}
+for(let i=0,t=0;i<60 && t<2000;t++){
+  const x=rr(40,W-40), y=rr(150,H-20); if(!freeSpot(x,y,-30)) continue; i++;
+  if(rand()<.7) addObj(`<svg viewBox="0 0 60 40"><ellipse cx="30" cy="36" rx="26" ry="4" fill="rgba(0,0,0,.18)"/><circle cx="18" cy="26" r="13" fill="#4a8f45"/><circle cx="34" cy="22" r="15" fill="#58a152"/><circle cx="44" cy="29" r="10" fill="#4a8f45"/></svg>`, x, y, 60, 40);
+  else { addObj(`<svg viewBox="0 0 50 34"><ellipse cx="25" cy="31" rx="22" ry="3.5" fill="rgba(0,0,0,.2)"/><path d="M4,30 Q6,10 22,6 Q42,6 46,30Z" fill="#9b968b" stroke="#6b665c" stroke-width="2"/></svg>`, x, y, 50, 34); colliders.push({x:x-20,y:y-12,w:40,h:12}); }
+}
+
+for(let i=0;i<34;i++){
+  const f = document.createElement('div'); f.className='firefly';
+  f.style.cssText = `left:${rr(60,W-60)}px;top:${rr(200,H-60)}px;z-index:9000;--dx:${rr(-60,60)}px;--dy:${rr(-50,50)}px;--dur:${rr(3,7)}s;animation-delay:${rr(-5,0)}s`;
+  objects.appendChild(f);
+}
+
+/* =====================================================
+   4. CHARACTERS
+===================================================== */
+function sprite(o){
+  const {skin,hair,top,stripe,bottom,bag,wrap,dress} = o, dk = '#1a0f0a';
+  const legsFB = `<g class="legL"><rect x="22" y="${dress?68:58}" width="7" height="${dress?16:26}" rx="3" fill="${skin}"/><ellipse cx="25.5" cy="85" rx="6" ry="3" fill="#2a1a10"/></g>
+    <g class="legR"><rect x="31" y="${dress?68:58}" width="7" height="${dress?16:26}" rx="3" fill="${skin}"/><ellipse cx="34.5" cy="85" rx="6" ry="3" fill="#2a1a10"/></g>`;
+  const bodyFB = dress
+    ? `<path d="M18,34 Q30,28 42,34 L50,76 Q30,83 10,76Z" fill="${top}"/><path d="M12,70 Q30,77 48,70 L50,76 Q30,83 10,76Z" fill="${stripe}"/>`
+    : `<rect x="20" y="52" width="20" height="13" rx="4" fill="${bottom}"/><path d="M19,34 Q30,28 41,34 L42,56 Q30,60 18,56Z" fill="${top}"/><path d="M18.4,50 Q30,54 41.6,50 L42,56 Q30,60 18,56Z" fill="${stripe}"/>`;
+  const armsFB = `<g class="armL"><rect x="12" y="34" width="6" height="22" rx="3" fill="${skin}"/></g><g class="armR"><rect x="42" y="34" width="6" height="22" rx="3" fill="${skin}"/></g>`;
+  const hairFront = wrap
+    ? `<path d="M17.5,22 Q16,5 30,5 Q44,5 42.5,22 Q38,13 30,14 Q22,13 17.5,22Z" fill="${hair}"/><path d="M16,17 Q17,1 30,1 Q43,1 44,17 Q30,9 16,17Z" fill="${wrap}"/><circle cx="42" cy="7" r="4.5" fill="${wrap}"/>`
+    : `<path d="M17.5,22 Q16,6 30,6 Q44,6 42.5,22 Q38,13 30,14 Q22,13 17.5,22Z" fill="${hair}"/><circle cx="20" cy="12" r="4.5" fill="${hair}"/><circle cx="26" cy="8" r="5" fill="${hair}"/><circle cx="34" cy="8" r="5" fill="${hair}"/><circle cx="40" cy="12" r="4.5" fill="${hair}"/>`;
+  const hairBack = `<circle cx="30" cy="21" r="13" fill="${hair}"/>` + (wrap ? `<path d="M16,17 Q17,1 30,1 Q43,1 44,17 Q30,11 16,17Z" fill="${wrap}"/><circle cx="42" cy="7" r="4.5" fill="${wrap}"/>` : '');
+  const fb = `<g class="v v-fb">${legsFB}${bodyFB}${armsFB}
+    <rect class="back" x="20" y="36" width="20" height="21" rx="5" fill="${bag}"/><path class="back" d="M20,43 Q30,48 40,43" stroke="rgba(0,0,0,.25)" fill="none" stroke-width="1.5"/>
+    <circle cx="30" cy="22" r="12" fill="${skin}"/>
+    <g class="front"><path d="M21,33 L39,57" stroke="${bag}" stroke-width="3.2" stroke-linecap="round"/>
+      <circle cx="25" cy="23" r="1.7" fill="${dk}"/><circle cx="35" cy="23" r="1.7" fill="${dk}"/><path d="M26,28.5 Q30,31.5 34,28.5" stroke="${dk}" stroke-width="1.4" fill="none" stroke-linecap="round"/>${hairFront}</g>
+    <g class="back">${hairBack}</g></g>`;
+  const bodySide = dress
+    ? `<path d="M21,34 Q30,29 39,34 L46,76 Q30,82 14,76Z" fill="${top}"/><path d="M15,70 Q30,76 45,70 L46,76 Q30,82 14,76Z" fill="${stripe}"/>`
+    : `<rect x="22" y="52" width="17" height="13" rx="4" fill="${bottom}"/><path d="M22,34 Q30,29 38,34 L39,56 Q30,60 21,56Z" fill="${top}"/><path d="M21.4,50 Q30,54 38.6,50 L39,56 Q30,60 21,56Z" fill="${stripe}"/>`;
+  const side = `<g class="v v-side">
+    <g class="legL"><rect x="25" y="${dress?68:58}" width="7" height="${dress?16:26}" rx="3" fill="${skin}" opacity=".85"/><ellipse cx="29" cy="85" rx="6" ry="3" fill="#2a1a10"/></g>
+    <g class="legR"><rect x="28" y="${dress?68:58}" width="7" height="${dress?16:26}" rx="3" fill="${skin}"/><ellipse cx="32" cy="85" rx="6" ry="3" fill="#2a1a10"/></g>
+    <rect x="13" y="37" width="12" height="20" rx="4" fill="${bag}"/>${bodySide}
+    <g class="armR"><rect x="27" y="34" width="6" height="22" rx="3" fill="${skin}"/></g>
+    <circle cx="31" cy="22" r="12" fill="${skin}"/>
+    <path d="M19,24 Q17,7 31,7 Q41,7 43,17 Q36,12 30,16 Q24,18 19,24Z" fill="${hair}"/><circle cx="22" cy="14" r="5.5" fill="${hair}"/><circle cx="28" cy="9" r="5.5" fill="${hair}"/><circle cx="21" cy="21" r="5" fill="${hair}"/>
+    ${wrap ? `<path d="M17,16 Q18,2 31,2 Q44,3 44,15 Q31,8 17,16Z" fill="${wrap}"/><circle cx="21" cy="8" r="4.5" fill="${wrap}"/>` : ''}
+    <circle cx="38" cy="22.5" r="1.7" fill="${dk}"/><path d="M43,23 q2.2,2 0,3.6" stroke="${dk}" stroke-width="1.2" fill="none"/><path d="M36,28 Q39,30 41,28" stroke="${dk}" stroke-width="1.3" fill="none" stroke-linecap="round"/></g>`;
+  return `<svg class="sp" viewBox="0 0 60 90"><ellipse cx="30" cy="87" rx="16" ry="4" fill="rgba(0,0,0,.28)"/>${fb}${side}</svg>`;
+}
+function makeActor(opts, rides = []){
+  const d = document.createElement('div'); d.className = 'actor'; d.dataset.dir = 'down';
+  const mounts = rides.map(r => `<div class="mount ${r}">${r==='bike' ? bikeSVG(opts.bike) : donkeySVG('ride')}</div>`).join('');
+  d.innerHTML = `${mounts}<div class="say"></div><div class="rider"><div class="bob">${sprite(opts)}</div></div>`;
+  objects.appendChild(d); return d;
+}
+
+const NS = 'http://www.w3.org/2000/svg';
+function E(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for(const k in (attrs||{})) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+function shade(hex,k){ const n = parseInt(hex.slice(1),16); return `rgb(${((n>>16)&255)*k|0},${((n>>8)&255)*k|0},${(n&255)*k|0})`; }
+const setLine = (l,a,b) => { l.setAttribute('x1',a[0]); l.setAttribute('y1',a[1]); l.setAttribute('x2',b[0]); l.setAttribute('y2',b[1]); };
+const setPt = (e,p,dx=0,dy=0) => { e.setAttribute('cx',p[0]+dx); e.setAttribute('cy',p[1]+dy); };
+function ik(h,p,l1,l2,s){
+  let dx = p[0]-h[0], dy = p[1]-h[1], d = Math.hypot(dx,dy) || 1; const mx = l1+l2-.01;
+  if(d > mx){ dx *= mx/d; dy *= mx/d; d = mx; }
+  const a = (l1*l1 - l2*l2 + d*d)/(2*d), hh = Math.sqrt(Math.max(0, l1*l1 - a*a)), ux = dx/d, uy = dy/d;
+  return { j:[h[0] + ux*a - uy*hh*s, h[1] + uy*a + ux*hh*s], e:[h[0]+dx, h[1]+dy] };
+}
+function ikPick(h,p,l1,l2,score){ const A = ik(h,p,l1,l2,1), B = ik(h,p,l1,l2,-1); return score(A.j) >= score(B.j) ? A : B; }
+
+function makeFigure(o){
+  const dark = '#2a1a10', f = {};
+  ['farLeg','farArm','body','nearLeg','nearArm'].forEach(n => { f['g' + n[0].toUpperCase() + n.slice(1)] = E('g'); });
+  const limb = (parent,leg,k) => ({
+    u:E('line',{stroke:shade(leg?(o.dress?o.top:o.bottom):o.top,k),'stroke-width':leg?(o.dress?12.5:9):7,'stroke-linecap':'round'},parent),
+    l:E('line',{stroke:shade(o.skin,k),'stroke-width':leg?6.5:5.5,'stroke-linecap':'round'},parent),
+    e:leg ? E('ellipse',{rx:5.5,ry:2.8,fill:dark},parent) : E('circle',{r:3.3,fill:shade(o.skin,k)},parent) });
+  f.fl = limb(f.gFarLeg,true,.7); f.nl = limb(f.gNearLeg,true,1); f.fa = limb(f.gFarArm,false,.7); f.na = limb(f.gNearArm,false,1);
+  f.bag    = E('rect',{x:-6.5,y:-8.5,width:13,height:17,rx:4,fill:o.bag},f.gBody);
+  f.torso  = E('line',{stroke:o.top,'stroke-linecap':'round'},f.gBody);
+  f.stripe = E('line',{stroke:o.stripe,'stroke-width':3.2,'stroke-linecap':'round'},f.gBody);
+  f.strap  = E('line',{stroke:o.bag,'stroke-width':3,'stroke-linecap':'round'},f.gBody);
+  f.bag2   = E('rect',{x:-7.5,y:-9,width:15,height:18,rx:4.5,fill:o.bag},f.gBody);
+  f.head   = E('circle',{r:10.5,fill:o.skin},f.gBody);
+  f.hair   = [0,1,2,3,4,5].map(() => E('circle',{fill:o.hair,r:0},f.gBody));
+  f.wrapC  = [0,1,2].map(() => E('circle',{fill:o.wrap||'none',r:0},f.gBody));
+  f.eyes   = [E('circle',{r:1.5,fill:dark},f.gBody), E('circle',{r:1.5,fill:dark},f.gBody)];
+  f.mouth  = E('path',{fill:'none',stroke:dark,'stroke-width':1.3,'stroke-linecap':'round'},f.gBody);
+  const HV = {
+    side:[[-3,-8,7.5],[-9,-3,6.5],[3,-10,6],[8,-6,5.2],[-8,3,5],[0,-4,9]],
+    down:[[-8,-6,6],[-3,-10,6.5],[3,-10,6.5],[8,-6,6],[0,-6,8],[0,-9,6]],
+    up:  [[0,-1,11.8],[-7,-5,6],[7,-5,6],[0,-9,7],[-6,4,5],[6,4,5]] };
+  f.update = (view,P) => {
+    const H = P.H, S = P.S, hd = P.hd, ft = view === 'side';
+    const leg = (L,pt,hip) => { setLine(L.u,hip,pt.j); setLine(L.l,pt.j,pt.e); setPt(L.e,pt.e,ft?4:0,3); };
+    leg(f.nl,P.nl,P.nH||H); leg(f.fl,P.fl,P.fH||H);
+    const arm = (A,sh,pt) => { setLine(A.u,sh,pt.j); setLine(A.l,pt.j,pt.e); setPt(A.e,pt.e); };
+    arm(f.na,P.nS||S,P.na); arm(f.fa,P.fS||S,P.fa);
+    setLine(f.torso,H,S); f.torso.setAttribute('stroke-width', ft ? 13 : 16);
+    const hx = H[0] + (S[0]-H[0])*.2, hy = H[1] + (S[1]-H[1])*.2;
+    setLine(f.stripe,[hx-7,hy],[hx+7,hy]); f.stripe.setAttribute('opacity', ft ? 0 : 1);
+    setPt(f.head,hd);
+    const hv = HV[view]; f.hair.forEach((c,i) => { setPt(c,hd,hv[i][0],hv[i][1]); c.setAttribute('r',hv[i][2]); });
+    const WV = { side:[[-2,-8,7.8],[4,-9,6.2],[-8,-3,5.5]], down:[[-5,-8,6.8],[5,-8,6.8],[0,-11,6.8]], up:[[-5,-6,7.8],[5,-6,7.8],[0,-9,8.2]] }[view];
+    f.wrapC.forEach((c,i) => { setPt(c,hd,WV[i][0],WV[i][1]); c.setAttribute('r', o.wrap ? WV[i][2] : 0); });
+    const eye = (e,dx,dy,on) => { setPt(e,hd,dx,dy); e.setAttribute('opacity',on?1:0); };
+    if(ft){ eye(f.eyes[0],5.5,-1,1); eye(f.eyes[1],0,0,0); f.mouth.setAttribute('d',`M${hd[0]+4},${hd[1]+4.5} q2.5,1.6 5,0`); f.mouth.setAttribute('opacity',1); }
+    else if(view === 'down'){ eye(f.eyes[0],-4,-.5,1); eye(f.eyes[1],4,-.5,1); f.mouth.setAttribute('d',`M${hd[0]-3.2},${hd[1]+4} q3.2,3 6.4,0`); f.mouth.setAttribute('opacity',1); }
+    else { eye(f.eyes[0],0,0,0); eye(f.eyes[1],0,0,0); f.mouth.setAttribute('opacity',0); }
+    const t = (P.tilt||0)*Math.PI/180, mx = (H[0]+S[0])/2, my = (H[1]+S[1])/2;
+    f.bag.setAttribute('opacity', ft ? 1 : 0); f.bag2.setAttribute('opacity', view==='up' ? 1 : 0); f.strap.setAttribute('opacity', view==='down' ? 1 : 0);
+    if(ft) f.bag.setAttribute('transform',`translate(${mx-Math.cos(t)*9},${my-Math.sin(t)*9}) rotate(${P.tilt||0})`);
+    if(view==='up') f.bag2.setAttribute('transform',`translate(${mx},${my+1})`);
+    if(view==='down') setLine(f.strap,[S[0]-6,S[1]+2],[H[0]+7,H[1]-3]);
+  };
+  return f;
+}
+
+function makeWalkerRig(o){
+  const svg = E('svg',{viewBox:'0 0 160 120','class':'rig'}), root = E('g',{},svg);
+  const mk = (view,rx) => { const fig = makeFigure(o), g = E('g',{'data-v':view},root); E('ellipse',{cx:80,cy:111,rx,ry:3.2,fill:'rgba(0,0,0,.25)'},g); return {fig,g}; };
+  const S = mk('side',17), D = mk('down',15), U = mk('up',15);
+  S.g.append(S.fig.gFarLeg, S.fig.gFarArm, S.fig.gBody, S.fig.gNearLeg, S.fig.gNearArm);
+  D.g.append(D.fig.gFarLeg, D.fig.gNearLeg, D.fig.gBody, D.fig.gFarArm, D.fig.gNearArm);
+  U.g.append(U.fig.gFarLeg, U.fig.gNearLeg, U.fig.gFarArm, U.fig.gNearArm, U.fig.gBody);
+  const DEG = Math.PI/180;
+  return { svg,
+    update(st){
+      root.setAttribute('transform',`rotate(${st.rot.toFixed(2)} 80 112)`);
+      S.g.style.opacity = st.view==='side' ? 1 : 0;
+      D.g.style.opacity = st.view==='down' ? 1 : 0;
+      U.g.style.opacity = st.view==='up' ? 1 : 0;
+      const r = st.r, amp = st.amp, w = st.w;
+      const idle = Math.sin(st.t*2)*.35*(1-amp);
+      const beta = lerp(.62,.38,r);
+      const s    = (lerp(28,58,r)) * amp;
+      const lift = lerp(8,18,r)*amp;
+      const foot = p => {
+        p = ((p%1)+1)%1;
+        if(p < beta){ const u = p/beta; return [s*(1-2*u), 0]; }
+        const u = (p-beta)/(1-beta);
+        const e = u*u*(3-2*u);
+        return [-s + 2*s*e, lift*Math.sin(Math.PI*u)];
+      };
+      const f1 = foot(w), f2 = foot(w+.5);
+      const hipY = 66 - (amp*(1+r*2.5)*Math.cos(4*Math.PI*(w-beta/2)) + amp*r*3) + idle;
+      const armA = (lerp(26,48,r)*amp + 2)*DEG;
+      const flex = (lerp(12,85,r)*amp + 8)*DEG;
+      if(st.view === 'side'){
+        S.g.setAttribute('transform',`translate(80,0) scale(${st.faceT.toFixed(3)},1) translate(-80,0)`);
+        const a = (lerp(3,18,r)*amp + 1.5)*DEG;
+        const H  = [80, hipY];
+        const Sh = [H[0]+25*Math.sin(a), H[1]-25*Math.cos(a)];
+        const hd = [Sh[0]+12.5*Math.sin(a+.12), Sh[1]-12.5*Math.cos(a+.12)];
+        const fS = [Sh[0]-1.5, Sh[1]+.5];
+        const arm = (sp,ph) => {
+          const u  = armA*Math.sin(2*Math.PI*(w+ph));
+          const el = [sp[0]+15*Math.sin(u), sp[1]+15*Math.cos(u)];
+          return { j:el, e:[el[0]+14*Math.sin(u+flex), el[1]+14*Math.cos(u+flex)] };
+        };
+        S.fig.update('side',{ H, S:Sh, hd, tilt:a/DEG,
+          nl:ik(H,[80+f1[0], 109-f1[1]], 26, 26, -1),
+          fl:ik(H,[80+f2[0], 109-f2[1]], 26, 26, -1),
+          na:arm(Sh,.5), fa:arm(fS,0), fS });
+      } else {
+        const dn = st.view === 'down', sg = dn ? 1 : -1, fig = dn ? D.fig : U.fig;
+        const sway = Math.sin(2*Math.PI*w)*1.8*amp;
+        const H  = [80+sway, hipY];
+        const Sh = [80+sway*1.2, hipY-25];
+        const hd = [80+sway*1.3, hipY-37.5];
+        const hR = [86+sway, hipY], hL = [74+sway, hipY];
+        const sR = [89+sway*1.2, Sh[1]+3], sL = [71+sway*1.2, Sh[1]+3];
+        const yR = 109 + sg*f1[0]*.3 - f1[1]*.9;
+        const yL = 109 + sg*f2[0]*.3 - f2[1]*.9;
+        const sh1 = Math.sin(2*Math.PI*(w+.5))*(4+6*r)*amp;
+        const handR = [sR[0]+4, sR[1]+24+sg*sh1];
+        const handL = [sL[0]-4, sL[1]+24-sg*sh1];
+        fig.update(st.view,{ H, S:Sh, hd, tilt:0,
+          nH:hR, fH:hL, nS:sR, fS:sL,
+          nl:ikPick(hR,[88,yR],26,26,j=>j[0]), fl:ikPick(hL,[72,yL],26,26,j=>-j[0]),
+          na:ikPick(sR,handR,15,14,j=>j[0]),   fa:ikPick(sL,handL,15,14,j=>-j[0]) });
+      }
+    }
+  };
+}
+
+function makeBikeRig(o){
+  const svg = E('svg',{viewBox:'0 0 160 120','class':'rig'}), root = E('g',{},svg);
+  const dk = '#1d1d1f', col = o.bike || '#c8452d', frames = [], fills = [];
+  const RW=[44,94], FW=[105,94], BB=[74,96], HT=[93,64], SP=[61,65], GR=[100,57];
+  const wheel = (parent,c) => { const g = E('g',{},parent), cx = c[0], cy = c[1];
+    E('circle',{cx,cy,r:17,fill:'none',stroke:dk,'stroke-width':3.4},g);
+    E('circle',{cx,cy,r:13.5,fill:'none',stroke:'#b9b9b9','stroke-width':.8},g);
+    E('path',{d:`M${cx},${cy-13.5}V${cy+13.5}M${cx-13.5},${cy}H${cx+13.5}M${cx-9.5},${cy-9.5}L${cx+9.5},${cy+9.5}M${cx+9.5},${cy-9.5}L${cx-9.5},${cy+9.5}`,stroke:'#bdbdbd','stroke-width':.8},g);
+    E('circle',{cx,cy,r:2.4,fill:'#777'},g);
+    return { rot:d => g.setAttribute('transform',`rotate(${d.toFixed(1)} ${cx} ${cy})`) }; };
+  const ln = (parent,a,b,w,c,isFrame) => { const l = E('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:c,'stroke-width':w,'stroke-linecap':'round'},parent); if(isFrame) frames.push(l); return l; };
+  const grips = g => { ln(g,[63,58],[97,58],3.2,dk); E('circle',{cx:63,cy:58,r:3.3,fill:'#222'},g); E('circle',{cx:97,cy:58,r:3.3,fill:'#222'},g); };
+
+  const figS = makeFigure(o), side = E('g',{'data-v':'side'},root);
+  E('ellipse',{cx:76,cy:112,rx:46,ry:3.5,fill:'rgba(0,0,0,.22)'},side);
+  side.append(figS.gFarLeg, figS.gFarArm);
+  const bk = E('g',{},side);
+  const crankF = ln(bk,BB,BB,2.6,'#333'), pedF = E('rect',{width:8,height:3,rx:1.2,fill:'#222'},bk);
+  const rw = wheel(bk,RW), fw = wheel(bk,FW);
+  [[RW,BB],[RW,SP],[BB,SP],[SP,HT],[BB,HT],[HT,FW]].forEach(q => ln(bk,q[0],q[1],3.3,col,true));
+  ln(bk,SP,[61.5,62.5],3,dk); ln(bk,[54,62],[68,62],4.2,dk); ln(bk,HT,[95,56],3,dk); ln(bk,[94,56],[101,57.5],3,dk);
+  E('circle',{cx:BB[0],cy:BB[1],r:6,fill:'none',stroke:'#555','stroke-width':1.6},bk);
+  const crankN = ln(bk,BB,BB,2.6,'#333'), pedN = E('rect',{width:8,height:3,rx:1.2,fill:'#222'},bk);
+  side.append(figS.gBody, figS.gNearLeg, figS.gNearArm);
+
+  const figD = makeFigure(o), down = E('g',{'data-v':'down'},root);
+  E('ellipse',{cx:80,cy:112,rx:18,ry:3.5,fill:'rgba(0,0,0,.22)'},down);
+  down.append(figD.gFarLeg, figD.gNearLeg, figD.gBody);
+  E('ellipse',{cx:80,cy:94,rx:3.6,ry:17.5,fill:dk},down);
+  const treadD = E('ellipse',{cx:80,cy:94,rx:3.6,ry:17.5,fill:'none',stroke:'#777','stroke-width':1.3,'stroke-dasharray':'3 4'},down);
+  ln(down,[80,64],[80,94],3.5,col,true); fills.push(E('rect',{x:77.5,y:59,width:5,height:8,rx:2,fill:col},down));
+  grips(down); down.append(figD.gFarArm, figD.gNearArm);
+
+  const figU = makeFigure(o), up = E('g',{'data-v':'up'},root);
+  E('ellipse',{cx:80,cy:112,rx:18,ry:3.5,fill:'rgba(0,0,0,.22)'},up);
+  grips(up);
+  E('ellipse',{cx:80,cy:94,rx:3.6,ry:17.5,fill:dk},up);
+  const treadU = E('ellipse',{cx:80,cy:94,rx:3.6,ry:17.5,fill:'none',stroke:'#777','stroke-width':1.3,'stroke-dasharray':'3 4'},up);
+  E('ellipse',{cx:80,cy:65,rx:9,ry:3.6,fill:'#222'},up);
+  up.append(figU.gFarLeg, figU.gNearLeg, figU.gFarArm, figU.gNearArm, figU.gBody);
+
+  return { svg,
+    setColor(c){ frames.forEach(l => l.setAttribute('stroke',c)); fills.forEach(r => r.setAttribute('fill',c)); },
+    update(st){
+      root.setAttribute('transform',`rotate(${st.rot.toFixed(2)} 78 112)`);
+      side.style.opacity = st.view==='side' ? 1 : 0; down.style.opacity = st.view==='down' ? 1 : 0; up.style.opacity = st.view==='up' ? 1 : 0;
+      const th = st.theta;
+      if(st.view === 'side'){
+        side.setAttribute('transform',`translate(76,0) scale(${st.faceT.toFixed(3)},1) translate(-76,0)`);
+        rw.rot(st.phi); fw.rot(st.phi);
+        const p1 = [BB[0]+9*Math.cos(th), BB[1]+9*Math.sin(th)], p2 = [BB[0]-9*Math.cos(th), BB[1]-9*Math.sin(th)];
+        setLine(crankN,BB,p1); setLine(crankF,BB,p2);
+        pedN.setAttribute('x',p1[0]-4); pedN.setAttribute('y',p1[1]-1.5); pedF.setAttribute('x',p2[0]-4); pedF.setAttribute('y',p2[1]-1.5);
+        const a = st.lean*Math.PI/180, H = [61,59], S = [H[0]+25*Math.sin(a), H[1]-25*Math.cos(a)], hd = [S[0]+12*Math.sin(a+.28), S[1]-12*Math.cos(a+.28)];
+        const fS = [S[0]-1.5, S[1]+.5];
+        figS.update('side',{H,S,hd,tilt:st.lean,
+          nl:ik(H,[p1[0]-.5,p1[1]-3],24,24,-1), fl:ik(H,[p2[0]-.5,p2[1]-3],24,24,-1),
+          na:ik(S,GR,16,16,1), fa:ik(fS,[GR[0]-1.5,GR[1]-.5],16,16,1), fS });
+      } else {
+        const dn = st.view === 'down', fig = dn ? figD : figU;
+        (dn ? treadD : treadU).setAttribute('stroke-dashoffset',(st.phi*.12).toFixed(1));
+        const sw = st.sway, yL = 96+9*Math.sin(th), yR = 96-9*Math.sin(th);
+        const H = [80+sw*.5,60], S = [80+sw,38], hd = [80+sw*1.2,27], hL = [74+sw*.5,60], hR = [86+sw*.5,60], sL = [71+sw,40], sR = [89+sw,40];
+        fig.update(st.view,{H,S,hd,tilt:0, nH:hR, fH:hL, nS:sR, fS:sL,
+          nl:ikPick(hR,[88,yR-2],24,24,j=>j[0]), fl:ikPick(hL,[72,yL-2],24,24,j=>-j[0]),
+          na:ikPick(sR,[97,58],16,16,j=>j[0]),   fa:ikPick(sL,[63,58],16,16,j=>-j[0]) });
+      }
+    } };
+}
+
+function makeDonkeyRig(o){
+  const svg = E('svg',{viewBox:'0 0 160 120','class':'rig'}), root = E('g',{},svg);
+  const figS = makeFigure(o), figD = makeFigure(o), figU = makeFigure(o);
+  const rope = parent => E('path',{fill:'none',stroke:'#7a4a22','stroke-width':1.9,'stroke-linecap':'round'},parent);
+  const pivotize = (e,org) => { e.style.transformBox = 'fill-box'; e.style.transformOrigin = org; };
+
+  const side = E('g',{'data-v':'side'},root), dg = E('g',{transform:'translate(18,26)'});
+  dg.innerHTML = donkeyInner('ride');
+  side.append(figS.gFarLeg, dg, figS.gFarArm, figS.gBody, figS.gNearLeg);
+  const ropeS = rope(side); side.append(figS.gNearArm);
+  const legs = [...dg.querySelectorAll('.dleg')], head = dg.querySelector('.dhead'), tail = dg.querySelector('.dtail');
+
+  const down = E('g',{'data-v':'down'},root), df = E('g');
+  df.innerHTML = `<ellipse cx="80" cy="110" rx="26" ry="4" fill="rgba(0,0,0,.2)"/>
+    <g class="fl"><rect x="66" y="86" width="9" height="24" rx="3.5" fill="#7a7671"/><rect x="65.5" y="106" width="10" height="5" rx="1.5" fill="#2a2420"/></g>
+    <g class="fl"><rect x="85" y="86" width="9" height="24" rx="3.5" fill="#7a7671"/><rect x="84.5" y="106" width="10" height="5" rx="1.5" fill="#2a2420"/></g>
+    <ellipse cx="80" cy="78" rx="21" ry="26" fill="#938f89"/><ellipse cx="80" cy="86" rx="14" ry="16" fill="#bdb9b1"/>
+    <g class="fh"><path d="M70,58 L90,58 L88,84 L72,84Z" fill="#938f89"/><path d="M72,69 L66,48 L77,64Z" fill="#7a7671"/><path d="M88,69 L94,48 L83,64Z" fill="#7a7671"/>
+      <ellipse cx="80" cy="82" rx="9" ry="15" fill="#938f89"/><path d="M80,64 L80,76" stroke="#4a4540" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="80" cy="94" rx="6.5" ry="5.5" fill="#d9d3c9"/><circle cx="74.5" cy="79" r="1.7" fill="#111"/><circle cx="85.5" cy="79" r="1.7" fill="#111"/>
+      <circle cx="78" cy="94" r="1" fill="#6a6661"/><circle cx="82" cy="94" r="1" fill="#6a6661"/></g>`;
+  down.append(figD.gBody, df, figD.gFarLeg, figD.gNearLeg);
+  const ropeDL = rope(down), ropeDR = rope(down); down.append(figD.gFarArm, figD.gNearArm);
+  const fls = [...df.querySelectorAll('.fl')], fh = df.querySelector('.fh');
+  fls.forEach(e => pivotize(e,'50% 100%')); pivotize(fh,'50% 20%');
+
+  const up = E('g',{'data-v':'up'},root), dbk = E('g');
+  dbk.innerHTML = `<ellipse cx="80" cy="110" rx="26" ry="4" fill="rgba(0,0,0,.2)"/>
+    <g class="bl"><rect x="66" y="88" width="9" height="22" rx="3.5" fill="#7a7671"/><rect x="65.5" y="106" width="10" height="5" rx="1.5" fill="#2a2420"/></g>
+    <g class="bl"><rect x="85" y="88" width="9" height="22" rx="3.5" fill="#7a7671"/><rect x="84.5" y="106" width="10" height="5" rx="1.5" fill="#2a2420"/></g>
+    <g class="rump"><ellipse cx="80" cy="78" rx="21" ry="26" fill="#938f89"/><ellipse cx="80" cy="82" rx="12" ry="18" fill="#a09c95"/>
+    <path d="M60,56 Q80,48 100,56 L98,76 Q80,82 62,76Z" fill="#c8452d"/><path d="M62,68 Q80,74 98,68" stroke="#f0b429" stroke-width="3" fill="none"/>
+    <g class="bt"><path d="M80,64 Q76,80 79,94" stroke="#6f6c68" stroke-width="3.4" fill="none" stroke-linecap="round"/><ellipse cx="79" cy="96" rx="3.5" ry="5" fill="#4a4540"/></g></g>`;
+  up.append(dbk, figU.gFarLeg, figU.gNearLeg, figU.gFarArm, figU.gNearArm, figU.gBody);
+  const bls = [...dbk.querySelectorAll('.bl')], bt = dbk.querySelector('.bt'), rump = dbk.querySelector('.rump');
+  bls.forEach(e => pivotize(e,'50% 100%')); pivotize(bt,'50% 0%');
+
+  const legsFB = (fig,view,H,S,hd,sw,by,g,A) => {
+    const hL = [74+sw,54+by], hR = [86+sw,54+by], sL = [71+sw,34+by], sR = [89+sw,34+by];
+    const ankL = [61+Math.sin(g)*2*A,86], ankR = [99-Math.sin(g)*2*A,86];
+    return { H,S,hd,tilt:0, nH:hR, fH:hL, nS:sR, fS:sL,
+      nl:ikPick(hR,ankR,22,22,j=>j[0]), fl:ikPick(hL,ankL,22,22,j=>-j[0]), sL, sR };
+  };
+
+  return { svg,
+    update(st){
+      root.setAttribute('transform',`rotate(${st.rot.toFixed(2)} 80 112)`);
+      side.style.opacity = st.view==='side' ? 1 : 0; down.style.opacity = st.view==='down' ? 1 : 0; up.style.opacity = st.view==='up' ? 1 : 0;
+      const g = st.gait, A = st.amp, by = -Math.abs(Math.sin(g))*2.4*A, sw = Math.sin(g)*1.6*A;
+      const tailSw = Math.sin(st.t*2.1)*7 + Math.sin(g)*8*A;
+      if(st.view === 'side'){
+        side.setAttribute('transform',`translate(80,0) scale(${st.faceT.toFixed(3)},1) translate(-80,0)`);
+        legs.forEach(l => { const ph = l.classList.contains('a') ? 0 : Math.PI; l.style.transform = `rotate(${(Math.sin(g+ph)*24*A).toFixed(1)}deg)`; });
+        const nod = Math.sin(g*2)*2.5*A + st.pull*7;
+        head.style.transform = `rotate(${nod.toFixed(1)}deg)`; tail.style.transform = `rotate(${tailSw.toFixed(1)}deg)`;
+        const a = .1, H = [76,54+by], S = [H[0]+24*Math.sin(a), H[1]-24*Math.cos(a)], hd = [S[0]+2.5,S[1]-13], fS = [S[0]-1,S[1]+.5];
+        const A1 = [84+3*Math.sin(g)*A,79], A2 = [80-3*Math.sin(g)*A,80];
+        const hand = [93-st.tension*3,49+by], fhand = [91-st.tension*3,48+by];
+        figS.update('side',{H,S,hd,tilt:6, nl:ik(H,A1,19,19,-1), fl:ik(H,A2,19,19,-1), na:ik(S,hand,14,14,1), fa:ik(fS,fhand,14,14,1), fS});
+        const ang = nod*Math.PI/180, px = 110, py = 75, mx0 = 144-px, my0 = 59-py;
+        const mouth = [px + mx0*Math.cos(ang) - my0*Math.sin(ang), py + mx0*Math.sin(ang) + my0*Math.cos(ang)];
+        const mid = [(hand[0]+mouth[0])/2, (hand[1]+mouth[1])/2], sag = (1-st.tension)*26 + 3;
+        ropeS.setAttribute('d',`M${hand[0]},${hand[1]} Q${mid[0]},${mid[1]+sag} ${mouth[0]},${mouth[1]}`);
+      } else if(st.view === 'down'){
+        fls.forEach((l,i) => { const lift = Math.max(0, Math.sin(g + i*Math.PI))*5*A; l.style.transform = `translateY(${(-lift).toFixed(1)}px)`; });
+        fh.style.transform = `translateY(${(Math.sin(g*2)*1.5*A).toFixed(1)}px) rotate(${(st.pull*8).toFixed(1)}deg)`;
+        const H = [80+sw,54+by], S = [80+sw*1.1,31+by], hd = [80+sw*1.2,20+by], sh = st.pull*4;
+        const P2 = legsFB(figD,'down',H,S,hd,sw,by,g,A);
+        const hl = [78+sh,62+by], hr = [82+sh,62+by];
+        figD.update('down',Object.assign(P2,{ na:ikPick(P2.sR,hr,14,14,j=>j[0]), fa:ikPick(P2.sL,hl,14,14,j=>-j[0]) }));
+        const mouth = [80+st.pull*5,94], spread = (1-st.tension)*8;
+        ropeDL.setAttribute('d',`M${hl[0]},${hl[1]} Q${79-spread},80 ${mouth[0]},${mouth[1]}`);
+        ropeDR.setAttribute('d',`M${hr[0]},${hr[1]} Q${81+spread},80 ${mouth[0]},${mouth[1]}`);
+      } else {
+        bls.forEach((l,i) => { const lift = Math.max(0, Math.sin(g + i*Math.PI))*5*A; l.style.transform = `translateY(${(-lift).toFixed(1)}px)`; });
+        bt.style.transform = `rotate(${tailSw.toFixed(1)}deg)`; rump.style.transform = `translateX(${sw.toFixed(1)}px)`;
+        const H = [80+sw,54+by], S = [80+sw*1.1,31+by], hd = [80+sw*1.2,20+by];
+        const P2 = legsFB(figU,'up',H,S,hd,sw,by,g,A);
+        figU.update('up',Object.assign(P2,{ na:ikPick(P2.sR,[84+st.pull*3,58+by],14,14,j=>j[0]), fa:ikPick(P2.sL,[76+st.pull*3,58+by],14,14,j=>-j[0]) }));
+      }
+    } };
+}
+
+function makeRider(kind,o){
+  const rig = kind === 'bike' ? makeBikeRig(o) : kind === 'donkey' ? makeDonkeyRig(o) : makeWalkerRig(o);
+  const st = { view:'side', face:1, faceT:1, theta:0, phi:0, gait:0, bank:0, lean:34, pull:0, tension:0, sway:0, amp:0, rot:0, t:0, prevH:null, spd:0, w:0, r:0, stride:60 };
+  return { svg:rig.svg,
+    setColor(c){ if(rig.setColor) rig.setColor(c); },
+    reset(face){ st.face = st.faceT = face; st.prevH = null; st.spd = 0; st.bank = 0; st.tension = 0; st.pull = 0; st.view = 'side'; },
+    step(dt,vx,vy,active,sprint){
+      const speed = Math.hypot(vx,vy); let turn = 0; st.t += dt;
+      if(speed > 25){
+        const h = Math.atan2(vy,vx);
+        if(st.prevH !== null){ let d = h - st.prevH; while(d > Math.PI) d -= 6.2832; while(d < -Math.PI) d += 6.2832; turn = d/Math.max(dt,.001); }
+        st.prevH = h; const c = Math.cos(h), sn = Math.sin(h);
+        if(Math.abs(c) >= .5){ st.view = 'side'; st.face = c < 0 ? -1 : 1; } else st.view = sn > 0 ? 'down' : 'up';
+      } else st.prevH = null;
+      const k = Math.min(1,dt*16); st.faceT += (st.face - st.faceT)*k;
+      const acc = (speed - st.spd)/Math.max(dt,.001); st.spd = speed;
+      st.bank += (clamp(turn*speed*.016,-12,12) - st.bank)*Math.min(1,dt*7);
+      st.tension += (clamp(Math.abs(turn)/2,0,1) - st.tension)*Math.min(1,dt*8);
+      st.pull += (clamp(turn/2.5,-1,1) - st.pull)*Math.min(1,dt*8);
+      const dist = speed*dt;
+      st.phi += dist/110*360; st.gait += dist/110*6.2832;
+      if(active) st.theta += dist/110*6.2832*.55;
+      st.amp = clamp(speed/(kind === 'walk' ? 60 : 120),0,1);
+      if(kind === 'walk'){
+        st.r += (clamp((speed-170)/90,0,1) - st.r)*Math.min(1,dt*8);
+        st.stride = clamp(speed*.6,36,90) + st.r*60;
+        if(speed > 8) st.w += dist/st.stride;
+      }
+      st.lean += ((34 + (sprint?14:0) + clamp(acc/300,-1,1)*5) - st.lean)*Math.min(1,dt*6);
+      st.sway = Math.sin(st.theta)*1.8;
+      st.rot = st.view === 'side' ? st.bank*.3 : st.bank*(st.view === 'down' ? -1 : 1);
+      rig.update(st);
+    } };
+}
+
+const P = { x:SPAWN.x, y:SPAWN.y, dir:'down', walking:false, mount:null, ride:null, face:'right', lock:0, approach:null, rigOn:false };
+const player = makeActor({skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'});
+const LOOK = {skin:'#7a4a2d',hair:'#16100d',top:'#c8452d',stripe:'#f0b429',bottom:'#2f5d8a',bag:'#3f7a45'};
+const riders = { walk:makeRider('walk',LOOK), bike:makeRider('bike',LOOK), donkey:makeRider('donkey',LOOK) };
+['walk','bike','donkey'].forEach(k => { if(k !== 'walk') riders[k].svg.style.display = 'none'; player.appendChild(riders[k].svg); });
+player.classList.add('rigged');
+const sayPlayer = player.querySelector('.say');
+sayPlayer.classList.add('go'); sayPlayer.setAttribute('role','button');
+
+const MAMA_LOOK = {skin:'#8a5636',hair:'#1a1210',top:'#2f7a5a',stripe:'#f4ead0',bottom:'#2f7a5a',wrap:'#e8a41c',bag:'#a85a2a',dress:true};
+const mama = makeActor(MAMA_LOOK);
+const mamaRider = makeRider('walk', MAMA_LOOK); mama.appendChild(mamaRider.svg); mama.classList.add('rigged');
+const sayMama = mama.querySelector('.say');
+const movers = [];
+function addMover(m){ const o = Object.assign({i:30,dir:1,wait:0,speed:50,off:[0,0],x:0,y:0}, m); movers.push(o); return o; }
+mama.style.setProperty('--gait','.4s');
+const MAMA = addMover({el:mama, actor:true, rider:mamaRider, i:60, speed:52, off:[26,12]});
+
+const CYC = {skin:'#8a5636',hair:'#16100d',top:'#2a6fb0',stripe:'#f4ead0',bottom:'#6b4429',bag:'#e8a41c',bike:'#2e7d4f'};
+const cyclist = makeActor(CYC);
+const cycRider = makeRider('bike', CYC); cyclist.appendChild(cycRider.svg); cyclist.classList.add('rigged');
+addMover({el:cyclist, actor:true, rider:cycRider, i:300, dir:-1, speed:135, off:[-26,22]});
+
+const packEl = document.createElement('div'); packEl.className = 'animal'; packEl.style.cssText = 'width:130px;height:90px';
+packEl.innerHTML = donkeySVG('pack'); objects.appendChild(packEl); packEl.style.setProperty('--hoof','.6s');
+const packM = addMover({el:packEl, actor:false, i:140, speed:40, off:[0,-20]});
+const FARMER_LOOK = {skin:'#6b4429',hair:'#111',top:'#8b5a2b',stripe:'#e8d9a8',bottom:'#3d4a63',bag:'#777'};
+const farmer = makeActor(FARMER_LOOK);
+const farmerRider = makeRider('walk', FARMER_LOOK); farmer.appendChild(farmerRider.svg); farmer.classList.add('rigged');
+farmer.style.setProperty('--gait','.44s');
+addMover({el:farmer, actor:true, rider:farmerRider, speed:40, leader:packM, lead:9, off:[0,-20]});
+
+function chickenSVG(c){ return `<svg viewBox="0 0 30 30"><ellipse cx="15" cy="28" rx="10" ry="2.5" fill="rgba(0,0,0,.2)"/><g class="bob"><ellipse cx="14" cy="19" rx="9" ry="7" fill="${c}"/><circle cx="21" cy="12" r="5" fill="${c}"/><path d="M20,6 q2,-3 3,0 q1,-2 2,1" fill="#d6372a"/><path d="M25,12 l4,1.5 l-4,1.5z" fill="#f0a020"/><circle cx="22.5" cy="11" r="1" fill="#111"/><path d="M5,17 q-4,-3 -3,-7 q4,2 6,6" fill="${c}"/><path d="M12,26 v-5 M17,26 v-5" stroke="#d98b1c" stroke-width="1.5"/></g></svg>`; }
+function goatSVG(){ return `<svg viewBox="0 0 54 44"><ellipse cx="27" cy="42" rx="20" ry="3" fill="rgba(0,0,0,.2)"/><g class="bob"><rect x="12" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="18" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="32" y="28" width="3" height="13" fill="#6b5a4a"/><rect x="38" y="28" width="3" height="13" fill="#6b5a4a"/><ellipse cx="26" cy="26" rx="17" ry="9" fill="#e8dfd0"/><path d="M38,22 L46,10 L52,14 L48,26Z" fill="#e8dfd0"/><path d="M44,10 q0,-7 6,-8 M47,11 q2,-6 7,-5" stroke="#6b5a4a" stroke-width="2" fill="none"/><circle cx="49" cy="15" r="1.2" fill="#111"/><path d="M48,25 q1,6 -1,7" stroke="#e8dfd0" stroke-width="2" fill="none"/><path d="M9,23 q-4,-2 -5,-6" stroke="#e8dfd0" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg>`; }
+function donkeyInner(mode){
+  const leg = (cls,x) => `<g class="dleg ${cls}"><rect x="${x}" y="56" width="7" height="27" rx="3" fill="#7a7671"/><rect x="${x-.5}" y="81" width="8" height="5" rx="1.5" fill="#2a2420"/></g>`;
+  const cover = mode==='ride'
+    ? `<path d="M42,31 Q62,25 82,31 L80,46 L44,46Z" fill="#c8452d"/><path d="M44,40 H80" stroke="#f0b429" stroke-width="3"/>`
+    : mode==='pack'
+    ? `<rect x="40" y="36" width="22" height="26" rx="5" fill="#a85a2a" stroke="#6b3a1a" stroke-width="2"/><rect x="64" y="38" width="18" height="24" rx="5" fill="#d9a441" stroke="#8a6a2c" stroke-width="2"/><path d="M38,32 Q62,26 84,32" stroke="#6b3a1a" stroke-width="4" fill="none"/>` : '';
+  return `<ellipse cx="62" cy="86" rx="44" ry="4" fill="rgba(0,0,0,.2)"/>
+    ${leg('b',30)}${leg('a',78)}
+    <g class="dtail"><path d="M26,40 Q10,48 14,72" stroke="#6f6c68" stroke-width="3.5" fill="none" stroke-linecap="round"/><circle cx="14" cy="73" r="3.5" fill="#4a4540"/></g>
+    <ellipse cx="62" cy="50" rx="38" ry="20" fill="#938f89"/><ellipse cx="62" cy="59" rx="30" ry="10" fill="#bdb9b1"/>
+    <g class="dhead"><path d="M86,40 L103,17 L117,24 L104,54Z" fill="#938f89"/><path d="M103,17 L124,22 L127,35 L112,37Z" fill="#938f89"/><ellipse cx="124" cy="31" rx="5.5" ry="5" fill="#d9d3c9"/>
+    <path d="M105,17 L102,2 L110,15Z" fill="#7a7671"/><path d="M110,18 L113,3 L118,19Z" fill="#6a6661"/>
+    <circle cx="114" cy="25" r="1.6" fill="#111"/><path d="M90,38 Q98,14 105,17" stroke="#4a4540" stroke-width="4" fill="none" stroke-linecap="round"/></g>
+    ${cover}${leg('a',40)}${leg('b',88)}`;
+}
+function donkeySVG(mode){ return `<svg viewBox="0 0 130 90">${donkeyInner(mode)}</svg>`; }
+function bikeSVG(c = '#c8452d'){
+  const wheel = cx => `<g class="wheel"><circle cx="${cx}" cy="58" r="17" fill="none" stroke="#1d1d1f" stroke-width="3.5"/><circle cx="${cx}" cy="58" r="2.5" fill="#888"/><path d="M${cx},41 V75 M${cx-17},58 H${cx+17} M${cx-12},46 L${cx+12},70 M${cx+12},46 L${cx-12},70" stroke="#b5b5b5" stroke-width="1"/></g>`;
+  return `<svg viewBox="0 0 120 80"><ellipse cx="60" cy="77" rx="46" ry="3" fill="rgba(0,0,0,.2)"/>
+    ${wheel(26)}${wheel(94)}
+    <path d="M26,58 L50,32 M26,58 L56,58 M56,58 L50,32 M50,32 L84,32 M56,58 L84,32 M84,32 L94,58" stroke="${c}" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <path d="M50,32 L48,26" stroke="#222" stroke-width="3"/><rect x="40" y="23" width="16" height="4" rx="2" fill="#222"/>
+    <path d="M84,32 L82,22 L90,20" stroke="#222" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <g class="wheel"><circle cx="56" cy="58" r="4" fill="#555"/><path d="M56,58 L50,66 M56,58 L62,50" stroke="#222" stroke-width="2.5" stroke-linecap="round"/></g></svg>`;
+}
+function cowSVG(){
+  const leg = (cls,x) => `<g class="dleg ${cls}"><rect x="${x}" y="42" width="8" height="22" rx="2" fill="#e9e3d6"/><rect x="${x-.5}" y="61" width="9" height="5" rx="1" fill="#2a2420"/></g>`;
+  return `<svg viewBox="0 0 100 70"><ellipse cx="48" cy="67" rx="40" ry="4" fill="rgba(0,0,0,.2)"/>
+    ${leg('b',24)}${leg('a',60)}
+    <path class="dtail" d="M18,26 Q6,34 9,54" stroke="#2b2522" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <rect x="16" y="18" width="60" height="32" rx="15" fill="#f1ece0"/><ellipse cx="34" cy="30" rx="10" ry="7" fill="#2b2522"/><ellipse cx="60" cy="38" rx="9" ry="6" fill="#2b2522"/>
+    <g class="dhead"><path d="M72,22 L90,20 L95,40 L76,44Z" fill="#f1ece0"/><ellipse cx="92" cy="38" rx="6.5" ry="5.5" fill="#e8b9a4"/>
+    <path d="M78,21 q-3,-9 4,-10 M84,20 q1,-8 7,-8" stroke="#d9d3c9" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M76,26 q-8,2 -6,8 q7,0 8,-5Z" fill="#2b2522"/><circle cx="86" cy="28" r="1.6" fill="#111"/></g>
+    ${leg('a',34)}${leg('b',66)}</svg>`;
+}
+function duckSVG(){ return `<svg viewBox="0 0 26 22"><ellipse cx="13" cy="20" rx="10" ry="2" fill="rgba(0,0,0,.18)"/><g class="bob"><ellipse cx="12" cy="14" rx="9" ry="6" fill="#f2efe6"/><path d="M5,13 q-4,-1 -4,-4 q4,0 6,3Z" fill="#f2efe6"/><circle cx="19" cy="7" r="4.5" fill="#2f7a55"/><path d="M22,7 l4,1.5 l-4,1.5z" fill="#f0a020"/><circle cx="20" cy="6" r="1" fill="#111"/><path d="M10,15 q4,3 8,0" stroke="#d6d0c0" fill="none"/></g></svg>`; }
+function dogSVG(){ return `<svg viewBox="0 0 44 32"><ellipse cx="22" cy="30" rx="16" ry="2.5" fill="rgba(0,0,0,.2)"/><g class="bob"><path class="tail" d="M8,16 Q1,10 3,5" stroke="#9a6a3a" stroke-width="3.5" fill="none" stroke-linecap="round"/><rect x="11" y="20" width="4" height="9" rx="1.5" fill="#8a5a2c"/><rect x="26" y="20" width="4" height="9" rx="1.5" fill="#8a5a2c"/><ellipse cx="20" cy="18" rx="14" ry="7" fill="#b07a42"/><circle cx="33" cy="12" r="6.5" fill="#b07a42"/><path d="M36,13 l6,2 l-1,3 l-6,-1z" fill="#d9a56a"/><path d="M29,7 l-3,6 l5,0z" fill="#6e4524"/><circle cx="35" cy="10.5" r="1.2" fill="#111"/><circle cx="42" cy="15" r="1.3" fill="#111"/><rect x="13" y="22" width="4" height="8" rx="1.5" fill="#b07a42"/><rect x="28" y="22" width="4" height="8" rx="1.5" fill="#b07a42"/></g></svg>`; }
+
+const KINDS = {
+  chicken:{svg:c => chickenSVG(c), sp:50, r:70,  w:28,  h:28},
+  goat:   {svg:() => goatSVG(),    sp:40, r:90,  w:54,  h:44},
+  donkey: {svg:() => donkeySVG('ride'), sp:30, r:100, w:130, h:90},
+  cow:    {svg:() => cowSVG(),     sp:22, r:120, w:100, h:70},
+  duck:   {svg:() => duckSVG(),    sp:28, r:70,  w:26,  h:22},
+  dog:    {svg:() => dogSVG(),     sp:85, r:140, w:44,  h:32}
+};
+const animals = [];
+function addAnimal(kind,x,y,color,extra){
+  const k = KINDS[kind], d = document.createElement('div');
+  d.className = 'animal'; d.style.cssText = `width:${k.w}px;height:${k.h}px`;
+  d.innerHTML = k.svg(color); objects.appendChild(d);
+  d.style.setProperty("--hoof", kind==="cow" ? ".8s" : kind==="donkey" ? ".55s" : ".45s");
+  const a = Object.assign({kind,el:d,hx:x,hy:y,x,y,tx:x,ty:y,wait:rr(0,3),sp:k.sp,r:k.r,taken:false}, extra||{});
+  animals.push(a); return a;
+}
+const bikes = [];
+function addBike(x,y,c){
+  const el = document.createElement('div'); el.className = 'ride-world';
+  el.style.cssText = `left:${x}px;top:${y}px;width:120px;height:80px;z-index:${Math.round(y)}`;
+  el.innerHTML = bikeSVG(c); objects.appendChild(el);
+  bikes.push({kind:'bike',el,x,y,taken:false,color:c});
+}
+['#f4efe6','#b9702f','#e9e1d0','#7a4a2a'].forEach((c,i) => addAnimal('chicken', 520+i*40, 770+(i%2)*30, c));
+addAnimal('chicken',1330,640,'#f4efe6'); addAnimal('chicken',1370,670,'#b9702f');
+addAnimal('goat',330,1400); addAnimal('goat',420,1450);
+addAnimal('cow',2010,1520); addAnimal('cow',2160,1570);
+[0,1,2].forEach(i => addAnimal('duck', 1880+i*40, 430+(i%2)*30));
+addAnimal('dog',1120,300,null,{follow:true});
+addAnimal('donkey',1340,430,null,{rideable:true});
+addAnimal('donkey',560,1010,null,{rideable:true});
+addAnimal('donkey',2000,1060,null,{rideable:true});
+addAnimal('donkey',760,1950,null,{rideable:true,drink:{x:608,y:1812}});
+addAnimal('cow',740,1700,null,{drink:{x:596,y:1750}});
+addAnimal('goat',770,2020); addAnimal('goat',700,2050);
+addAnimal('duck',380,1790,null,{r:50}); addAnimal('duck',460,1810,null,{r:50});
+addBike(800,1890,'#d9a21b');
+addBike(1085,340,'#c8452d'); addBike(560,700,'#2e7d4f'); addBike(855,1350,'#e8a41c'); addBike(1440,1700,'#2a6fb0');
+
+/* =====================================================
+   5. COLLISION & MOVEMENT
+===================================================== */
+function blocked(x,y){
+  if(x<30 || x>W-30 || y<110 || y>H-12) return true;
+  const L=x-12, R=x+12, T=y-10, B=y;
+  for(const c of colliders){
+    if(c.e){ const nx=(x-c.cx)/(c.rx+12), ny=((y-4)-c.cy)/(c.ry+8); if(nx*nx+ny*ny<1) return true; }
+    else if(R>c.x && L<c.x+c.w && B>c.y && T<c.y+c.h) return true;
+  }
+  return false;
+}
+
+const keys = new Set();
+let route = [], pending = null, stuck = 0, modalOpen = true, introOpen = true;
+const SPEEDS = {foot:[150,285], bike:[270,410], donkey:[140,230]};
+const ACCEL  = {foot:1100, bike:420, donkey:560};
+
+let joyVec = [0,0];
+let padRun = false;
+
+function inputVec(){
+  let vx=0, vy=0;
+  if(keys.has('arrowleft')||keys.has('q')||keys.has('a')) vx--;
+  if(keys.has('arrowright')||keys.has('d')) vx++;
+  if(keys.has('arrowup')||keys.has('z')||keys.has('w')) vy--;
+  if(keys.has('arrowdown')||keys.has('s')) vy++;
+  if(Math.abs(joyVec[0]) > .01 || Math.abs(joyVec[1]) > .01){
+    vx += joyVec[0]; vy += joyVec[1];
+  }
+  const m = Math.hypot(vx,vy);
+  if(m > 1){ vx /= m; vy /= m; }
+  return [vx, vy];
+}
+function setDir(el, vx, vy){ el.dataset.dir = Math.abs(vx) > Math.abs(vy) ? (vx<0?'left':'right') : (vy<0?'up':'down'); }
+
+let stepClock = 0, dustClock = 0;
+const vel = {x:0, y:0};
+function updatePlayer(dt){
+  const kind = P.mount || 'foot';
+  if(P.lock > 0) P.lock -= dt;
+  if(P.approach && !blocked(P.approach.x,P.approach.y)){ const k = Math.min(1,dt*10); P.x += (P.approach.x-P.x)*k; P.y += (P.approach.y-P.y)*k; }
+  let tx = 0, ty = 0, usingInput = false, wantRun = false, arrive = 1;
+  let analogMag = 1;
+
+  if(!modalOpen && !(P.lock > 0)){
+    const [ix,iy] = inputVec(); usingInput = !!(ix || iy);
+    wantRun = keys.has('shift') || padRun;
+    if(usingInput){
+      route = []; pending = null;
+      analogMag = Math.min(1, Math.hypot(ix,iy));
+      const l = Math.hypot(ix,iy);
+      tx = ix/l; ty = iy/l;
+    } else if(route.length){
+      const t = route[0], dx = t.x-P.x, dy = t.y-P.y, d = Math.hypot(dx,dy), last = route.length === 1;
+      if(d < (last ? 10 : 28)){ route.shift(); stuck = 0; if(!route.length && pending){ const k = pending; pending = null; openHut(k); } }
+      else { tx = dx/d; ty = dy/d; if(last) arrive = clamp(d/70, .25, 1); wantRun = route.length > 8; }
+    }
+  }
+  const moving = !!(tx || ty);
+  const canRun = wantRun && moving;
+
+  const sp = SPEEDS[kind];
+  const baseSpeed = canRun ? sp[1] : sp[0];
+  const maxS = baseSpeed * analogMag * arrive;
+
+  const wx = tx*maxS, wy = ty*maxS, ex = wx-vel.x, ey = wy-vel.y, el = Math.hypot(ex,ey);
+  const stepA = ACCEL[kind]*dt*(moving ? 1 : 1.4);
+  if(el <= stepA || el < 1e-6){ vel.x = wx; vel.y = wy; } else { vel.x += ex/el*stepA; vel.y += ey/el*stepA; }
+  if(!isFinite(vel.x) || !isFinite(vel.y)){ vel.x = vel.y = 0; }
+  if(!isFinite(P.x) || !isFinite(P.y)){ P.x = SPAWN.x; P.y = SPAWN.y; }
+
+  const bx = P.x, by = P.y;
+  if(vel.x){ if(!blocked(P.x+vel.x*dt, P.y)) P.x += vel.x*dt; else vel.x = 0; }
+  if(vel.y){ if(!blocked(P.x, P.y+vel.y*dt)) P.y += vel.y*dt; else vel.y = 0; }
+  const speed = Math.hypot(vel.x,vel.y), real = Math.hypot(P.x-bx, P.y-by) / Math.max(dt,.001);
+  if(route.length && !usingInput){
+    if(real < maxS*.25){ stuck += dt; if(stuck > .6){ route.shift(); stuck = 0; if(!route.length) pending = null; } } else stuck = 0;
+  }
+
+  const walking = speed > 12, running = walking && canRun && speed > sp[0]*1.15;
+  P.walking = walking;
+  player.classList.toggle('walking', walking);
+  player.classList.toggle('running', running);
+  if(speed > 18){
+    if(Math.abs(vel.x) > 10) P.face = vel.x < 0 ? 'left' : 'right';
+    if(P.mount) player.dataset.dir = P.face; else setDir(player, vel.x, vel.y);
+  }
+
+  let gait = .32;
+  if(walking){
+    gait = kind==='foot' ? clamp(54/speed,.15,.5) : kind==='donkey' ? clamp(70/speed,.26,.55) : clamp(96/speed,.12,.6);
+    player.style.setProperty('--gait', gait.toFixed(3)+'s');
+    player.style.setProperty('--spin', clamp(107/speed,.08,.9).toFixed(3)+'s');
+    player.style.setProperty('--hoof', clamp(70/speed,.26,.55).toFixed(3)+'s');
+    const side = player.dataset.dir === 'left' || player.dataset.dir === 'right';
+    const lean = (running && side) ? (kind==='foot' ? 9 : 5) * (P.face==='left' ? -1 : 1) : 0;
+    player.style.setProperty('--lean', lean + 'deg');
+  } else player.style.setProperty('--lean','0deg');
+
+  if(walking){
+    dustClock += dt; stepClock += dt;
+    if(dustClock > (running ? .09 : .2)){ dustClock = 0; dust(P.x + rr(-6,6), P.y-2, running ? 1.7 : kind==='foot' ? 1 : 1.3); }
+    if(stepClock > gait){ stepClock = 0; footstep(); }
+  }
+  if(P.rigOn) riders[P.mount].step(dt, vel.x, vel.y, moving, running);
+  else riders.walk.step(dt, vel.x, vel.y, moving, running);
+
+  player.style.left = P.x + 'px'; player.style.top = P.y + 'px'; player.style.zIndex = Math.round(P.y);
+}
+function dust(x,y,sc=1){
+  const d = document.createElement('div'); d.className='dust';
+  d.style.cssText = `left:${x}px;top:${y}px;width:${14*sc}px;height:${8*sc}px;z-index:${Math.round(y)-1}`;
+  objects.appendChild(d); setTimeout(() => d.remove(), 600);
+}
+
+function routeTo(x,y,enterKey){
+  route = [];
+  const nearMain = (px,py) => { const k = nearestSample(px,py); return [k, Math.hypot(S[k][0]-px, S[k][1]-py)]; };
+  const nearBr = (px,py) => { let b = {d:1e9,bi:-1,pi:0}; BR.forEach((br,bi) => br.pts.forEach((q,pi) => { const d = Math.hypot(q[0]-px,q[1]-py); if(d < b.d) b = {d,bi,pi}; })); return b; };
+  const addMain = (a,b) => { const st = a<=b ? 1 : -1; for(let k=a; st>0 ? k<=b : k>=b; k+=st*6) route.push({x:S[k][0],y:S[k][1]}); route.push({x:S[b][0],y:S[b][1]}); };
+  const addBr = (bi,from,to) => { const br = BR[bi], st = from<=to ? 1 : -1; for(let k=from; st>0 ? k<=to : k>=to; k+=st*6) route.push({x:br.pts[k][0],y:br.pts[k][1]}); route.push({x:br.pts[to][0],y:br.pts[to][1]}); };
+  const pm = nearMain(P.x,P.y), pb = nearBr(P.x,P.y), onBr = pb.d < pm[1]-30 ? pb : null;
+  const tm = nearMain(x,y),    tb = nearBr(x,y),     toBr = tb.d < tm[1]-30 ? tb : null;
+  let cur = pm[0];
+  if(onBr){ addBr(onBr.bi, onBr.pi, 0); cur = BR[onBr.bi].j; }
+  if(toBr){
+    if(onBr && onBr.bi === toBr.bi){ route = []; addBr(onBr.bi, onBr.pi, toBr.pi); }
+    else { addMain(cur, BR[toBr.bi].j); addBr(toBr.bi, 0, toBr.pi); }
+  } else addMain(cur, tm[0]);
+  route.push({x,y}); pending = enterKey || null; stuck = 0;
+}
+function goToHut(key, enter){
+  const h = HUTS.find(h => h.key===key);
+  routeTo(h.front.x, h.front.y, enter ? key : null);
+}
+
+function updateMovers(dt){
+  for(const m of movers){
+    let walking;
+    if(m.leader){ const L = m.leader; m.dir = L.dir; m.i = clamp(L.i + L.dir*m.lead, 2, S.length-3); walking = L.wait <= 0; }
+    else if(m.wait > 0){ m.wait -= dt; walking = false; }
+    else {
+      m.i += m.dir * m.speed * dt / 12; walking = true;
+      if(m.i >= S.length-3){ m.i = S.length-3; m.dir = -1; m.wait = 4; }
+      else if(m.i <= 2){ m.i = 2; m.dir = 1; m.wait = 4; }
+    }
+    const i0 = Math.floor(m.i), a = S[i0], b = S[Math.min(S.length-1, i0+1)], f = m.i - i0;
+    const vx = (b[0]-a[0]) * m.dir, vy = (b[1]-a[1]) * m.dir;
+    m.x = lerp(a[0],b[0],f) + m.off[0]; m.y = lerp(a[1],b[1],f) + m.off[1];
+    if(m.actor){
+      m.el.classList.toggle('walking', walking);
+      if(m.rider){ const l = Math.hypot(vx,vy) || 1, sp = walking ? m.speed : 0; m.rider.step(dt, vx/l*sp, vy/l*sp, walking, false); }
+      else if(walking || m.leader) setDir(m.el, vx, vy);
+    } else {
+      m.el.classList.toggle('moving', walking);
+      if(walking) m.el.classList.toggle('flip', vx < 0);
+    }
+    m.el.style.left = m.x+'px'; m.el.style.top = m.y+'px'; m.el.style.zIndex = Math.round(m.y);
+  }
+  const near = Math.hypot(P.x-MAMA.x, P.y-MAMA.y) < 130 && !modalOpen;
+  if(near){
+    const n = visited.size;
+    if(LANG === 'fr'){
+      sayMama.textContent = n===0 ? "Muraho ! Bienvenue. Essaie l'Atelier d'abord." : n<HUTS.length ? `Muraho ! Encore ${HUTS.length-n} endroit${HUTS.length-n>1?'s':''} à visiter.` : 'Tu as tout vu. Va dire bonjour au feu !';
+    } else {
+      sayMama.textContent = n===0 ? 'Muraho! Welcome. Try the Workshop first.' : n<HUTS.length ? `Muraho! ${HUTS.length-n} place${HUTS.length-n>1?'s':''} left to visit.` : 'You saw it all. Go say hello at the fire!';
+    }
+  }
+  sayMama.classList.toggle('on', near);
+}
+function updateAnimals(dt){
+  for(const a of animals){
+    if(a.taken) continue;
+    if(a.follow){
+      const dx = P.x-a.x, dy = P.y-a.y, d = Math.hypot(dx,dy);
+      if(d > 110){ const sp = a.sp * (d>500 ? 4 : d>260 ? 2.4 : 1.6); a.x += dx/d*sp*dt; a.y += dy/d*sp*dt; a.el.classList.add('moving'); a.el.classList.toggle('flip', dx<0); }
+      else a.el.classList.remove('moving');
+    } else if(a.wait > 0){ a.wait -= dt; a.el.classList.remove('moving'); }
+    else {
+      a.el.classList.remove('drinking');
+      const dx = a.tx-a.x, dy = a.ty-a.y, d = Math.hypot(dx,dy);
+      if(d < 4){
+        const atDrink = a.drink && a.tx === a.drink.x && a.ty === a.drink.y;
+        if(atDrink){ a.el.classList.add('drinking'); a.wait = rr(4,7); } else a.wait = rr(1.5,5);
+        if(a.drink && !atDrink && rand() < .45){ a.tx = a.drink.x; a.ty = a.drink.y; }
+        else { a.tx = a.hx + rr(-a.r,a.r); a.ty = a.hy + rr(-a.r*.6,a.r*.6); }
+      }
+      else { a.x += dx/d*a.sp*dt; a.y += dy/d*a.sp*dt; a.el.classList.add('moving'); a.el.classList.toggle('flip', dx<0); }
+    }
+    a.el.style.left = a.x+'px'; a.el.style.top = a.y+'px'; a.el.style.zIndex = Math.round(a.y);
+  }
+}
+
+/* =====================================================
+   6. CAMERA + PROXIMITY
+===================================================== */
+const cam = { x:0, y:0 };
+let vw = 0, vh = 0;
+function updateCamera(snap){
+  const tx = vw >= W ? (W-vw)/2 : clamp(P.x - vw/2, 0, W-vw);
+  const ty = vh >= H ? (H-vh)/2 : clamp(P.y - vh*.55, 0, H-vh);
+  cam.x = snap ? tx : lerp(cam.x, tx, .14);
+  cam.y = snap ? ty : lerp(cam.y, ty, .14);
+  world.style.transform = `translate3d(${-cam.x}px,${-cam.y}px,0)`;
+}
+
+let nearKey = null, nearRide = null, promptState = '';
+function findRide(){
+  let best = null, bd = 95;
+  for(const r of bikes.concat(animals.filter(a => a.rideable))){
+    if(r.taken) continue;
+    const d = Math.hypot(P.x-r.x, (P.y-r.y)*1.3);
+    if(d < bd){ bd = d; best = r; }
+  }
+  return best;
+}
+function mount(r){
+  r.taken = true; r.el.classList.remove('near');
+  P.mount = r.kind; P.ride = r; route = []; pending = null; P.lock = .55; P.approach = {x:r.x, y:r.y};
+  if(Math.abs(r.x-P.x) > 6) P.face = r.x > P.x ? 'right' : 'left';
+  player.dataset.dir = P.face; player.classList.add('mounting-' + r.kind); riders.walk.svg.classList.add('hopOn');
+  if(r.kind === 'bike'){ riders.bike.setColor(r.color); tone(1760,.28,.05); tone(2093,.3,.04,'sine',.12); toast(t('on_bike')); }
+  else { tone(520,.18,.04,'sawtooth'); tone(260,.32,.04,'sawtooth',.2); toast(t('on_donkey')); }
+  setTimeout(() => {
+    if(P.ride !== r) return;
+    r.el.style.display = 'none'; P.approach = null;
+    player.classList.remove('mounting-' + r.kind); player.classList.add('mounted','ride-' + r.kind);
+    riders.walk.svg.classList.remove('hopOn'); riders.walk.svg.style.display = 'none';
+    const rs = riders[r.kind]; rs.reset(P.face === 'left' ? -1 : 1); rs.svg.style.display = 'block'; rs.svg.classList.add('dropIn'); setTimeout(() => rs.svg.classList.remove('dropIn'), 260);
+    P.rigOn = true;
+  }, 260);
+  nearRide = null; promptState = '';
+}
+function dismount(){
+  const r = P.ride; if(!r) return;
+  const side = P.face === 'left' ? -1 : 1, d = r.kind === 'bike' ? 62 : 72;
+  const spots = [[P.x+side*d,P.y],[P.x-side*d,P.y],[P.x,P.y+58],[P.x,P.y-58]];
+  const spot = spots.find(c => !blocked(c[0],c[1])) || spots[0];
+  r.x = spot[0]; r.y = spot[1]; r.taken = false;
+  if(r.kind === 'bike'){ r.el.style.left = r.x+'px'; r.el.style.top = r.y+'px'; r.el.style.zIndex = Math.round(r.y); }
+  else { r.hx = r.tx = r.x; r.hy = r.ty = r.y; r.wait = 2; }
+  r.el.style.display = '';
+  const kind = r.kind;
+  riders[kind].svg.style.display = 'none';
+  riders.walk.svg.style.display = ''; riders.walk.reset(P.face === 'left' ? -1 : 1); riders.walk.svg.classList.add('hopOff'); setTimeout(() => riders.walk.svg.classList.remove('hopOff'), 500);
+  P.rigOn = false;
+  player.classList.remove('mounted','ride-bike','ride-donkey','walking','running','mounting-bike','mounting-donkey');
+  player.classList.add('dismounting-' + kind); setTimeout(() => player.classList.remove('dismounting-' + kind), 480);
+  P.mount = null; P.ride = null; P.approach = null; P.lock = .45; promptState = '';
+  setDir(player, P.face==='left' ? -1 : 1, 0);
+}
+function toggleRide(){
+  if(modalOpen || P.lock > 0) return;
+  if(P.mount) return dismount();
+  const r = findRide();
+  if(r) mount(r); else toast(t('no_ride'));
+}
+
+function updateProximity(){
+  let best = null, bd = 1e9;
+  for(const h of HUTS){ const d = Math.hypot(P.x-h.talk.x, P.y-h.talk.y); if(d < bd){ bd = d; best = h; } }
+  const k = (bd < 130 && !modalOpen) ? best.key : null;
+  const r = (!modalOpen && !P.mount) ? findRide() : null;
+  if(r !== nearRide){ if(nearRide) nearRide.el.classList.remove('near'); nearRide = r; if(r) r.el.classList.add('near'); }
+  if(k !== nearKey){
+    nearKey = k;
+    for(const h of HUTS){ signEls[h.key].classList.toggle('near', h.key===k); hutEls[h.key].classList.toggle('near', h.key===k); }
+    document.querySelectorAll('#fast button').forEach(b => b.classList.toggle('here', b.dataset.key===k));
+  }
+  const st = k ? 'h'+k : (r ? 'r'+r.kind : '');
+  if(st !== promptState){
+    promptState = st;
+    if(k){
+      const name = t('name_' + k);
+      const verb = k === 'marigot' ? t('rest_at') : t('enter_hut');
+      sayPlayer.innerHTML = `${verb} ${name}<small>${coarse ? t('tap_go') : t('press_e')}</small>`;
+    }
+    else if(r){
+      sayPlayer.innerHTML = `${r.kind==='bike' ? t('hop_bike') : t('hop_donkey')}<small>${coarse ? t('tap_ride') : t('press_f')}</small>`;
+    }
+    sayPlayer.classList.toggle('on', !!(k || r));
+  }
+}
+
+/* =====================================================
+   7. DAY / NIGHT
+===================================================== */
+const stars = $('#stars');
+for(let i=0;i<95;i++){
+  const s = document.createElement('i'), sz = rr(1.4,3.2);
+  s.className='star'; s.style.cssText = `left:${rr(0,100)}%;top:${rr(0,80)}%;width:${sz}px;height:${sz}px;--t:${rr(.45,.95).toFixed(2)};--d:${rr(0,2.6).toFixed(2)}s`;
+  stars.appendChild(s);
+}
+let A = 0, targetA = 0;
+const DAY_LEN = 5.2;
+function applySky(){
+  const dusk = clamp(1 - Math.abs(A - .42)/.4, 0, 1);
+  root.style.setProperty('--a', A.toFixed(3));
+  root.style.setProperty('--dusk', (dusk*dusk*(3-2*dusk)).toFixed(3));
+  root.style.setProperty('--night', smooth(.35,.95,A).toFixed(3));
+  root.style.setProperty('--sunp', smooth(0,.72,A).toFixed(3));
+  root.style.setProperty('--moonp', smooth(.45,1,A).toFixed(3));
+  const th = A > .5 ? 'night' : 'day';
+  if(document.body.dataset.theme !== th) document.body.dataset.theme = th;
+}
+function updateDay(dt){
+  if(Math.abs(A-targetA) > .0004){
+    A += Math.sign(targetA-A) * dt / DAY_LEN; A = clamp(A,0,1);
+    if(Math.abs(A-targetA) < .001) A = targetA;
+    applySky();
+  }
+}
+$('#themeBtn').addEventListener('click', () => {
+  targetA = targetA ? 0 : 1; chime(targetA ? 330 : 523);
+  toast(targetA ? t('sunset') : t('sunrise'));
+});
+
+const cv = $('#night'), cx = cv.getContext('2d');
+let dpr = 1;
+function resize(){
+  vw = viewport.clientWidth; vh = viewport.clientHeight; dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = vw*dpr; cv.height = vh*dpr; cv.style.width = vw+'px'; cv.style.height = vh+'px';
+  cx.setTransform(dpr,0,0,dpr,0,0);
+}
+function drawNight(t){
+  cx.setTransform(dpr,0,0,dpr,0,0);
+  cx.clearRect(0,0,vw,vh);
+  if(A < .005) return;
+  const k = smooth(.35,.95,A);
+  const col = [lerp(122,8,k), lerp(54,12,k), lerp(78,40,k)].map(Math.round);
+  const alpha = .82 * smooth(0,.9,A);
+  cx.globalCompositeOperation = 'source-over';
+  cx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${alpha})`;
+  cx.fillRect(0,0,vw,vh);
+  const all = lights.concat([{x:P.x,y:P.y-40,r:150,warm:.35}]);
+  cx.globalCompositeOperation = 'destination-out';
+  for(const l of all){
+    const f = l.flick ? 1 + Math.sin(t*9 + l.x)*.04 + Math.sin(t*17)*.02 : 1, r = l.r*f;
+    const sx = l.x - cam.x, sy = l.y - cam.y;
+    if(sx < -r || sx > vw+r || sy < -r || sy > vh+r) continue;
+    const gr = cx.createRadialGradient(sx,sy,0,sx,sy,r);
+    gr.addColorStop(0,'rgba(0,0,0,.95)'); gr.addColorStop(.55,'rgba(0,0,0,.55)'); gr.addColorStop(1,'rgba(0,0,0,0)');
+    cx.fillStyle = gr; cx.beginPath(); cx.arc(sx,sy,r,0,6.2832); cx.fill();
+  }
+  cx.globalCompositeOperation = 'source-over';
+  for(const l of all){
+    const f = l.flick ? 1 + Math.sin(t*9 + l.x)*.04 : 1, r = l.r*f, sx = l.x - cam.x, sy = l.y - cam.y;
+    if(sx < -r || sx > vw+r || sy < -r || sy > vh+r) continue;
+    const gr = cx.createRadialGradient(sx,sy,0,sx,sy,r*.9);
+    gr.addColorStop(0,`rgba(255,168,70,${.26*l.warm*k})`); gr.addColorStop(1,'rgba(255,168,70,0)');
+    cx.fillStyle = gr; cx.beginPath(); cx.arc(sx,sy,r,0,6.2832); cx.fill();
+  }
+}
+
+/* =====================================================
+   8. SOUND
+===================================================== */
+let ac = null, soundOn = false, loopTimer = null;
+function ctx(){ if(!ac){ const C = window.AudioContext || window.webkitAudioContext; if(C) ac = new C(); } if(ac && ac.state==='suspended') ac.resume(); return ac; }
+function tone(f, dur=.7, vol=.05, type='sine', when=0){
+  if(!soundOn) return; const c = ctx(); if(!c) return;
+  const o = c.createOscillator(), g2 = c.createGain(), t0 = c.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(f,t0);
+  g2.gain.setValueAtTime(vol,t0); g2.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+  o.connect(g2); g2.connect(c.destination); o.start(t0); o.stop(t0+dur);
+}
+const chime = f => tone(f,.45,.06);
+function footstep(){ if(!soundOn || P.mount==='bike') return; if(P.mount==='donkey') tone(rr(150,190),.09,.05,'triangle'); else tone(player.classList.contains('running') ? rr(110,150) : rr(90,130),.07,.03,'triangle'); }
+const SCALE = [392,440,523.25,587.33,659.25,783.99,880];
+function melody(){
+  if(!soundOn) return;
+  const night = A > .5, n = night ? 2 : 3;
+  for(let i=0;i<n;i++) tone(SCALE[(rand()*SCALE.length)|0] * (night?.5:1), 1.4, .035, 'sine', i*(night?.7:.45));
+  if(night && rand()<.5) for(let i=0;i<4;i++) tone(4200 + rand()*200, .05, .012, 'square', i*.09);
+  loopTimer = setTimeout(melody, night ? 2600 : 1900);
+}
+const soundBtn = $('#soundBtn');
+soundBtn.addEventListener('click', () => {
+  soundOn = !soundOn; soundBtn.setAttribute('aria-pressed', soundOn);
+  clearTimeout(loopTimer);
+  if(soundOn){ ctx(); chime(523.25); melody(); toast(t('music_on')); } else toast(t('music_off'));
+});
+
+/* =====================================================
+   9. CONTENT — 100% RÉEL
+===================================================== */
+
+/* Projets : uniquement ceux qui existent réellement sur ton GitHub.
+   Les 3 premiers ont une URL vérifiable. Les 4 suivants sont présentés comme
+   "en cours / à venir" si tu veux les garder, ou supprime-les simplement. */
+const PROJECTS = [
+  { name:'Pharma Finder', tag:{en:'Backend · PostgreSQL',fr:'Backend · PostgreSQL'},
+    text:{en:'Search for a medicine, find nearby pharmacies that stock it, then order for delivery or pickup. Built with a PostgreSQL backend to work across several countries.',
+          fr:"Cherche un médicament, trouve les pharmacies proches qui le vendent, puis commande pour la livraison ou le retrait. Construit avec un backend PostgreSQL pour fonctionner dans plusieurs pays."},
+    tech:['PostgreSQL','REST API','Multi-country'], url:'https://github.com/sage235/pharmaback' },
+  { name:'LockSave', tag:{en:'Digital wallet · Backend',fr:'Portefeuille numérique · Backend'},
+    text:{en:'A digital wallet (porte-monnaie) application built over 600 commits, focused on keeping balances and transactions safe.',
+          fr:"Une application de portefeuille numérique construite sur plus de 600 commits, axée sur la sécurité des soldes et des transactions."},
+    tech:['Backend','Wallet','Security'], url:'https://github.com/sage235/locksave' },
+  { name:'Restaurant Backend', tag:{en:'Backend · REST API',fr:'Backend · API REST'},
+    text:{en:'The server side of a restaurant platform: menus, orders, and the data behind them.',
+          fr:"Le côté serveur d'une plateforme de restaurant : menus, commandes et leurs données."},
+    tech:['Backend','REST API'], url:'https://github.com/sage235/restaurant-backend' },
+  { name:'Rent House Management', tag:{en:'Spring Boot · PostgreSQL',fr:'Spring Boot · PostgreSQL'},
+    text:{en:'Rental platform with multi-role authentication, automated lease contracts and transactional integrity. University project.',
+          fr:'Plateforme de location avec authentification multi-rôles, contrats de bail automatisés et intégrité transactionnelle. Projet universitaire.'},
+    tech:['Java 17','Spring Boot','PostgreSQL'] },
+  { name:'Hotel Management System', tag:{en:'PHP · MySQL',fr:'PHP · MySQL'},
+    text:{en:'Hotel booking with live availability, automated billing and an admin area. Coursework project.',
+          fr:"Réservation d'hôtel avec disponibilité en direct, facturation automatisée et espace admin. Projet de cours."},
+    tech:['PHP','MySQL','JavaScript'] },
+  { name:'Football Data Analytics', tag:{en:'Python · Data',fr:'Python · Data'},
+    text:{en:'Data cleaning, exploratory analysis and predictive models on football match trends. Academic project.',
+          fr:'Nettoyage de données, analyse exploratoire et modèles prédictifs sur les tendances des matchs de football. Projet académique.'},
+    tech:['Python','Pandas','Colab'] },
+  { name:'VAPT Security Lab', tag:{en:'Cybersecurity · Lab',fr:'Cybersécurité · Labo'},
+    text:{en:'Vulnerability assessment on virtual machines, controlled exploitation and hardening guides. Coursework in network security.',
+          fr:'Évaluation de vulnérabilités sur machines virtuelles, exploitation contrôlée et guides de durcissement. Cours de sécurité réseau.'},
+    tech:['Linux','Wireshark','Nmap'] }
+];
+const L = k => (typeof k === 'object' ? k[LANG] : k);
+const projCard = p => `<div class="card"><span class="when">${L(p.tag)}</span><h4>${p.name}</h4><p>${L(p.text)}</p>
+  <div class="tags">${p.tech.map(x => `<span>${x}</span>`).join('')}</div>
+  ${p.url ? `<a class="lnk" href="${p.url}" target="_blank" rel="noopener">${LANG==='fr'?'Voir sur GitHub':'View on GitHub'} ↗</a>` : ''}</div>`;
+
+const CONTENT = {
+  about: () => LANG === 'fr' ? `<div class="kicker">Hutte I · À propos</div><h2 id="modalTitle">L'esprit derrière le code</h2>
+    <p>Je suis <strong>étudiant en génie logiciel à l'AUCA</strong> — l'Université Adventiste d'Afrique Centrale, à Kigali, au Rwanda. J'y suis depuis 2023 et j'obtiendrai mon diplôme en 2027.</p>
+    <p>Ce que j'aime, c'est construire des backends fiables : des modèles de données soignés, une architecture claire, des API qui tiennent la charge, et des tests qui attrapent les problèmes avant que les utilisateurs ne les voient. Mon terrain principal, c'est <strong>Java et Spring Boot</strong>, entourés de <strong>PHP, JavaScript et plusieurs bases de données</strong>.</p>
+    <p>Ce portfolio est lui-même un de mes projets : une seule page HTML, aucun framework, tout écrit à la main — la carte, les personnages, l'animation, le cycle jour/nuit. Je crois qu'on apprend mieux en construisant des choses complètes, jusqu'au bout.</p>
+    <div class="quote">« Une bonne architecture est invisible : elle permet aux données de circuler rapidement et en sécurité. »</div>`
+  : `<div class="kicker">Hut I · About me</div><h2 id="modalTitle">The mind behind the code</h2>
+    <p>I'm a <strong>software engineering student at AUCA</strong> — the Adventist University of Central Africa, in Kigali, Rwanda. I've been there since 2023 and will graduate in 2027.</p>
+    <p>What I love is building reliable backends: careful data models, clear architecture, APIs that hold up under load, and tests that catch problems before users ever see them. My home ground is <strong>Java and Spring Boot</strong>, surrounded by <strong>PHP, JavaScript and several databases</strong>.</p>
+    <p>This portfolio is itself one of my projects: a single HTML file, no framework, everything written by hand — the map, the characters, the animation, the day/night cycle. I believe you learn best by building complete things, all the way through.</p>
+    <div class="quote">“Good architecture is invisible: it lets data move quickly and safely.”</div>`,
+
+  workshop: () => LANG === 'fr' ? `<div class="kicker">Hutte II · L'Atelier</div><h2 id="modalTitle">Ce que j'ai construit</h2>
+    <p>Des projets réels, certains sur GitHub, d'autres issus de mes cours à l'AUCA. Chaque carte dit clairement de quoi il s'agit.</p>
+    <div class="grid">${PROJECTS.map(projCard).join('')}</div>`
+  : `<div class="kicker">Hut II · The Workshop</div><h2 id="modalTitle">What I've built</h2>
+    <p>Real projects — some on GitHub, others from my coursework at AUCA. Each card says clearly what it is.</p>
+    <div class="grid">${PROJECTS.map(projCard).join('')}</div>`,
+
+  skills: () => LANG === 'fr' ? `<div class="kicker">Hutte III · Le Grenier</div><h2 id="modalTitle">Outils et compétences</h2>
+    <p>Ce que j'utilise au quotidien, à l'université et sur mes projets personnels.</p>
+    <div class="grid">
+      <div class="card"><h4>Langages & backend</h4><ul class="skill-list">
+        <li><b>Java 17 / 21 :</b> POO, collections, streams, multithreading</li>
+        <li><b>Spring Boot :</b> Spring Core, Spring Data JPA, Spring Security, contrôleurs REST</li>
+        <li><b>PHP :</b> applications web côté serveur</li>
+        <li><b>JavaScript :</b> côté client, DOM, fetch</li>
+        <li><b>Python :</b> scripts, nettoyage de données (Pandas)</li></ul></div>
+      <div class="card"><h4>Données, outils & sécurité</h4><ul class="skill-list">
+        <li><b>Bases de données :</b> PostgreSQL, MySQL, MongoDB</li>
+        <li><b>API :</b> conception REST, tests avec Postman, documentation OpenAPI</li>
+        <li><b>Tests :</b> tests unitaires, plans de test, démarche QA</li>
+        <li><b>Sécurité :</b> notions de VAPT, Linux, réseaux, Wireshark, Nmap</li>
+        <li><b>Outils :</b> Git, GitHub, Maven, VS Code, IntelliJ</li></ul></div>
+    </div>`
+  : `<div class="kicker">Hut III · The Granary</div><h2 id="modalTitle">Tools and skills</h2>
+    <p>What I actually use — at university and on my personal projects.</p>
+    <div class="grid">
+      <div class="card"><h4>Languages & backend</h4><ul class="skill-list">
+        <li><b>Java 17 / 21:</b> OOP, collections, streams, multithreading</li>
+        <li><b>Spring Boot:</b> Spring Core, Spring Data JPA, Spring Security, REST controllers</li>
+        <li><b>PHP:</b> server-side web applications</li>
+        <li><b>JavaScript:</b> client-side, DOM, fetch</li>
+        <li><b>Python:</b> scripting, data cleaning (Pandas)</li></ul></div>
+      <div class="card"><h4>Data, tools & security</h4><ul class="skill-list">
+        <li><b>Databases:</b> PostgreSQL, MySQL, MongoDB</li>
+        <li><b>APIs:</b> REST design, Postman, OpenAPI documentation</li>
+        <li><b>Testing:</b> unit tests, test plans, QA mindset</li>
+        <li><b>Security:</b> VAPT basics, Linux, networking, Wireshark, Nmap</li>
+        <li><b>Tools:</b> Git, GitHub, Maven, VS Code, IntelliJ</li></ul></div>
+    </div>`,
+
+  school: () => LANG === 'fr' ? `<div class="kicker">Hutte IV · L'École</div><h2 id="modalTitle">Où j'apprends</h2>
+    <div class="timeline">
+      <div class="card"><span class="when">2023 – 2027 · En cours</span><h4>Licence en génie logiciel</h4>
+        <div class="school-name">Université Adventiste d'Afrique Centrale (AUCA), Kigali, Rwanda</div>
+        <p>Structures de données, algorithmes, bases de données avancées, sécurité réseau, techniques de test logiciel, développement d'applications d'entreprise.</p></div>
+      <div class="card"><span class="when">Diplômé en 2023</span><h4>Diplôme d'études secondaires · section scientifique</h4>
+        <div class="school-name">Complexe Scolaire Frère Polycarpe</div>
+        <p>Une base solide en mathématiques, logique et sciences appliquées — c'est là que j'ai su que je voulais écrire du logiciel.</p></div>
+    </div>`
+  : `<div class="kicker">Hut IV · The School</div><h2 id="modalTitle">Where I learn</h2>
+    <div class="timeline">
+      <div class="card"><span class="when">2023 – 2027 · In progress</span><h4>Bachelor of Software Engineering</h4>
+        <div class="school-name">Adventist University of Central Africa (AUCA), Kigali, Rwanda</div>
+        <p>Data structures, algorithms, advanced databases, network security, software testing techniques, enterprise software development.</p></div>
+      <div class="card"><span class="when">Graduated 2023</span><h4>Secondary school diploma · science track</h4>
+        <div class="school-name">Complexe Scolaire Frère Polycarpe</div>
+        <p>A solid base in mathematics, logic and applied sciences — that's where I knew I wanted to write software.</p></div>
+    </div>`,
+
+  /* ==== CERTIFICATIONS : état vide honnête, à remplir quand tu les auras ==== */
+  certs: () => LANG === 'fr' ? `<div class="kicker">Hutte V · Certifications</div>
+    <h2 id="modalTitle">Certifications</h2>
+    <p>Cette hutte est encore vide — et c'est volontaire. Je préfère ne rien afficher plutôt qu'inventer des titres que je n'ai pas encore obtenus.</p>
+    <div class="empty-state">
+      <div class="icon">🎓</div>
+      <h4>En préparation</h4>
+      <p>Je travaille actuellement sur mes premières certifications professionnelles. Cette section sera remplie dès qu'elles seront validées.</p>
+      <a class="btn in" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener">Suivre mon parcours sur LinkedIn</a>
+    </div>
+    <p style="margin-top:22px;font-size:.85rem;opacity:.7;text-align:center">Tu veux en savoir plus sur ma formation ? Ouvre la hutte <strong>Formation</strong> sur le chemin principal.</p>`
+  : `<div class="kicker">Hut V · Certifications</div>
+    <h2 id="modalTitle">Certifications</h2>
+    <p>This hut is still empty — on purpose. I'd rather show nothing than invent titles I haven't earned yet.</p>
+    <div class="empty-state">
+      <div class="icon">🎓</div>
+      <h4>In progress</h4>
+      <p>I'm currently working on my first professional certifications. This section will be filled as soon as they're validated.</p>
+      <a class="btn in" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener">Follow my path on LinkedIn</a>
+    </div>
+    <p style="margin-top:22px;font-size:.85rem;opacity:.7;text-align:center">Want to know more about my education? Open the <strong>Education</strong> hut on the main path.</p>`,
+
+  contact: () => LANG === 'fr' ? `<div class="kicker">Feu de camp · Arbre à palabres</div><h2 id="modalTitle">Parlons-en</h2>
+    <p>Prends un rondin. Parle-moi d'un stage, d'un emploi, d'un projet à construire, ou simplement d'une idée à discuter.</p>
+    <p class="open-to"><strong>Ouvert à :</strong> stages et postes junior, missions freelance backend, tests logiciels et QA, et mentorat en programmation.</p>
+    <div class="actions">
+      <a class="btn" href="mailto:lesageasdodji@gmail.com">✉️ lesageasdodji@gmail.com</a>
+      <a class="btn in" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener">LinkedIn · le-sage-asdodji</a>
+      <a class="btn gh" href="https://github.com/sage235" target="_blank" rel="noopener">GitHub · sage235</a>
+      <a class="btn alt" href="tel:+250735562281">📞 +250 735 562 281</a>
+      <a class="btn alt" href="ASDODJI_Le_Sage_Resume.pdf" download="ASDODJI_Le_Sage_Resume.pdf">📄 Télécharger mon CV (PDF)</a>
+    </div>
+    <p style="margin-top:22px;font-size:.85rem;opacity:.7">Si le fichier du CV n'est pas encore en place, remplace-le par ton PDF final dans le dossier à côté de ce fichier <code>index.html</code>.</p>`
+  : `<div class="kicker">Fireside · Palaver Tree</div><h2 id="modalTitle">Let's talk</h2>
+    <p>Pull up a log. Tell me about an internship, a job, a project you want built, or simply an idea worth discussing.</p>
+    <p class="open-to"><strong>Open to:</strong> internships and junior roles, freelance backend work, software testing and QA, and coding mentorship.</p>
+    <div class="actions">
+      <a class="btn" href="mailto:lesageasdodji@gmail.com">✉️ lesageasdodji@gmail.com</a>
+      <a class="btn in" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener">LinkedIn · le-sage-asdodji</a>
+      <a class="btn gh" href="https://github.com/sage235" target="_blank" rel="noopener">GitHub · sage235</a>
+      <a class="btn alt" href="tel:+250735562281">📞 +250 735 562 281</a>
+      <a class="btn alt" href="ASDODJI_Le_Sage_Resume.pdf" download="ASDODJI_Le_Sage_Resume.pdf">📄 Download my resume (PDF)</a>
+    </div>
+    <p style="margin-top:22px;font-size:.85rem;opacity:.7">If the resume file isn't in place yet, drop your final PDF next to this <code>index.html</code> file.</p>`
+};
+
+/* Lettres de motivation ------------------------------------------------- */
+const LETTERS = [
+  { title:{en:'On starting small', fr:'Commencer petit'},
+    body:{en:"Every large system I admire began as a single file, written by someone who didn't yet know how it would end. Start anyway.",
+          fr:"Tout grand système que j'admire a commencé par un seul fichier, écrit par quelqu'un qui ne savait pas encore comment il finirait. Commence quand même."} },
+  { title:{en:'On asking for help', fr:"Demander de l'aide"},
+    body:{en:'A well is shared. Asking a question is not a weakness — it is the fastest way to grow.',
+          fr:"Un puits se partage. Poser une question n'est pas une faiblesse — c'est le chemin le plus rapide pour grandir."} },
+  { title:{en:'On consistency', fr:'La constance'},
+    body:{en:'Thirty minutes a day, every day, will take you further than one brilliant weekend. The donkey reaches the market; the hare often does not.',
+          fr:"Trente minutes par jour, chaque jour, t'emmèneront plus loin qu'un week-end brillant. L'âne atteint le marché ; le lièvre souvent non."} },
+  { title:{en:'On shipping', fr:'Livrer'},
+    body:{en:'An imperfect project that exists teaches more than a perfect one that stays in your head. Ship it small, then make it better.',
+          fr:"Un projet imparfait qui existe enseigne plus qu'un projet parfait qui reste dans ta tête. Livre petit, puis améliore."} },
+  { title:{en:'On mistakes', fr:'Les erreurs'},
+    body:{en:'The bug you fixed yesterday is the skill you own today. Read the error message — it is trying to help you.',
+          fr:"Le bug que tu as corrigé hier est la compétence que tu possèdes aujourd'hui. Lis le message d'erreur — il essaie de t'aider."} },
+  { title:{en:'On patience', fr:'La patience'},
+    body:{en:'A tree does not apologize for growing slowly. Neither should you. Progress is quiet until it becomes obvious.',
+          fr:"Un arbre ne s'excuse pas de pousser lentement. Toi non plus. Le progrès est silencieux jusqu'à ce qu'il devienne évident."} },
+  { title:{en:'On showing up', fr:'Être présent'},
+    body:{en:'Talent is common. Reliability is rare. Be the person whose code, and whose word, others can build on.',
+          fr:'Le talent est commun. La fiabilité est rare. Sois la personne sur qui les autres peuvent bâtir — son code comme sa parole.'} },
+  { title:{en:'On humility', fr:"L'humilité"},
+    body:{en:"You will always be a beginner at something. That's not a flaw; it's the doorway to everything you have not learned yet.",
+          fr:"Tu seras toujours débutant en quelque chose. Ce n'est pas un défaut ; c'est la porte vers tout ce que tu n'as pas encore appris."} },
+  { title:{en:'On finishing', fr:'Finir'},
+    body:{en:'Starting is exciting. Finishing is what pays. The last 10% — documentation, tests, cleanup — is where juniors become professionals.',
+          fr:"Commencer est excitant. Finir, c'est ce qui paie. Les derniers 10% — documentation, tests, nettoyage — c'est là que les juniors deviennent des professionnels."} },
+  { title:{en:'On generosity', fr:'La générosité'},
+    body:{en:'Explain what you learn. Write the README you wished existed. Teaching is the second time you truly learn.',
+          fr:"Explique ce que tu apprends. Écris le README que tu aurais aimé trouver. Enseigner, c'est apprendre une seconde fois."} },
+  { title:{en:'On courage', fr:'Le courage'},
+    body:{en:'Apply for the role you are not sure you deserve. The worst answer is silence, and silence leaves you exactly where you are.',
+          fr:"Postule au poste dont tu n'es pas sûr de mériter. La pire réponse est le silence, et le silence te laisse exactement où tu es."} },
+  { title:{en:'On rest', fr:'Le repos'},
+    body:{en:'Rest is part of the road, not a detour. A tired mind writes tired code. Close the laptop. The bug will still be there — and so will you.',
+          fr:"Le repos fait partie de la route, pas un détour. Un esprit fatigué écrit du code fatigué. Ferme l'ordinateur. Le bug sera encore là — et toi aussi."} }
+];
+const dayIdx = Math.floor(Date.now()/86400000);
+let letterIdx = dayIdx % LETTERS.length;
+window.letterNext = () => {
+  letterIdx = (letterIdx + 1 + ((Math.random()*(LETTERS.length-1))|0)) % LETTERS.length;
+  const e = document.getElementById('letterBody');
+  if(e) e.innerHTML = renderLetter();
+};
+function renderLetter(){
+  const L2 = LETTERS[letterIdx];
+  return `<div class="big" style="font-size:1.05rem;margin-bottom:8px">${L2.title[LANG]}</div><p class="motto">${L2.body[LANG]}</p>`;
+}
+CONTENT.marigot = () => LANG === 'fr' ? `<div class="kicker">Le Marigot · Halte</div>
+  <h2 id="modalTitle">Bois, repose-toi, lis</h2>
+  <p>Tu t'agenouilles au bord, tu bois l'eau fraîche et tu t'assois sur la pierre chaude une minute. <strong>Tu te sens frais à nouveau.</strong></p>
+  <div class="grid">
+    <div class="card"><span class="when">Lettre du jour</span>
+      <div id="letterBody">${renderLetter()}</div>
+      <button class="btn" style="align-self:flex-start;padding:8px 18px;font-size:.8rem;box-shadow:none" onclick="letterNext()">Une autre</button>
+    </div>
+  </div>`
+: `<div class="kicker">The Marigot · Rest stop</div>
+  <h2 id="modalTitle">Drink, rest, read</h2>
+  <p>You kneel at the edge, drink the cool water and sit on the warm stone for a minute. <strong>You feel fresh again.</strong></p>
+  <div class="grid">
+    <div class="card"><span class="when">Letter of the day</span>
+      <div id="letterBody">${renderLetter()}</div>
+      <button class="btn" style="align-self:flex-start;padding:8px 18px;font-size:.8rem;box-shadow:none" onclick="letterNext()">Another one</button>
+    </div>
+  </div>`;
+
+/* =====================================================
+   10. MODAL, PROGRESS, FAST TRAVEL, TOAST
+===================================================== */
+const visited = new Set();
+const modal = $('#modal'), bodyEl = $('#modalBody'), intro = $('#intro');
+function openHut(key){
+  if(!CONTENT[key]) return;
+  route = []; pending = null; keys.clear(); joyVec = [0,0];
+  bodyEl.innerHTML = CONTENT[key]();
+  modal.classList.add('open'); modalOpen = true; chime(659.25);
+  modal.querySelector('.sheet').scrollTop = 0;
+  setTimeout(() => $('#closeBtn').focus(), 50);
+  if(!visited.has(key)){
+    visited.add(key); updateProgress();
+    const b = document.querySelector(`#fast button[data-key="${key}"]`); b && b.classList.add('seen');
+    if(visited.size === HUTS.length) setTimeout(() => toast(t('all_seen')), 700);
+  }
+}
+function closeModal(){
+  if(!modal.classList.contains('open')) return;
+  modal.classList.remove('open'); modalOpen = false; chime(330);
+  nearKey = null; promptState = '';
+}
+function updateProgress(){ $('#progress').textContent = `${t('explored')} ${visited.size}/${HUTS.length}`; }
+$('#closeBtn').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
+
+function startGame(){ intro.classList.remove('open'); introOpen = false; modalOpen = false; if(!soundOn) ctx(); }
+$('#startBtn').addEventListener('click', startGame);
+
+const fast = $('#fast');
+HUTS.forEach(h => {
+  const li = document.createElement('li');
+  li.innerHTML = `<button data-key="${h.key}"><span data-hut-label="${h.key}"></span><span class="tick">✓</span></button>`;
+  li.firstChild.addEventListener('click', () => { if(modalOpen) return; goToHut(h.key, false); });
+  fast.appendChild(li);
+});
+
+let toastT;
+function toast(msg){ const tt = $('#toast'); tt.textContent = msg; tt.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => tt.classList.remove('on'), 3400); }
+
+/* =====================================================
+   11. I18N — application au DOM
+===================================================== */
+function refreshTexts(){
+  document.documentElement.lang = LANG;
+  const langBtn = $('#langBtn'); if(langBtn) langBtn.textContent = LANG === 'fr' ? 'EN' : 'FR';
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+
+  HUTS.forEach((h,idx) => {
+    const i = document.querySelector(`[data-hut-i="${h.key}"]`);
+    const b = document.querySelector(`[data-hut-b="${h.key}"]`);
+    const roman = ['I','II','III','IV','V','VI','VII','VIII'][idx] || (idx+1);
+    if(i) i.textContent = h.key === 'contact' ? (LANG==='fr'?'Feu de camp':'Fireside')
+                            : h.key === 'marigot' ? 'Marigot'
+                            : (LANG==='fr' ? `Hutte ${roman}` : `Hut ${roman}`);
+    if(b) b.textContent = t('sign_' + h.key);
+  });
+  document.querySelectorAll('[data-hut-label]').forEach(el => { el.textContent = t('hut_' + el.dataset.hutLabel); });
+
+  const small = document.querySelector('.who small'); if(small) small.textContent = t('tagline');
+  updateProgress();
+
+  const act = $('#actBtn'); if(act) act.textContent = LANG === 'fr' ? 'OK' : 'GO';
+  const ride = $('#rideBtn'); if(ride) ride.textContent = LANG === 'fr' ? 'MONTER' : 'RIDE';
+  const run = $('#runBtn'); if(run) run.textContent = LANG === 'fr' ? 'SPRINT' : 'RUN';
+
+  const h2 = $('#hint');
+  if(h2) h2.innerHTML = `<span>${t('hint_walk')}</span> <kbd>🕹️</kbd> <kbd>←↑→↓</kbd> <kbd>WASD</kbd>
+    <span>·</span> <span>${t('hint_enter')}</span> <kbd>E</kbd>
+    <span>·</span> <span>${t('hint_ride')}</span> <kbd>F</kbd>
+    <span>·</span> <span>${t('hint_sprint')}</span> <kbd>Shift</kbd>`;
+
+  promptState = '';
+}
+$('#langBtn').addEventListener('click', () => {
+  LANG = LANG === 'fr' ? 'en' : 'fr';
+  localStorage.setItem('lang', LANG);
+  refreshTexts();
+  toast(t('lang_switched'));
+});
+
+/* =====================================================
+   12. INPUT
+===================================================== */
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if(introOpen){ if(k==='enter' || k===' '){ e.preventDefault(); startGame(); } return; }
+  if(modalOpen){ if(k==='escape') closeModal(); return; }
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  if(['arrowleft','arrowright','arrowup','arrowdown','z','q','s','d','w','a'].includes(k)){ keys.add(k); e.preventDefault(); }
+  else if(k==='shift'){ keys.add('shift'); }
+  else if(k==='f'){ toggleRide(); }
+  else if(k==='e' || k===' ' || k==='enter'){ if(nearKey){ e.preventDefault(); openHut(nearKey); } }
+});
+window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+window.addEventListener('blur', () => keys.clear());
+
+const joyBase = $('#joyBase'), joyKnob = $('#joyKnob');
+let joyActive = false, joyId = null, joyCenter = {x:0,y:0};
+const JOY_RADIUS = 56;
+function joyStart(e){
+  if(modalOpen || introOpen) return;
+  const rect = joyBase.getBoundingClientRect();
+  joyCenter = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+  joyActive = true; joyId = e.pointerId;
+  joyBase.classList.add('active');
+  try{ joyBase.setPointerCapture(e.pointerId); }catch(_){}
+  joyMove(e);
+}
+function joyMove(e){
+  if(!joyActive || e.pointerId !== joyId) return;
+  let dx = e.clientX - joyCenter.x, dy = e.clientY - joyCenter.y;
+  const d = Math.hypot(dx,dy);
+  if(d > JOY_RADIUS){ dx = dx/d*JOY_RADIUS; dy = dy/d*JOY_RADIUS; }
+  joyKnob.style.transform = `translate(${dx}px,${dy}px)`;
+  const mag = Math.min(1, d/JOY_RADIUS);
+  if(d < 6){ joyVec = [0,0]; }
+  else { const nx = dx/(d||1), ny = dy/(d||1); joyVec = [nx*mag, ny*mag]; }
+}
+function joyEnd(e){
+  if(e.pointerId !== joyId) return;
+  joyActive = false; joyId = null; joyVec = [0,0];
+  joyBase.classList.remove('active');
+  joyKnob.style.transform = 'translate(0,0)';
+}
+joyBase.addEventListener('pointerdown', joyStart);
+joyBase.addEventListener('pointermove', joyMove);
+joyBase.addEventListener('pointerup', joyEnd);
+joyBase.addEventListener('pointercancel', joyEnd);
+
+$('#actBtn').addEventListener('click', () => { if(nearKey) openHut(nearKey); });
+$('#rideBtn').addEventListener('click', toggleRide);
+const runBtn = $('#runBtn');
+runBtn.addEventListener('pointerdown', e => { e.preventDefault(); try{ runBtn.setPointerCapture(e.pointerId);}catch(_){} padRun = true; runBtn.classList.add('on'); });
+['pointerup','pointercancel'].forEach(ev => runBtn.addEventListener(ev, () => { padRun = false; runBtn.classList.remove('on'); }));
+
+sayPlayer.addEventListener('click', e => { e.stopPropagation(); if(nearKey) openHut(nearKey); else if(nearRide) mount(nearRide); });
+
+viewport.addEventListener('click', e => {
+  if(modalOpen || e.target.closest('.say')) return;
+  const hs = e.target.closest('.hut, .sign');
+  if(hs){ goToHut(hs.dataset.key, true); return; }
+  const r = viewport.getBoundingClientRect();
+  routeTo(e.clientX - r.left + cam.x, e.clientY - r.top + cam.y);
+});
+
+/* =====================================================
+   13. MAIN LOOP
+===================================================== */
+window.addEventListener('resize', () => { resize(); updateCamera(true); });
+resize();
+if(matchMedia('(prefers-color-scheme: dark)').matches){ A = targetA = 1; }
+applySky();
+refreshTexts();
+player.style.left = P.x+'px'; player.style.top = P.y+'px';
+updateCamera(true);
+
+let last = performance.now();
+function frame(now){
+  const dt = clamp((now-last)/1000, 0, .05); last = now;
+  updatePlayer(dt); updateMovers(dt); updateAnimals(dt); updateDay(dt);
+  updateCamera(false); updateProximity(); drawNight(now/1000);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
 </body>
 </html>
