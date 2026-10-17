@@ -1012,7 +1012,7 @@ function makeWalkerRig(o){
       const foot = p => { p = ((p%1)+1)%1; if(p < beta) return [s*(1-2*p/beta),0]; const u = (p-beta)/(1-beta), e = u*u*(3-2*u); return [-s+2*s*e, lift*Math.sin(Math.PI*u)]; };
       const f1 = foot(w), f2 = foot(w+.5);
       // foot pitch through the step: heel strike (toes up), flat, heel rise at push-off (toes down), swing
-      const footAng = p => { p = ((p%1)+1)%1; let a; if(p < .1) a = -10*(1-p/.1); else if(p < beta-.14) a = 0; else if(p < beta) a = 28*((p-(beta-.14))/.14); else { const u = (p-beta)/(1-beta); a = 28 - 34*Math.min(1,u*1.4); } return a*amp; };
+      const footAng = p => { p = ((p%1)+1)%1; let a; if(p < .1) a = -6*(1-p/.1); else if(p < beta-.14) a = 0; else if(p < beta) a = 16*((p-(beta-.14))/.14); else { const u = (p-beta)/(1-beta); a = 16 - 22*Math.min(1,u*1.4); } return a*amp; };
       const hipY = 66 - (amp*(1+r*2.5)*Math.cos(4*Math.PI*(w-beta/2)) + amp*r*3) + idle;
       const armA = (lerp(26,48,r)*amp + 2)*DEG, flex = (lerp(12,85,r)*amp + 8)*DEG;
       if(st.view === 'side'){
