@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1007,7 +1007,7 @@ function makeWalkerRig(o){
       S.g.style.opacity = st.view==='side' ? 1 : 0; D.g.style.opacity = st.view==='down' ? 1 : 0; U.g.style.opacity = st.view==='up' ? 1 : 0;
       const r = st.r, amp = st.amp, w = st.w, idle = Math.sin(st.t*2)*.35*(1-amp);
       // a real gait cycle: stance (foot planted, body moves over it) then swing (foot lifts and reaches forward)
-      const beta = lerp(.62,.38,r), s = beta*st.stride/2*amp, lift = lerp(6,14,r)*amp;
+      const beta = lerp(.62,.38,r), s = beta*st.stride/2, lift = lerp(6,14,r)*amp;   // s has no amp: foot plants correctly at any speed
       const foot = p => { p = ((p%1)+1)%1; if(p < beta) return [s*(1-2*p/beta),0]; const u = (p-beta)/(1-beta), e = u*u*(3-2*u); return [-s+2*s*e, lift*Math.sin(Math.PI*u)]; };
       const f1 = foot(w), f2 = foot(w+.5);
       // foot pitch through the step: heel strike (toes up), flat, heel rise at push-off (toes down), swing
@@ -1219,12 +1219,13 @@ function makeRider(kind,o){
       const dist = speed*dt;
       st.phi += dist/110*360; st.gait += dist/110*6.2832;
       if(active) st.theta += dist/110*6.2832*.55;
-      st.amp = clamp(speed/(kind === 'walk' ? 60 : 120),0,1);
+      const tAmp = clamp(speed/(kind === 'walk' ? 60 : 120),0,1);
+      st.amp += (tAmp - st.amp) * Math.min(1, dt*10);                        // smooth: limbs ease into idle, no snap to T-pose
       if(kind === 'walk'){          // walk -> run blends smoothly with speed, stride grows with speed
-        st.r += (clamp((speed-135)/90,0,1) - st.r)*Math.min(1,dt*8);
+        st.r += (clamp((speed-115)/80,0,1) - st.r)*Math.min(1,dt*8);         // run blend starts at walk-max (115) not 135
         const tgtStride = lerp(55 + 40*clamp(speed/115,0,1), 185, st.r);      // slower cadence, longer stride
         st.stride += (tgtStride - st.stride)*Math.min(1,dt*5);               // changes gradually, so feet do not slide
-        if(speed > 8) st.w += dist/st.stride;
+        if(speed > 2) st.w += dist/st.stride;                                 // lower threshold: feet cycle at slow walk
       }
       st.lean += ((34 + (sprint?14:0) + clamp(acc/300,-1,1)*5) - st.lean)*Math.min(1,dt*6);
       st.sway = Math.sin(st.theta)*1.8;
