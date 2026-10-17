@@ -951,7 +951,7 @@ function makeFigure(o){
   const limb = (parent,leg,k) => ({
     u:E('line',{stroke:shade(leg?(o.dress?o.top:o.bottom):o.top,k),'stroke-width':leg?(o.dress?12.5:9):7,'stroke-linecap':'round'},parent),
     l:E('line',{stroke:shade(o.skin,k),'stroke-width':leg?6.5:5.5,'stroke-linecap':'round'},parent),
-    e:leg ? E('ellipse',{rx:5.5,ry:2.8,fill:dark},parent) : E('circle',{r:3.3,fill:shade(o.skin,k)},parent) });
+    e:leg ? E('ellipse',{rx:8,ry:1.6,fill:dark},parent) : E('circle',{r:3.3,fill:shade(o.skin,k)},parent) });
   f.fl = limb(f.gFarLeg,true,.7); f.nl = limb(f.gNearLeg,true,1); f.fa = limb(f.gFarArm,false,.7); f.na = limb(f.gNearArm,false,1);
   f.bag    = E('rect',{x:-6.5,y:-8.5,width:13,height:17,rx:4,fill:o.bag},f.gBody);
   f.torso  = E('line',{stroke:o.top,'stroke-linecap':'round'},f.gBody);
@@ -969,7 +969,8 @@ function makeFigure(o){
     up:  [[0,-1,11.8],[-7,-5,6],[7,-5,6],[0,-9,7],[-6,4,5],[6,4,5]] };
   f.update = (view,P) => {
     const H = P.H, S = P.S, hd = P.hd, ft = view === 'side';
-    const leg = (L,pt,hip,ang) => { setLine(L.u,hip,pt.j); setLine(L.l,pt.j,pt.e); setPt(L.e,pt.e,ft?4:0,3); L.e.setAttribute('transform', ft && ang ? `rotate(${ang.toFixed(1)} ${pt.e[0]+4} ${pt.e[1]+3})` : ''); };
+    // foot: shift toe-tip forward (2px) so flat shoe sits naturally under the shin
+    const leg = (L,pt,hip,ang) => { setLine(L.u,hip,pt.j); setLine(L.l,pt.j,pt.e); setPt(L.e,pt.e,ft?2:0,1); L.e.setAttribute('transform', ft && ang ? `rotate(${ang.toFixed(1)} ${pt.e[0]+2} ${pt.e[1]+1})` : ''); };
     leg(f.nl,P.nl,P.nH||H,P.nAng); leg(f.fl,P.fl,P.fH||H,P.fAng);
     const arm = (A,sh,pt) => { setLine(A.u,sh,pt.j); setLine(A.l,pt.j,pt.e); setPt(A.e,pt.e); };
     arm(f.na,P.nS||S,P.na); arm(f.fa,P.fS||S,P.fa);
@@ -1211,7 +1212,9 @@ function makeRider(kind,o){
         const ac = Math.abs(c), toSide = st.view === 'side' ? ac >= .42 : ac >= .6;     // hysteresis: no flicker on diagonals
         if(toSide){ st.view = 'side'; if(ac > .25) st.face = c < 0 ? -1 : 1; } else st.view = sn > 0 ? 'down' : 'up';
       } else st.prevH = null;
-      const k = Math.min(1,dt*16); st.faceT += (st.face - st.faceT)*k;
+      // snap face direction instantly when reversing: avoids squishing through a straight line mid-turn
+      if(Math.sign(st.face) !== Math.sign(st.faceT)) st.faceT = st.face;
+      else { const k = Math.min(1,dt*16); st.faceT += (st.face - st.faceT)*k; }
       const acc = (speed - st.spd)/Math.max(dt,.001); st.spd = speed;
       st.bank += (clamp(turn*speed*.016,-12,12) - st.bank)*Math.min(1,dt*7);
       st.tension += (clamp(Math.abs(turn)/2,0,1) - st.tension)*Math.min(1,dt*8);
