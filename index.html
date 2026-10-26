@@ -309,6 +309,18 @@ body[data-theme="night"] .letter{background:rgba(255,255,255,.04)}
 body[data-theme="night"] .ph{color:#f0c35a}
 .empty-slot{border-style:dashed;opacity:.7}
 .ph-note{margin-top:14px;font-size:.85rem;padding:12px 14px;border-radius:12px;background:rgba(232,164,28,.12);border:1px dashed #e8a41c}
+.cert-card{position:relative}
+.badge-tag{font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(200,69,45,.14);color:var(--accent)}
+body[data-theme="night"] .badge-tag{background:rgba(235,110,85,.18);color:#ff9e88}
+.cert-thumb{width:100%;max-height:140px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#071a2e;display:flex;align-items:center;justify-content:center;margin:6px 0 8px;cursor:pointer}
+.cert-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
+.cert-thumb:hover img{transform:scale(1.03)}
+.cert-id-tag{font-size:.73rem;color:var(--ink-soft);display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.cert-id-tag code{font-family:monospace;background:rgba(0,0,0,.05);padding:2px 6px;border-radius:6px;font-size:.71rem;word-break:break-all}
+body[data-theme="night"] .cert-id-tag code{background:rgba(255,255,255,.07)}
+.cert-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:auto;padding-top:8px}
+.cert-actions .lnk-alt{color:var(--leaf);border-bottom-color:currentColor}
+body[data-theme="night"] .cert-actions .lnk-alt{color:#8fd19a}
 
 .dust{position:absolute;width:14px;height:8px;border-radius:50%;background:rgba(214,170,120,.7);transform:translate(-50%,-50%);pointer-events:none;animation:dust .55s ease-out forwards}
 @keyframes dust{to{opacity:0;transform:translate(-50%,-90%) scale(2.4)}}
@@ -585,9 +597,41 @@ const ht = h => HUT_TEXT[h.key][LANG];
    (name / issuer / desc can be a plain string or {en:'…', fr:'…'})
 ===================================================== */
 const CERTIFICATIONS = [
-  // The Certifications hut is EMPTY on purpose. When you earn a certificate, add one line here:
-  // { name:'Certificate name', issuer:'Organisation', year:'2026', desc:'What it covers', url:'https://link-to-the-credential' },
-  // name / issuer / desc can also be { en:'…', fr:'…' } to show both languages.
+  {
+    name: {
+      en: 'Operating Systems Basics',
+      fr: 'Bases des Systèmes d’Exploitation'
+    },
+    issuer: 'Cisco Networking Academy',
+    year: '2026',
+    date: '24 Oct 2026',
+    certId: '77e1a51f-aff9-4c07-a28a-99fd3c7af27b',
+    desc: {
+      en: 'Foundational certification covering operating system architecture, process lifecycle, memory management, storage and file systems, Linux & Windows CLI administration, and core security hardening principles.',
+      fr: 'Certification fondamentale couvrant l’architecture des OS, le cycle des processus, la gestion de la mémoire, les systèmes de fichiers, l’administration CLI sous Linux et Windows, et le durcissement de la sécurité.'
+    },
+    url: 'https://www.netacad.com/certificates/77e1a51f-aff9-4c07-a28a-99fd3c7af27b',
+    file: 'mycertification/Operating_Systems_Basics_certificate_aslesage90-gmail-com_77e1a51f-aff9-4c07-a28a-99fd3c7af27b (1).pdf',
+    badge: 'Cisco Networking Academy'
+  },
+  {
+    name: {
+      en: 'Freelancer Academy — Certificate of Achievement',
+      fr: 'Freelancer Academy — Certificat de Réussite'
+    },
+    issuer: 'ALX Africa (Freelancer Academy)',
+    year: '2026',
+    date: '26 Oct 2026',
+    certId: '4a23d284-bb68-4e02-99e0-930d2aabd8dd',
+    desc: {
+      en: 'Awarded upon graduation from the ALX Freelancer Academy: client communication, proposal drafting, contract negotiation, project delivery excellence, and market positioning.',
+      fr: 'Diplômé du programme ALX Freelancer Academy : prospection professionnelle, relation et communication client, rédaction d’offres, excellence de livraison et positionnement stratégique.'
+    },
+    url: 'https://ehub.alxafrica.com/ob3/verify-certificate/4a23d284-bb68-4e02-99e0-930d2aabd8dd',
+    file: 'mycertification/certificate-4a23d284-bb68-4e02-99e0-930d2aabd8dd.png',
+    image: 'mycertification/certificate-4a23d284-bb68-4e02-99e0-930d2aabd8dd.png',
+    badge: 'ALX Freelancer Academy'
+  }
 ];
 const SIG = 'ASDODJI Le Sage\nlesageasdodji@gmail.com · +250 735 562 281\nLinkedIn: linkedin.com/in/le-sage-asdodji · GitHub: github.com/sage235';
 const LETTERS = [
@@ -1006,34 +1050,137 @@ function makeWalkerRig(o){
     update(st){
       root.setAttribute('transform',`rotate(${st.rot.toFixed(2)} 80 112)`);
       S.g.style.opacity = st.view==='side' ? 1 : 0; D.g.style.opacity = st.view==='down' ? 1 : 0; U.g.style.opacity = st.view==='up' ? 1 : 0;
-      const r = st.r, amp = st.amp, w = st.w, idle = Math.sin(st.t*2)*.35*(1-amp);
-      // a real gait cycle: stance (foot planted, body moves over it) then swing (foot lifts and reaches forward)
-      const beta = lerp(.62,.38,r), s = beta*st.stride/2, lift = lerp(6,14,r)*amp;   // s has no amp: foot plants correctly at any speed
-      const foot = p => { p = ((p%1)+1)%1; if(p < beta) return [s*(1-2*p/beta),0]; const u = (p-beta)/(1-beta), e = u*u*(3-2*u); return [-s+2*s*e, lift*Math.sin(Math.PI*u)]; };
-      const f1 = foot(w), f2 = foot(w+.5);
-      // foot pitch through the step: heel strike (toes up), flat, heel rise at push-off (toes down), swing
-      const footAng = p => { p = ((p%1)+1)%1; let a; if(p < .1) a = -6*(1-p/.1); else if(p < beta-.14) a = 0; else if(p < beta) a = 16*((p-(beta-.14))/.14); else { const u = (p-beta)/(1-beta); a = 16 - 22*Math.min(1,u*1.4); } return a*amp; };
-      const hipY = 66 - (amp*(1+r*2.5)*Math.cos(4*Math.PI*(w-beta/2)) + amp*r*3) + idle;
-      const armA = (lerp(26,48,r)*amp + 2)*DEG, flex = (lerp(12,85,r)*amp + 8)*DEG;
+      const r = st.r, amp = st.amp, w = st.w, idle = Math.sin(st.t*2)*0.4*(1-amp);
+
+      // Realistic human biomechanics:
+      // Ground contact duty factor: ~0.60 walking, ~0.44 running (flight phase)
+      const beta = lerp(0.60, 0.44, r);
+      // Foot horizontal reach (s): smooth scaling with speed, well within 48px leg length
+      const s = (beta * st.stride / 2) * (0.2 + 0.8 * amp);
+      // Foot lift during swing: walk ~7px, run ~17px (natural heel lift and knee drive)
+      const lift = lerp(7, 17, r) * amp;
+
+      const foot = p => {
+        p = ((p % 1) + 1) % 1;
+        if(p < beta){
+          // Stance phase: foot planted on ground moving rearward relative to hip
+          const u = p / beta;
+          return [s * (1 - 2 * u), 0, false];
+        } else {
+          // Swing phase: foot lifts cleanly and swings forward
+          const u = (p - beta) / (1 - beta);
+          const e = u * u * (3 - 2 * u);
+          const h = lift * Math.sin(Math.PI * u);
+          return [-s + 2 * s * e, h, true];
+        }
+      };
+
+      const f1 = foot(w), f2 = foot(w + 0.5);
+
+      // Foot pitch: heel strike -> flat -> push-off -> swing recovery
+      const footAng = p => {
+        p = ((p % 1) + 1) % 1;
+        let a = 0;
+        if(p < 0.12) a = lerp(-12, -4, r) * (1 - p / 0.12);
+        else if(p < beta - 0.14) a = 0;
+        else if(p < beta) a = lerp(18, 25, r) * ((p - (beta - 0.14)) / 0.14);
+        else {
+          const u = (p - beta) / (1 - beta);
+          a = lerp(20, 24, r) * (1 - u * 1.4);
+        }
+        return a * amp;
+      };
+
+      // Hip bounce: lowest at heel strike, highest at mid-stance; drops slightly into sprint
+      const hipBounce = amp * (lerp(1.2, 2.8, r) * Math.cos(4 * Math.PI * (w - beta / 2)));
+      const hipY = 66 - hipBounce + (amp * r * 1.5) + idle;
+
+      // Arm swing amplitude and natural elbow flexion
+      const armA = (lerp(22, 42, r) * amp + 2) * DEG;
+      const flex = (lerp(24, 76, r) * amp + 8) * DEG;
+
       if(st.view === 'side'){
         S.g.setAttribute('transform',`translate(80,0) scale(${st.faceT.toFixed(3)},1) translate(-80,0)`);
-        const H = [80,hipY], a = (lerp(3,15,r)*amp + 1.5)*DEG;
-        const Sh = [H[0]+25*Math.sin(a), H[1]-25*Math.cos(a)], hd = [Sh[0]+12.5*Math.sin(a+.12), Sh[1]-12.5*Math.cos(a+.12)], fS = [Sh[0]-1.5,Sh[1]+.5];
-        const arm = (sp,ph) => { const u = armA*Math.sin(2*Math.PI*(w+ph)); const el = [sp[0]+15*Math.sin(u), sp[1]+15*Math.cos(u)]; return {j:el, e:[el[0]+14*Math.sin(u+flex), el[1]+14*Math.cos(u+flex)]}; };
-        S.fig.update('side',{H,S:Sh,hd,tilt:a/DEG, nAng:footAng(w), fAng:footAng(w+.5), nl:ik(H,[80+f1[0],109-f1[1]],26,26,-1), fl:ik(H,[80+f2[0],109-f2[1]],26,26,-1), na:arm(Sh,.5), fa:arm(fS,0), fS});
+        // Forward lean during walk (2-3 deg) and run (10-12 deg)
+        const a = (lerp(2.5, 11, r) * amp + 1) * DEG;
+        const H = [80, hipY];
+        const Sh = [H[0] + 25 * Math.sin(a), H[1] - 25 * Math.cos(a)];
+        const hd = [Sh[0] + 12.5 * Math.sin(a + 0.08), Sh[1] - 12.5 * Math.cos(a + 0.08)];
+        const fS = [Sh[0] - 1.5, Sh[1] + 0.5];
+
+        // Arms: upper arm swings, forearm flexes naturally forward
+        const arm = (sp, ph) => {
+          const u = armA * Math.sin(2 * Math.PI * (w + ph));
+          const el = [sp[0] + 14 * Math.sin(u), sp[1] + 14 * Math.cos(u)];
+          const fa = u + flex * (0.8 + 0.2 * Math.sin(2 * Math.PI * (w + ph)));
+          return { j: el, e: [el[0] + 13 * Math.sin(fa), el[1] + 13 * Math.cos(fa)] };
+        };
+
+        // Legs: knee always bends forward (+X in facing direction)
+        const l1 = 24, l2 = 24;
+        const nlIK = ik(H, [80 + f1[0], 109 - f1[1]], l1, l2, -1);
+        const flIK = ik(H, [80 + f2[0], 109 - f2[1]], l1, l2, -1);
+
+        S.fig.update('side', {
+          H, S: Sh, hd, tilt: a / DEG,
+          nAng: footAng(w), fAng: footAng(w + 0.5),
+          nl: nlIK, fl: flIK,
+          na: arm(Sh, 0.5), fa: arm(fS, 0), fS
+        });
       } else {
+        // FRONT (down) & BACK (up) VIEWS:
+        // In 2.5D top-down view, human legs remain vertically aligned under the hips.
+        // Knees flex forward/backward in depth without unnatural sideways flaring.
         const dn = st.view === 'down', sg = dn ? 1 : -1, fig = dn ? D.fig : U.fig;
-        const sway = Math.sin(2*Math.PI*w)*1.6*amp;
-        const H = [80+sway,hipY], Sh = [80+sway*1.2,hipY-25], hd = [80+sway*1.3,hipY-37.5];
-        const hR = [86+sway,hipY], hL = [74+sway,hipY], sR = [89+sway*1.2,Sh[1]+3], sL = [71+sway*1.2,Sh[1]+3];
-        const yR = 109 + sg*f1[0]*.3 - f1[1]*.9, yL = 109 + sg*f2[0]*.3 - f2[1]*.9;
-        const sh1 = Math.sin(2*Math.PI*(w+.5))*(4+6*r)*amp;
-        const handR = [sR[0]+4, sR[1]+24+sg*sh1], handL = [sL[0]-4, sL[1]+24-sg*sh1];
-        fig.update(st.view,{H,S:Sh,hd,tilt:0, nH:hR, fH:hL, nS:sR, fS:sL,
-          nl:ikPick(hR,[88,yR],26,26,j=>j[0]), fl:ikPick(hL,[72,yL],26,26,j=>-j[0]),
-          na:ikPick(sR,handR,15,14,j=>j[0]),   fa:ikPick(sL,handL,15,14,j=>-j[0]) });
+        // Pelvic sway: natural weight shift toward stance leg (subtle 1.2px)
+        const sway = Math.sin(2 * Math.PI * w) * 1.2 * amp;
+        const H = [80 + sway, hipY];
+        const Sh = [80 + sway * 1.1, hipY - 25];
+        const hd = [80 + sway * 1.15, hipY - 37.5];
+
+        const hR = [85 + sway, hipY];
+        const hL = [75 + sway, hipY];
+        const sR = [88 + sway * 1.1, Sh[1] + 3];
+        const sL = [72 + sway * 1.1, Sh[1] + 3];
+
+        // Leg animation in 2.5D front/back view:
+        const legFB = (hip, fData, isRight) => {
+          const footX = hip[0] + (isRight ? 1 : -1) * 0.5;
+          const fY = 109 - fData[1] * 0.85 + (fData[2] ? sg * fData[0] * 0.12 : 0);
+          const footPos = [footX, fY];
+          // Knee tracks cleanly between hip and ankle, never splaying outward
+          const kneeX = hip[0] + (isRight ? 0.6 : -0.6) * (1 - amp * 0.5);
+          const kneeY = hip[1] + (fY - hip[1]) * 0.51 - (fData[2] ? fData[1] * 0.25 : 0);
+          return { j: [kneeX, kneeY], e: footPos };
+        };
+
+        const legR = legFB(hR, f1, true);
+        const legL = legFB(hL, f2, false);
+
+        // Arms in front/back view:
+        // Relaxed arms at sides, swinging forward and back in depth
+        const armSwing = Math.sin(2 * Math.PI * w) * amp;
+        const armFB = (sh, swingVal, isRight) => {
+          const sideSign = isRight ? 1 : -1;
+          const elbowX = sh[0] + sideSign * (1.2 + (r > 0.4 ? 1.5 : 0.4) * amp);
+          const elbowY = sh[1] + 13 - swingVal * lerp(1.5, 4.5, r) * sg;
+          const handX = sh[0] + sideSign * (1.8 - swingVal * 0.8 * sideSign);
+          const handY = sh[1] + 25 - swingVal * lerp(3.5, 9, r) * sg;
+          return { j: [elbowX, elbowY], e: [handX, handY] };
+        };
+
+        const armR = armFB(sR, armSwing, true);
+        const armL = armFB(sL, -armSwing, false);
+
+        fig.update(st.view, {
+          H, S: Sh, hd, tilt: 0,
+          nH: hR, fH: hL, nS: sR, fS: sL,
+          nl: legR, fl: legL,
+          na: armR, fa: armL
+        });
       }
-    } };
+    }
+  };
 }
 
 function makeBikeRig(o){
@@ -1226,9 +1373,9 @@ function makeRider(kind,o){
       st.amp += (tAmp - st.amp) * Math.min(1, dt*10);                        // smooth: limbs ease into idle, no snap to T-pose
       if(kind === 'walk'){          // walk -> run blends smoothly with speed, stride grows with speed
         st.r += (clamp((speed-115)/80,0,1) - st.r)*Math.min(1,dt*8);         // run blend starts at walk-max (115) not 135
-        const tgtStride = lerp(55 + 40*clamp(speed/115,0,1), 185, st.r);      // slower cadence, longer stride
-        st.stride += (tgtStride - st.stride)*Math.min(1,dt*5);               // changes gradually, so feet do not slide
-        if(speed > 2) st.w += dist/st.stride;                                 // lower threshold: feet cycle at slow walk
+        const tgtStride = lerp(52 + 4*clamp(speed/115,0,1), 78, st.r);       // realistic human stride (56px walk, 78px run)
+        st.stride += (tgtStride - st.stride)*Math.min(1,dt*6);                // smooth stride adjustment, zero foot slide
+        if(speed > 2) st.w += dist/st.stride;                                 // cadence matches natural 120-180 spm
       }
       st.lean += ((34 + (sprint?14:0) + clamp(acc/300,-1,1)*5) - st.lean)*Math.min(1,dt*6);
       st.sway = Math.sin(st.theta)*1.8;
@@ -1454,7 +1601,7 @@ function updatePlayer(dt){
 
   if(walking){
     stepDist += speed*dt;
-    const every = kind==='foot' ? (running ? 92 : 47) : kind==='donkey' ? 52 : 70;      // one footfall per half stride
+    const every = kind==='foot' ? (running ? 39 : 28) : kind==='donkey' ? 52 : 70;      // one footfall per half stride
     if(stepDist >= every){ stepDist = 0; dust(P.x + rr(-6,6), P.y-2, running ? 1.7 : kind==='foot' ? 1 : 1.3); footstep(); }
   }
   if(P.rigOn) riders[P.mount].step(dt, vel.x, vel.y, moving, running);
@@ -1746,35 +1893,52 @@ const PROJECTS = [
     tech:{en:['Backend','REST API'], fr:['Backend','API REST']}, url:'https://github.com/sage235/restaurant-backend' },
   { name:'Rent House Management', tag:'Spring Boot · PostgreSQL',
     text:{en:'Rental platform with multi-role authentication, automated lease contracts and transactional integrity.', fr:'Plateforme de gestion locative avec authentification multi-rôles, contrats de bail automatisés et intégrité transactionnelle.'},
-    tech:['Java 17','Spring Boot','PostgreSQL'] },
+    tech:['Java 17','Spring Boot','PostgreSQL'], url:'https://github.com/sage235' },
   { name:'Hotel Management System', tag:'PHP · MySQL',
     text:{en:'Hotel booking with live availability, automated billing and an admin area.', fr:'Réservation d’hôtel avec disponibilités en direct, facturation automatisée et espace d’administration.'},
-    tech:['PHP','MySQL','JavaScript'] },
+    tech:['PHP','MySQL','JavaScript'], url:'https://github.com/sage235' },
   { name:'Football Data Analytics', tag:'Python · Data',
     text:{en:'Data cleaning, exploratory analysis and predictive models on football match trends.', fr:'Nettoyage de données, analyse exploratoire et modèles prédictifs sur les tendances des matchs de football.'},
-    tech:['Python','Pandas','Colab'] },
+    tech:['Python','Pandas','Colab'], url:'https://github.com/sage235' },
   { name:'VAPT Security Lab', tag:{en:'Cybersecurity', fr:'Cybersécurité'},
     text:{en:'Vulnerability assessment on virtual machines, controlled exploitation and hardening guides.', fr:'Évaluation de vulnérabilités sur des machines virtuelles, exploitation contrôlée et guides de durcissement.'},
-    tech:['Linux','Wireshark','Nmap'] }
+    tech:['Linux','Wireshark','Nmap'], url:'https://github.com/sage235' }
 ];
 const projCard = p => `<div class="card"><span class="when">${tx(p.tag)}</span><h4>${p.name}</h4><p>${tx(p.text)}</p>
   <div class="tags">${techOf(p.tech).map(t => `<span>${t}</span>`).join('')}</div>
   ${p.url ? `<a class="lnk" href="${p.url}" target="_blank" rel="noopener">${L('View on GitHub ↗','Voir sur GitHub ↗')}</a>` : ''}</div>`;
-const certCard = c => `<div class="card"><span class="when">${esc(c.year || '')}</span><h4>${esc(tx(c.name))}</h4><div class="school-name">${esc(tx(c.issuer))}</div>
+const certCard = c => `<div class="card cert-card">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <span class="when">${esc(c.date || c.year || '')}</span>
+    ${c.badge ? `<span class="badge-tag">${esc(c.badge)}</span>` : ''}
+  </div>
+  <h4>${esc(tx(c.name))}</h4>
+  <div class="school-name">${esc(tx(c.issuer))}</div>
+  ${c.image ? `<div class="cert-thumb"><img src="${esc(c.image)}" alt="${esc(tx(c.name))}" loading="lazy"/></div>` : ''}
   ${c.desc ? `<p>${esc(tx(c.desc))}</p>` : ''}
+  ${c.certId ? `<div class="cert-id-tag"><span>${L('Credential ID','ID du certificat')} :</span> <code>${esc(c.certId)}</code></div>` : ''}
   ${c.placeholder ? `<span class="ph">${L('Example · edit in the code','Exemple · à modifier dans le code')}</span>` : ''}
-  ${c.url ? `<a class="lnk" href="${esc(c.url)}" target="_blank" rel="noopener">${L('View credential ↗','Voir le certificat ↗')}</a>` : ''}
-  ${c.file ? `<a class="lnk" href="${esc(c.file)}" target="_blank" rel="noopener">${L('Open the file ↗','Ouvrir le fichier ↗')}</a>` : ''}</div>`;
+  <div class="cert-actions">
+    ${c.url ? `<a class="lnk" href="${esc(c.url)}" target="_blank" rel="noopener">${L('Verify credential ↗','Vérifier le certificat ↗')}</a>` : ''}
+    ${c.file ? `<a class="lnk ${c.url ? 'lnk-alt' : ''}" href="${esc(c.file)}" target="_blank" rel="noopener">${c.file.endsWith('.pdf') ? L('View PDF document ↗','Ouvrir le document PDF ↗') : L('View certificate image ↗','Voir l’image du certificat ↗')}</a>` : ''}
+  </div>
+</div>`;
 
 const CONTENT = {
   about: () => `<div class="kicker">${L('Hut I · About me','Case I · À propos')}</div><h2 id="modalTitle">${L('The mind behind the code','L’esprit derrière le code')}</h2>
     <p>${L(`I'm a <strong>software engineering student at AUCA</strong> (Adventist University of Central Africa) in Kigali, Rwanda, graduating in 2027.`,
            `Je suis en <strong>licence de génie logiciel à l’AUCA</strong> (Adventist University of Central Africa) à Kigali, au Rwanda, avec un diplôme prévu en 2027.`)}</p>
     <p>${L('I like building backends that are reliable, secure and fast: careful data models, clean architecture, and tests that catch problems before users do. Java and Spring Boot are my home ground, with PHP, JavaScript and several databases around them.',
-           'J’aime construire des backends fiables, sécurisés et rapides : modèles de données soignés, architecture propre et tests qui détectent les problèmes avant les utilisateurs. Java et Spring Boot sont mon terrain de prédilection, avec PHP, JavaScript et plusieurs bases de données autour.')}</p>
-    <div class="quote">${L('“Good architecture is invisible: it lets data move quickly and safely.”','« Une bonne architecture est invisible : elle permet aux données de circuler vite et en sécurité. »')}</div>`,
+           'J’aime construire des backends fiables, sécurisés et rapides : modèles de données soignés, architecture propre et tests qui détectent les problèmes avant les utilisateurs. Java et Spring Boot sont mon terrain de prédilection, avec PHP, JavaScript et plusieurs bases de données autour.')}</p>
+    <div class="quote">${L('“Good architecture is invisible: it lets data move quickly and safely.”','« Une bonne architecture est invisible : elle permet aux données de circuler vite et en sécurité. »')}</div>
+    <div class="actions" style="margin-top:24px">
+      <a class="btn" href="mailto:lesageasdodji@gmail.com">✉️ lesageasdodji@gmail.com</a>
+      <a class="btn in" href="https://www.linkedin.com/in/le-sage-asdodji/" target="_blank" rel="noopener">LinkedIn · le-sage-asdodji</a>
+      <a class="btn gh" href="https://github.com/sage235" target="_blank" rel="noopener">GitHub · sage235</a>
+      <a class="btn alt" href="ASDODJI_Le_Sage_Resume.pdf" download="ASDODJI_Le_Sage_Resume.pdf">📄 ${L('Download my resume (PDF)','Télécharger mon CV (PDF)')}</a>
+    </div>`,
   workshop: () => `<div class="kicker">${L('Hut II · The Workshop','Case II · L’Atelier')}</div><h2 id="modalTitle">${L('Seven things I\'ve built','Sept réalisations')}</h2>
-    <p>${L('Each one solves a concrete problem. The first three are on GitHub.','Chacune répond à un problème concret. Les trois premières sont sur GitHub.')}</p>
+    <p>${L('Each one solves a concrete problem. All are linked to GitHub—click any card to explore the code.','Chacune répond à un problème concret. Toutes sont liées à GitHub—cliquez sur une carte pour explorer le code.')}</p>
     <div class="grid">${PROJECTS.map(projCard).join('')}</div>`,
   skills: () => `<div class="kicker">${L('Hut III · The Granary','Case III · Le Grenier')}</div><h2 id="modalTitle">${L('Tools and skills','Outils et compétences')}</h2>
     <div class="grid">
@@ -1788,6 +1952,17 @@ const CONTENT = {
         <li><b>${L('Security','Sécurité')} :</b> VAPT, ${L('Linux hardening, networking','durcissement Linux, réseaux')}</li>
         <li><b>Web :</b> PHP, JavaScript, HTML5, ${L('modern CSS','CSS moderne')}</li>
         <li><b>${L('Tools','Outils')} :</b> Git, GitHub, Maven, Python (Pandas)</li></ul></div>
+      <div class="card"><h4>${L('Languages spoken','Langues parlées')}</h4><ul class="skill-list">
+        <li><b>${L('French','Français')} :</b> ${L('Native','Natif')}</li>
+        <li><b>${L('English','Anglais')} :</b> ${L('Professional working proficiency','Niveau professionnel')}</li>
+        <li><b>Kinyarwanda :</b> ${L('Professional working proficiency','Niveau professionnel')}</li>
+      </ul></div>
+      <div class="card"><h4>${L('Currently learning','En cours d’apprentissage')}</h4><ul class="skill-list">
+        <li><b>Docker :</b> ${L('containerisation & local dev environments','conteneurisation & environnements locaux')}</li>
+        <li><b>React :</b> ${L('building interactive frontends','interfaces interactives')}</li>
+        <li><b>AWS :</b> ${L('cloud basics, S3, EC2','notions cloud, S3, EC2')}</li>
+        <li><b>CI/CD :</b> GitHub Actions, ${L('automated pipelines','pipelines automatisés')}</li>
+      </ul></div>
     </div>`,
   school: () => `<div class="kicker">${L('Hut IV · The School','Case IV · L’École')}</div><h2 id="modalTitle">${L('Where I learn','Là où j’apprends')}</h2>
     <div class="timeline">
